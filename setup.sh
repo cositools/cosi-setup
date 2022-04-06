@@ -1,9 +1,18 @@
 #!/bin/bash
 
+# This bash file is part of the COSItools.
+#
+# The original file is part of MEGAlib.
+# Port to COSItools and license change approved by original author, Andreas Zoglauer  
+#
+# Development lead: Andreas Zoglauer
+# License: Apache 2.0
+
+# Description:
 # This is the stage 1 script to setup the COSI tools
 # It sets up up the main directory if it not exists and 
-# then either updates or clones the cosi-setup repository.
-# And then hands off the setup to the newly downloaded stage 2 script
+# then either updates or clones the cosi-setup repository,
+# and finally hands off the setup to the newly downloaded stage 2 script
 
 
 ############################################################################################################
@@ -14,7 +23,8 @@ CMD=( "$@" )
 
 # The path to the COSItools install
 COSIPATH=""
-BRANCH="main"
+GITBASEDIR="https://github.com/cositools"
+GITBRANCH="main"
 
 
 
@@ -38,13 +48,15 @@ confhelp() {
   echo "--cositoolspath=[path to CSOItools - first launch default: \"COSItools\"]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
   echo " "
-  echo "--branch=[name of a git branch - first launch default is the lastest release version]"
-  echo "    Choose a specific branch of the COSItools git repository. If the option is not given the latest release will be used."
+  echo "--branch=[name of a git branch]"
+  echo "    Choose a specific branch of the COSItools git repositories."
+  echo "    If the option is not given the latest release will be used."
+  echo "    If the branch does not exist for all repositories use the main/master branch."
   echo " "
-  echo "--keepenvironmentasis=[off/no, on/yes - first launch default: off]"
-  echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty"
-  echo "    to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not."
-  echo " "
+  #echo "--keepenvironmentasis=[off/no, on/yes - first launch default: off]"
+  #echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty"
+  #echo "    to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not."
+  #echo " "
   echo "--root=[options: empty (default), path to existing ROOT installation]"
   echo "    If empty (or the option has not been given at all), download and install the latest compatible version"
   echo "    If a path to an existing ROOT installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error."
@@ -62,7 +74,7 @@ confhelp() {
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
   echo "--debug=[off/no, on/yes - first launch default: off]"
-  echo "    Debugging options for ROOT, Geant4 & MEGAlib."
+  echo "    Debugging options for C++ programs (MEGAlib, Nuclearizer), ROOT, Geant4."
   echo " "
   echo "--optimization=[off/no, normal/on/yes, strong/hard (requires gcc 4.2 or higher) - first launch default: on]"
   echo "    Compilation optimization for MEGAlib ONLY (Default is normal)"
@@ -96,7 +108,7 @@ for C in "${CMD[@]}"; do
   if [[ ${C} == *-co*=* ]]; then
     COSIPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-b* ]]; then
-    BRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -190,20 +202,20 @@ if [[ -d cosi-setup ]]; then
     exit 1
   fi
 else 
-  git clone https://github.com/cositools/cosi-setup cosi-setup
+  git clone ${GITBASEDIR}/cosi-setup cosi-setup
   if [ "$?" != "0" ]; then
     echo ""
-    echo "ERROR: Unable to checkout branch ${BRANCH} from cosi-setup!"
+    echo "ERROR: Unable to clone cosi-setup!"
     exit 1
   fi
   cd cosi-setup
 fi
 # At this stage we need to be in the cosi-setup directory
 
-git checkout ${BRANCH}
+git checkout ${GITBRANCH}
 if [ "$?" != "0" ]; then
   echo ""
-  echo "ERROR: Unable to checkout branch ${BRANCH} from cosi-setup!"
+  echo "ERROR: Unable to checkout branch ${GITBRANCH} from cosi-setup!"
   exit 1
 fi
 
@@ -212,13 +224,14 @@ fi
 ############################################################################################################
 # Step 7: Switch to the newly downloaded stage 2 file
 
+pwd
 if [[ ! -f setup-stage2.sh ]]; then
   echo ""
   echo "ERROR: Unable to find the stage 2 setup script!"
   exit 1
 fi
 
-setup-stage2.sh "$@"
+./setup-stage2.sh "$@"
 if [ "$?" != "0" ]; then
   exit 1
 fi
