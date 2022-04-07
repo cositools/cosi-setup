@@ -5,6 +5,9 @@
 #
 # Please see the MEGAlib software license and documentation for more informations.
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 CONFIGUREOPTIONS=" "
 # Install path relative to the build path --- simply one up in this script
 CONFIGUREOPTIONS+=" -DCMAKE_INSTALL_PREFIX=.."
@@ -351,7 +354,7 @@ if [ "${TARBALL}" != "" ]; then
       exit 1
     fi
   else
-    bash ${MEGALIB}/config/check-rootversion.sh --good-version=${VER}
+    ${SETUPPATH}/check-rootversion.sh --good-version=${VER}
     if [ "$?" != "0" ]; then
       echo "ERROR: The ROOT tarball you supplied does not contain an acceptable ROOT version!"
       exit 1
@@ -362,7 +365,7 @@ else
 
   # Get desired version:
   if [[ ${WANTEDVERSION} == "" ]]; then
-    WANTEDVERSION=`bash ${MEGALIB}/config/check-rootversion.sh --get-max`
+    WANTEDVERSION=`${SETUPPATH}/check-rootversion.sh --get-max`
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine required ROOT version!"
       exit 1

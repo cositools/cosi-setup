@@ -231,7 +231,7 @@ if [[ ! -f setup-stage2.sh ]]; then
   exit 1
 fi
 
-./setup-stage2.sh "$@"
+./setup-stage2.sh "$@" --br=${GITBRANCH}
 if [ "$?" != "0" ]; then
   exit 1
 fi

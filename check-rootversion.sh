@@ -55,6 +55,9 @@ for C in ${CMD}; do
   fi
 done
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 CHECK="false"
 GET="false"
 GOOD="false"
@@ -99,8 +102,8 @@ for C in ${CMD}; do
   fi
 done
 
-RootVersionMin=`cat allowed-versions.txt | grep "ROOT-min" | awk -F":" '{ print $2 }'`
-RootVersionMax=`cat allowed-versions.txt | grep "ROOT-max" | awk -F":" '{ print $2 }'`
+RootVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Min" | awk -F":" '{ print $2 }')
+RootVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Max" | awk -F":" '{ print $2 }')
 
 RootVersionMinString="${RootVersionMin:(-3):1}.${RootVersionMin:(-2):2}"
 RootVersionMaxString="${RootVersionMax:(-3):1}.${RootVersionMax:(-2):2}"

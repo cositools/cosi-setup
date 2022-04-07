@@ -166,9 +166,9 @@ CPPDEBUG=`echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]'`
 # Provide feed back and perform error checks:
 
 if [[ ${BRANCH} != "" ]]; then
-  echo " * Using MEGAlib branch ${BRANCH}"
+  echo " * Using branch ${BRANCH}"
 else
-  BRANCH="master" # Will switch to main if non-existint
+  BRANCH="master" # Will switch to main if non-existent
   echo " * Using the main branch"
 fi
 
@@ -337,6 +337,14 @@ if [ "${ROOTPATH}" != "" ]; then
   # Add ROOT to the environment file
   echo "ROOTDIR=$(cd $(dirname ${ROOTPATH}); pwd)/$(basename ${ROOTPATH})" >> ${ENVFILE}
   
+  # Source ROOT to be available for later installs
+  . ${SETUPPATH}/source-root.sh -p=$(cd $(dirname ${ROOTPATH}); pwd)/$(basename ${ROOTPATH})
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source ROOT"
+    exit 1
+  fi
+  
 # Install a new version of ROOT
 else
   # Download and build a new ROOT version
@@ -354,20 +362,20 @@ else
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
-  NEWROOT4DIR=`grep ROOTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
-  if [[ -d ${NEWROOT4DIR} ]]; then
-    if [[ -f ${NEWROOT4DIR}/BuildLogROOT.txt ]]; then
-      mv ${NEWROOT4DIR}/BuildLogROOT.txt ${NEWROOT4DIR}/BuildLogROOT_before$(date +'%y%m%d%H%M%S').txt
+  NEWROOTDIR=`grep ROOTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  if [[ -d ${NEWROOTDIR} ]]; then
+    if [[ -f ${NEWROOTDIR}/BuildLogROOT.txt ]]; then
+      mv ${NEWROOTDIR}/BuildLogROOT.txt ${NEWROOTDIR}/BuildLogROOT_before$(date +'%y%m%d%H%M%S').txt
     fi
-    mv BuildLogROOT.txt ${NEWROOT4DIR}
+    mv BuildLogROOT.txt ${NEWROOTDIR}
   fi
 
   # Now handle build errors
   if [ "${RESULT}" != "0" ]; then
     echo " "
     echo "ERROR: Something went wrong during the ROOT setup."
-    if [[ -d ${NEWROOT4DIR} ]]; then
-      echo "       Please check the *whole* file ${NEWROOT4DIR}/BuildLogROOT.txt for errors."
+    if [[ -d ${NEWROOTDIR} ]]; then
+      echo "       Please check the *whole* file ${NEWROOTDIR}/BuildLogROOT.txt for errors."
     else 
       echo "       Please check the *whole* file $(pwd)/BuildLogROOT.txt for errors."
     fi
@@ -380,6 +388,14 @@ else
     echo " "
     echo "       If not, please add your problem there and attach your BuildLogROOT.txt file."
     echo " "
+    exit 1
+  fi
+  
+  # Source ROOT to be available for later installs
+  . ${SETUPPATH}/source-root.sh -p=${NEWROOTDIR}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source ROOT"
     exit 1
   fi
   
@@ -419,6 +435,14 @@ if [ "${GEANT4PATH}" != "" ]; then
   # Add Geant4 to the environment file
   echo "GEANT4DIR=$(cd $(dirname ${GEANT4PATH}); pwd)/$(basename ${GEANT4PATH})" >> ${ENVFILE}
   
+  # Source Geant4 to be available for later installs
+  . ${SETUPPATH}/source-geant4.sh -p=$(cd $(dirname ${GEANT4PATH}); pwd)/$(basename ${GEANT4PATH})
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source Geant4"
+    exit 1
+  fi
+  
 # Install a new version of Geant4
 else
   # Download and build a new Geant4 version
@@ -451,6 +475,14 @@ else
     exit 1
   fi
   
+  # Source Geant4 to be available for later installs
+  . ${SETUPPATH}/source-geant4.sh -p=${NEWGEANT4DIR}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source Geant4"
+    exit 1
+  fi
+    
   # The build-script will have added Geant4 to the environment file
 fi
 
@@ -487,6 +519,14 @@ if [ "${HEASOFTPATH}" != "" ]; then
   # Add HEASoft to the environment file
   echo "HEASOFTDIR=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})" >> ${ENVFILE}
   
+  # Source HEASoft to be available for later installs
+  . ${SETUPPATH}/source-heasoft.sh -p=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source HEAsoft"
+    exit 1
+  fi
+  
 # Install a new version of HEASoft
 else
   # Download and build a new HEASoft version
@@ -520,6 +560,14 @@ else
     exit 1
   fi
   
+  # Source HEASoft to be available for later installs
+  . ${SETUPPATH}/source-heasoft.sh -p=${NEWHEASOFTDIR}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source HEAsoft"
+    exit 1
+  fi
+    
   # The build-script will have added Geant4 to the environment file
 fi
 
@@ -559,6 +607,7 @@ cd ${COSIPATH}/megalib
 echo "The MEGAlib source code has been updated"
 
 echo "Configuring MEGAlib..."
+export MEGALIB=${COSIPATH}/megalib
 bash configure --os=${OSTYPE} --debug=${CPPDEBUG} --opt=${CPPOPT} --updates=off
 if [ "$?" != "0" ]; then
   echo " "

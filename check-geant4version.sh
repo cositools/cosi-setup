@@ -52,6 +52,9 @@ for C in ${CMD}; do
   fi
 done
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 CHECK="false"
 GET="false"
 GOOD="false"
@@ -97,8 +100,8 @@ for C in ${CMD}; do
 done
 
 
-Geant4VersionMin=`cat allowed-versions.txt | grep "Geant4-min" | awk -F":" '{ print $2 }'`
-Geant4VersionMax=`cat allowed-versions.txt | grep "Geant4-max" | awk -F":" '{ print $2 }'`
+Geant4VersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Min" | awk -F":" '{ print $2 }')
+Geant4VersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Max" | awk -F":" '{ print $2 }')
 
 Sep=$((${#Geant4VersionMin}-1))
 if [ ${Geant4VersionMin:0:${Sep}} -ge 10 ]; then 

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 # Start with the configure options, since we want to compare them to what was done previously
 CONFIGUREOPTIONS=""
 type g++ >/dev/null 2>&1
@@ -271,7 +275,7 @@ if [ "${TARBALL}" != "" ]; then
       exit 1
     fi
   else 
-    bash ${MEGALIB}/config/check-geant4version.sh --good-version=${VER}
+    ${SETUPPATH}/check-geant4version.sh --good-version=${VER}
     if [ "$?" != "0" ]; then
       echo "ERROR: The Geant4 tarball you supplied does not contain an acceptable Geant4 version!"
       exit 1
@@ -282,7 +286,7 @@ else
   
   if [[ ${WANTEDVERSION} == "" ]]; then
     # Get desired version:
-    WANTEDVERSION=`bash ${MEGALIB}/config/check-geant4version.sh --get-max`
+    WANTEDVERSION=`${SETUPPATH}/check-geant4version.sh --get-max`
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine required Geant4 version!"
       exit 1

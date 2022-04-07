@@ -49,6 +49,9 @@ for C in ${CMD}; do
   fi
 done
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 CHECK="false"
 GET="false"
 GOOD="false"
@@ -94,8 +97,8 @@ for C in ${CMD}; do
 done
 
 
-HEASoftVersionMin=`cat allowed-versions.txt | grep "HEASoft-min" | awk -F":" '{ print $2 }'`
-HEASoftVersionMax=`cat allowed-versions.txt | grep "HEASoft-max" | awk -F":" '{ print $2 }'`
+HEASoftVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Min" | awk -F":" '{ print $2 }')
+HEASoftVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Max" | awk -F":" '{ print $2 }')
 
 
 
