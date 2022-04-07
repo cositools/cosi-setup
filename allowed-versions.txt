@@ -1,0 +1,13 @@
+# Allowed versions of specific packages
+
+# ROOT: 6.18 till 6.24
+ROOT-Min:618
+ROOT-Max:624
+
+# Geant4: Only 10.2
+Geant4-Min:102
+Geant4-Max:102
+
+# HEASoft:
+HEASoft-Min:630
+HEASoft-Max:699
