@@ -24,7 +24,7 @@ CMD=( "$@" )
 # The path to the COSItools install
 COSIPATH=""
 GITBASEDIR="https://github.com/cositools"
-GITBRANCH="main"
+GITBRANCH="feature/initialsetup"
 
 
 
