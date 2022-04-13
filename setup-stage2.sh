@@ -289,10 +289,37 @@ echo "*****************************"
 echo "" 
 echo "Checking if all software packages are installed"
 
+# macOS
 if [[ ${OSTYPE} == *arwin* ]]; then
-  echo ""
-  echo "ERROR: macOS is missing..."
-  exit 1
+  # Look for macports
+  type port >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    if [[ ! -f ${SETUPPATH}/setup-packages-macports.sh ]]; then
+      echo ""
+      echo "ERROR: Unable to find the macports package script!"
+      exit 1
+    fi
+
+    ${SETUPPATH}/setup-packages-macports.sh
+    if [ "$?" != "0" ]; then
+      # The error message is part of the above script
+      exit 1
+    fi
+  else
+    type brew >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      echo ""
+      echo "ERROR: Brew is currently not supported to install the required packages for COSItools!"
+      echo "       Please use macports: https://www.macports.org/install.php"
+      exit 1
+    else
+      echo ""
+      echo "ERROR: Please install macports to install the required COSItools packages:"
+      echo "       https://www.macports.org/install.php"s
+      exit 1
+    fi
+  fi
+# Any Linux
 elif [[ ${OSTYPE} == *inux* ]]; then
   if [[ ! -f ${SETUPPATH}/setup-packages-linux.sh ]]; then
     echo ""
@@ -305,6 +332,10 @@ elif [[ ${OSTYPE} == *inux* ]]; then
     # The error message is part of the above script
     exit 1
   fi
+else  
+  echo ""
+  echo "ERROR: You are using an unsupported operating system: ${OSTYPE}"
+  exit 1
 fi
 
 
@@ -500,82 +531,88 @@ echo " "
 echo "Installing HEASoft"
 echo " "
 
-# If we are given an existing HEASoft installation, check is it is compatible
-if [ "${HEASOFTPATH}" != "" ]; then
-  # Check if we can use the given HEASoft version
-  if [[ ! -f ${SETUPPATH}/check-heasoftversion.sh ]]; then
-    echo ""
-    echo "ERROR: Unable to find the script to check the Geant4 version!"
-    exit 1
-  fi
-  
-  ${SETUPPATH}/check-heasoftversion.sh --check=${HEASOFTPATH}
-  if [[ "$?" != "0" ]]; then
-    echo " "
-    echo "ERROR: The directory ${HEASOFTPATH} cannot be used as your HEASoft install for COSItools."
-    exit 1
-  fi
-  
-  # Add HEASoft to the environment file
-  echo "HEASOFTDIR=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})" >> ${ENVFILE}
-  
-  # Source HEASoft to be available for later installs
-  . ${SETUPPATH}/source-heasoft.sh -p=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})
-  if [[ "$?" != "0" ]]; then
-    echo " "
-    echo "ERROR: Unable to source HEAsoft"
-    exit 1
-  fi
-  
-# Install a new version of HEASoft
-else
-  # Download and build a new HEASoft version
-  if [[ ! -f ${SETUPPATH}/build-heasoft.sh ]]; then
-    echo ""
-    echo "ERROR: Unable to find the script to check the Geant4 version!"
-    exit 1
-  fi
-  
-  echo "Switching to build-heasoft.sh script..."
-  cd ${EXTERNALPATH}
-
-  ${SETUPPATH}/build-heasoft.sh -source=${ENVFILE} 2>&1 | tee BuildLogHEASoft.txt
-  RESULT=${PIPESTATUS[0]}
-  
-  
-  # If we have a new HEASoft dir, copy the build log there
-  NEWHEASOFTDIR=`grep HEASOFTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
-  if [[ -d ${NEWHEASOFTDIR} ]]; then
-    if [[ -f ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ]]; then
-      mv ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt
+# Until HEAsoft compiles in ARM mode, we cannot install it here:
+if [[ $(uname) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
+  echo "Warning: For the time being HEAsoft cannot be compiled in arm64 mode,"
+  echo "         and thus we cannot link against it with COSItools,"
+  echo "         and we will not install HEAsoft."
+else 
+  # If we are given an existing HEASoft installation, check is it is compatible
+  if [ "${HEASOFTPATH}" != "" ]; then
+    # Check if we can use the given HEASoft version
+    if [[ ! -f ${SETUPPATH}/check-heasoftversion.sh ]]; then
+      echo ""
+      echo "ERROR: Unable to find the script to check the Geant4 version!"
+      exit 1
     fi
-    mv HEASoftBuildLog.txt ${NEWHEASOFTDIR}
-  fi
   
-  # Now handle build errors
-  if [ "${RESULT}" != "0" ]; then
-    echo " "
-    echo "ERROR: Something went wrong during the HEASoft setup."
-    issuereport
-    exit 1
-  fi
+    ${SETUPPATH}/check-heasoftversion.sh --check=${HEASOFTPATH}
+    if [[ "$?" != "0" ]]; then
+      echo " "
+      echo "ERROR: The directory ${HEASOFTPATH} cannot be used as your HEASoft install for COSItools."
+      exit 1
+    fi
   
-  # Source HEASoft to be available for later installs
-  . ${SETUPPATH}/source-heasoft.sh -p=${NEWHEASOFTDIR}
-  if [[ "$?" != "0" ]]; then
-    echo " "
-    echo "ERROR: Unable to source HEAsoft"
-    exit 1
-  fi
+    # Add HEASoft to the environment file
+    echo "HEASOFTDIR=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})" >> ${ENVFILE}
+  
+    # Source HEASoft to be available for later installs
+    . ${SETUPPATH}/source-heasoft.sh -p=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})
+    if [[ "$?" != "0" ]]; then
+      echo " "
+      echo "ERROR: Unable to source HEAsoft"
+      exit 1
+    fi
+  
+  # Install a new version of HEASoft
+  else
+    # Download and build a new HEASoft version
+    if [[ ! -f ${SETUPPATH}/build-heasoft.sh ]]; then
+      echo ""  
+      echo "ERROR: Unable to find the script to check the Geant4 version!"
+      exit 1
+    fi
+  
+    echo "Switching to build-heasoft.sh script..."
+    cd ${EXTERNALPATH}
+
+    ${SETUPPATH}/build-heasoft.sh -source=${ENVFILE} 2>&1 | tee BuildLogHEASoft.txt
+    RESULT=${PIPESTATUS[0]}
+  
+  
+    # If we have a new HEASoft dir, copy the build log there
+    NEWHEASOFTDIR=`grep HEASOFTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+    if [[ -d ${NEWHEASOFTDIR} ]]; then
+      if [[ -f ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ]]; then
+        mv ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt
+      fi
+      mv HEASoftBuildLog.txt ${NEWHEASOFTDIR}
+    fi
+  
+    # Now handle build errors
+    if [ "${RESULT}" != "0" ]; then
+      echo " "
+      echo "ERROR: Something went wrong during the HEASoft setup."
+      issuereport
+      exit 1
+    fi
+  
+    # Source HEASoft to be available for later installs
+    . ${SETUPPATH}/source-heasoft.sh -p=${NEWHEASOFTDIR}
+    if [[ "$?" != "0" ]]; then
+      echo " "
+      echo "ERROR: Unable to source HEAsoft"
+      exit 1
+    fi
     
-  # The build-script will have added Geant4 to the environment file
+    # The build-script will have added Geant4 to the environment file
+  fi
+
+  cd ${COSIPATH}
+
+  echo " "
+  echo "SUCCESS: We have a usable HEASoft version!"
 fi
-
-cd ${COSIPATH}
-
-echo " "
-echo "SUCCESS: We have a usable HEASoft version!"
-
 
 
 ############################################################################################################
@@ -806,7 +843,9 @@ echo "# Source the inividual environment variables" >> ${ENVFILE}
 echo "# Order is important!" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-geant4.sh -p=\${GEANT4DIR}" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-megalib.sh -p=\${MEGALIBDIR}" >> ${ENVFILE}
-echo ". ${SETUPPATH}/source-heasoft.sh -p=\${HEASOFTDIR}" >> ${ENVFILE}
+if grep -q "HEASOFTDIR" ${ENVFILE}; then  # We currently don't install HEASoft on M1 machines
+  echo ". ${SETUPPATH}/source-heasoft.sh -p=\${HEASOFTDIR}" >> ${ENVFILE}
+fi
 echo ". ${SETUPPATH}/source-root.sh -p=\${ROOTDIR}" >> ${ENVFILE}
 echo " " >> ${ENVFILE}
 echo "alias cosi='cd ${COSIPATH}; source python-env/bin/activate'" >> ${ENVFILE}
@@ -814,6 +853,7 @@ echo " "
 
 echo "Renaming and moving the environment script"
 mv ${ENVFILE} ${COSIPATH}/source.sh
+chmod +x source.sh
 
 
 

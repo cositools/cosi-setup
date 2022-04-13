@@ -6,7 +6,7 @@
 # License: Apache 2.0
 
 # Description:
-# This script check is all required packages are installed 
+# This script checks if all required macports packages are installed 
 
 
 ############################################################################################################
@@ -49,7 +49,7 @@ if [[ "$?" != "0" ]]; then
 fi
 
 # Install tensorflow & torch the special way to take care of issues on Apple M1 machines
-if [ "$(uname -s)" == "*arwin*" ]; then 
+if [[ $(uname -s) == *arwin* ]]; then 
   # HDF5 is troublesome, thus do this first
   P=$(which port); P=${P%/bin/port}
   if [[ -f ${P}/lib/libhdf5.dylib ]]; then
