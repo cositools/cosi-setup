@@ -105,6 +105,9 @@ issuereport() {
   echo " "
 }
 
+absolutefilename() {
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
 
 ############################################################################################################
 # Step 3: extract the main parameters for the stage 1 script
@@ -551,9 +554,13 @@ if [[ $(uname) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
   echo "Warning: For the time being HEAsoft cannot be compiled in arm64 mode,"
   echo "         and thus we cannot link against it with COSItools,"
   echo "         and we will not install HEAsoft."
+# Until HEAsoft compiles in ARM mode, we cannot install it here:
+elif [[ "${HEASOFTPATH}" == "off" ]]; then
+  echo " "
+  echo "Command line option --heasoft=off: Do not install HEAsoft "
 else 
   # If we are given an existing HEASoft installation, check is it is compatible
-  if [ "${HEASOFTPATH}" != "" ]; then
+  if [[ "${HEASOFTPATH}" != "" ]]; then
     # Check if we can use the given HEASoft version
     if [[ ! -f ${SETUPPATH}/check-heasoftversion.sh ]]; then
       echo ""

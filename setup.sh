@@ -68,7 +68,7 @@ confhelp() {
   echo "    If empty (or the option has not been given at all), download and install the latest compatible version"
   echo "    If a path to an existing GEANT4 installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error."
   echo " "
-  echo "--heasoft=[options: off (default) empty, path to existing HEASoft installation]"
+  echo "--heasoft=[options: off (default), empty, path to existing HEASoft installation]"
   echo "    If empty (or the option has not been given at all), download and install the latest compatible version"
   echo "    If the string \"off\" is given, do not install HEASoft. This will affect some tertiary tools of MEGAlib, such as storing the data in fits files."
   echo "    If a path to an existing HEASoft installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error."
