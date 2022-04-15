@@ -198,7 +198,7 @@ fi
 if [ "${ROOTPATH}" == "" ]; then
   echo " * Download latest compatible version of ROOT"
 else
-  echo " * Using the installation of ROOT: ${ROOTPATH}"
+  echo " * Using this installation of ROOT: ${ROOTPATH}"
 fi
 
 
@@ -213,22 +213,25 @@ fi
 if [ "${GEANT4PATH}" == "" ]; then
   echo " * Download latest compatible version of Geant4"
 else
-  echo " * Using the installation of Geant4: ${GEANT4PATH}"
+  echo " * Using this installation of Geant4: ${GEANT4PATH}"
 fi
 
-
-if [[ "${HEASOFTPATH}" != "" ]]; then
-  HEASOFTPATH=`absolutefilename ${HEASOFTPATH}`
-fi
-if [[ "${HEASOFTPATH}" != "${HEASOFTPATH% *}" ]]; then
-  echo "ERROR: HEASoft needs to be installed in a path without spaces,"
-  echo "       but you chose: \"${HEASOFTPATH}\""
-  exit 1
-fi
-if [ "${HEASOFTPATH}" == "" ]; then
-  echo " * Download latest compatible version of HEASoft"
+if [[ "${HEASOFTPATH}" == "off" ]]; then
+  echo " * Do not install HEASoft"
 else
-  echo " * Using the installation of HEASoft ${HEASOFTPATH}"
+  if [[ "${HEASOFTPATH}" != "" ]]; then
+    HEASOFTPATH=`absolutefilename ${HEASOFTPATH}`
+  fi
+  if [[ "${HEASOFTPATH}" != "${HEASOFTPATH% *}" ]]; then
+    echo "ERROR: HEASoft needs to be installed in a path without spaces,"
+    echo "       but you chose: \"${HEASOFTPATH}\""
+    exit 1
+  fi
+  if [ "${HEASOFTPATH}" == "" ]; then
+    echo " * Download latest compatible version of HEASoft"
+  else
+    echo " * Using this installation of HEASoft ${HEASOFTPATH}"
+  fi
 fi
 
 
