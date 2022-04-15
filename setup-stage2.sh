@@ -174,16 +174,16 @@ CPPDEBUG=`echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]'`
 # Provide feed back and perform error checks:
 
 if [[ "${IGNOREMISSINGPACKAGES}" == true ]]; then
-  echo " * Not checking for missing packages"
+  echo " * Do not check for missing packages"
 else
-  echo " * Checking for missing packages"
+  echo " * Check for missing packages"
 fi
 
 if [[ ${BRANCH} != "" ]]; then
-  echo " * Using branch ${BRANCH}"
+  echo " * Use default branch ${BRANCH}"
 else
   BRANCH="master" # Will switch to main if non-existent
-  echo " * Using the main branch"
+  echo " * Use the main branch"
 fi
 
 
@@ -198,7 +198,7 @@ fi
 if [ "${ROOTPATH}" == "" ]; then
   echo " * Download latest compatible version of ROOT"
 else
-  echo " * Using this installation of ROOT: ${ROOTPATH}"
+  echo " * Use this installation of ROOT: ${ROOTPATH}"
 fi
 
 
@@ -213,7 +213,7 @@ fi
 if [ "${GEANT4PATH}" == "" ]; then
   echo " * Download latest compatible version of Geant4"
 else
-  echo " * Using this installation of Geant4: ${GEANT4PATH}"
+  echo " * Use this installation of Geant4: ${GEANT4PATH}"
 fi
 
 if [[ "${HEASOFTPATH}" == "off" ]]; then
@@ -230,17 +230,17 @@ else
   if [ "${HEASOFTPATH}" == "" ]; then
     echo " * Download latest compatible version of HEASoft"
   else
-    echo " * Using this installation of HEASoft ${HEASOFTPATH}"
+    echo " * Use this installation of HEASoft: ${HEASOFTPATH}"
   fi
 fi
 
 
 if [[ ${OSTYPE} == *inux* ]]; then
   OSTYPE="linux"
-  echo " * Using operating system architecture Linux"
+  echo " * Use operating system architecture Linux"
 elif ( [[ ${OSTYPE} == d* ]] || [[ ${OSTYPE} == m* ]] ); then
   OSTYPE="darwin"
-  echo " * Using operating system architecture Darwin (Mac OS X)"
+  echo " * Use operating system architecture Darwin (macOS)"
 else
   echo " "
   echo "ERROR: Unknown operating system architecture: \"${OSTYPE}\""
@@ -251,13 +251,13 @@ fi
 
 if ( [[ ${CPPOPT} == of* ]] || [[ ${CPPOPT} == no ]] ); then
   OPT="off"
-  echo " * Using no code optimization"
+  echo " * Use no C++ code optimizations"
 elif ( [[ ${CPPOPT} == nor* ]] || [[ ${CPPOPT} == on ]] || [[ ${CPPOPT} == y* ]] ); then
   OPT="normal"
-  echo " * Using normal code optimization"
+  echo " * Use normal C++ code optimizations"
 elif ( [[ ${CPPOPT} == s* ]] || [[ ${CPPOPT} == h* ]] ); then
   OPT="strong"
-  echo " * Using strong code optimization"
+  echo " * Use strong, CPU-specific code optimizations"
 else
   echo " "
   echo "ERROR: Unknown code optimization: ${CPPOPT}"
@@ -268,13 +268,13 @@ fi
 
 if ( [[ ${CPPDEBUG} == of* ]] || [[ ${CPPDEBUG} == no ]] ); then
   DEBUG="off"
-  echo " * Using no debugging code"
+  echo " * Use no debugging symbols"
 elif ( [[ ${CPPDEBUG} == on ]] || [[ ${CPPDEBUG} == y* ]] || [[ ${CPPDEBUG} == nor* ]] ); then
   DEBUG="normal"
-  echo " * Using debugging code"
+  echo " * Use debugging symbols (system specific)"
 elif ( [[ ${CPPDEBUG} == st* ]] || [[ ${CPPDEBUG} == h* ]] ); then
   DEBUG="strong"
-  echo " * Using more debug flags"
+  echo " * Use more debugging symbols (system specific)"
 else
   echo " "
   echo "ERROR: Unknown debugging code selection: ${CPPDEBUG}"
@@ -291,7 +291,7 @@ if [ "${MAXTHREADS}" -le "0" ]; then
   echo "ERROR: The maximum number of threads must be at least 1 and not ${MAXTHREADS}!"
   exit 1
 else
-  echo " * Using this maximum number of threads: ${MAXTHREADS}"
+  echo " * Use this maximum number of threads: ${MAXTHREADS}"
 fi
 
 
@@ -465,7 +465,7 @@ echo "SUCCESS: We have a usable ROOT version!"
 echo ""
 echo "*****************************"
 echo " "
-echo "Installing Geant4:"
+echo "Installing Geant4"
 echo " "
 
 # If we are given an existing Geant4 installation, check is it is compatible
@@ -560,7 +560,7 @@ if [[ $(uname) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
 # Until HEAsoft compiles in ARM mode, we cannot install it here:
 elif [[ "${HEASOFTPATH}" == "off" ]]; then
   echo " "
-  echo "Command line option --heasoft=off: Do not install HEAsoft "
+  echo "Command line option --heasoft=off: Do not install HEASoft"
 else 
   # If we are given an existing HEASoft installation, check is it is compatible
   if [[ "${HEASOFTPATH}" != "" ]]; then
