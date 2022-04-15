@@ -39,6 +39,9 @@ GITBRANCH="main"
 # Operating system type
 OSTYPE=$(uname -s)
 
+# Ignore the stage where we look for missing packages
+IGNOREMISSINGPACKAGES=false
+
 # C++ optimization and debugging options
 CPPOPT="normal"
 CPPDEBUG="off"
@@ -88,9 +91,9 @@ echo "COSITOOLSDIR=${COSIPATH}" >> ${ENVFILE}
 # Step 2: helper functions
 
 
-# Use the help of the main setup script sinmce it must be the same anyway 
+# Use the help of the main setup script since it describes the options
 confhelp() {
-  ${COSIPATH}/cosi-setup/setup-print-options.sh
+  ${COSIPATH}/cosi-setup/setup.sh --help
 }
 
 # Tell the user where to look for past and present issues
@@ -131,6 +134,8 @@ for C in "${CMD[@]}"; do
     CPPDEBUG=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-ma*=* ]]; then
     MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
+  elif [[ ${C} == *--i*-m* ]]; then
+    IGNOREMISSINGPACKAGES=true
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -164,6 +169,12 @@ CPPDEBUG=`echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]'`
 
 
 # Provide feed back and perform error checks:
+
+if [[ "${IGNOREMISSINGPACKAGES}" == true ]]; then
+  echo " * Not checking for missing packages"
+else
+  echo " * Checking for missing packages"
+fi
 
 if [[ ${BRANCH} != "" ]]; then
   echo " * Using branch ${BRANCH}"
@@ -289,55 +300,59 @@ echo "*****************************"
 echo "" 
 echo "Checking if all software packages are installed"
 
-# macOS
-if [[ ${OSTYPE} == *arwin* ]]; then
-  # Look for macports
-  type port >/dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    if [[ ! -f ${SETUPPATH}/setup-packages-macports.sh ]]; then
+if [[ "${IGNOREMISSINGPACKAGES}" == true ]]; then
+  echo ""
+  echo "Not checking for missing packages."
+else 
+  # macOS
+  if [[ ${OSTYPE} == *arwin* ]]; then
+    # Look for macports
+    type port >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      if [[ ! -f ${SETUPPATH}/setup-packages-macports.sh ]]; then
+        echo ""
+        echo "ERROR: Unable to find the macports package script!"
+        exit 1
+      fi
+
+      ${SETUPPATH}/setup-packages-macports.sh
+      if [ "$?" != "0" ]; then
+        # The error message is part of the above script
+        exit 1
+      fi
+    else
+      type brew >/dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        echo ""
+        echo "ERROR: Brew is currently not supported to install the required packages for COSItools!"
+        echo "       Please use macports: https://www.macports.org/install.php"
+        exit 1
+      else
+        echo ""
+        echo "ERROR: Please install macports to install the required COSItools packages:"
+        echo "       https://www.macports.org/install.php"s
+        exit 1
+      fi
+    fi
+  # Any Linux
+  elif [[ ${OSTYPE} == *inux* ]]; then
+    if [[ ! -f ${SETUPPATH}/setup-packages-linux.sh ]]; then
       echo ""
-      echo "ERROR: Unable to find the macports package script!"
+      echo "ERROR: Unable to find the linux package script!"
       exit 1
     fi
 
-    ${SETUPPATH}/setup-packages-macports.sh
+    ${SETUPPATH}/setup-packages-linux.sh
     if [ "$?" != "0" ]; then
       # The error message is part of the above script
       exit 1
     fi
-  else
-    type brew >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-      echo ""
-      echo "ERROR: Brew is currently not supported to install the required packages for COSItools!"
-      echo "       Please use macports: https://www.macports.org/install.php"
-      exit 1
-    else
-      echo ""
-      echo "ERROR: Please install macports to install the required COSItools packages:"
-      echo "       https://www.macports.org/install.php"s
-      exit 1
-    fi
-  fi
-# Any Linux
-elif [[ ${OSTYPE} == *inux* ]]; then
-  if [[ ! -f ${SETUPPATH}/setup-packages-linux.sh ]]; then
+  else  
     echo ""
-    echo "ERROR: Unable to find the linux package script!"
+    echo "ERROR: You are using an unsupported operating system: ${OSTYPE}"
     exit 1
   fi
-
-  ${SETUPPATH}/setup-packages-linux.sh
-  if [ "$?" != "0" ]; then
-    # The error message is part of the above script
-    exit 1
-  fi
-else  
-  echo ""
-  echo "ERROR: You are using an unsupported operating system: ${OSTYPE}"
-  exit 1
 fi
-
 
 
 ############################################################################################################
