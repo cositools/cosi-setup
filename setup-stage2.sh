@@ -884,7 +884,7 @@ echo " "
 
 echo "Renaming and moving the environment script"
 mv ${ENVFILE} ${COSIPATH}/source.sh
-chmod +x source.sh
+chmod +x ${COSIPATH}/source.sh
 
 
 
