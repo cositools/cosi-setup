@@ -168,8 +168,13 @@ else
   git stash push -m ${STASHNAME}
   if [ "$?" != "0" ]; then
     echo " "
-    echo "ERROR: Something went wrong stashing modified source code."
-    exit 1
+    echo "Warning: Unable to stash with \"push -m\" -- your git version might be too old. Trying just git stash"
+    git stash
+    if [ "$?" != "0" ]; then
+      echo " "
+      echo "ERROR: Unable to stash any changes in your code"
+      exit 1
+    fi
   fi   
 fi
 
