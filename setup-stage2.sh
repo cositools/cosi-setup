@@ -810,7 +810,7 @@ echo "Switching to file setup-retrieve-git-repository.sh"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-coserl -b=${BRANCH} -r=https://github.com/cositools/massmodel-coserl.git -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
-  echo "ERROR: Something went wrong while retrieving cosi-data-challenges from the repository"
+  echo "ERROR: Something went wrong while retrieving massmodel-coserl from the repository"
   issuereport
   exit 1
 fi  
@@ -822,6 +822,12 @@ cd massmodels
 
 if [[ ! -d massmodel-coserl-v1 ]]; then
   git clone -c advice.detachedHead=false --branch v1.0 https://github.com/cositools/massmodel-coserl massmodel-coserl-v1
+  if [ "$?" != "0" ]; then
+    echo " "
+    echo "ERROR: Something went wrong while retrieving massmodel-coserl (v1) from the repository"
+    issuereport
+    exit 1
+  fi  
   rm -rf massmodel-coserl-v1/.git
 fi
 
