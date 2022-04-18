@@ -69,7 +69,7 @@ confhelp() {
   echo "--debug=[off/no, on/yes - default: off]"
   echo "    Compile with degugging options."
   echo " "
-  echo "--keepenvironmentasis=[off/no, on/yes - default: off]"
+  echo "--keepenvironmentasis=[false/off/no, true/on/yes - default: false]"
   echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty to avoid most libray conflicts."
   echo "    This flag toggles this behaviour and lets you decide to keep your environment or not."
   echo " "
@@ -114,7 +114,7 @@ DEBUGSTRING=""
 DEBUGOPTIONS=""
 PATCH="off"
 CLEANUP="off"
-KEEPENVASIS="off"
+KEEPENVASIS="false"
 
 # Overwrite default options with user options:
 for C in ${CMD}; do
@@ -238,14 +238,14 @@ fi
 
 
 KEEPENVASIS=`echo ${KEEPENVASIS} | tr '[:upper:]' '[:lower:]'`
-if ( [[ ${KEEPENVASIS} == of* ]] || [[ ${KEEPENVASIS} == n* ]] ); then
-  KEEPENVASIS="off"
+if [[ ${KEEPENVASIS} == f* ]] || [[ ${KEEPENVASIS} == of* ]] || [[ ${KEEPENVASIS} == n* ]]; then
+  KEEPENVASIS="false"
   echo " * Clearing the environment paths LD_LIBRARY_PATH, CPATH"
   # We cannot clean PATH, otherwise no programs can be found anymore 
   export LD_LIBRARY_PATH=""
   export CPATH=""
-elif ( [[ ${KEEPENVASIS} == on ]] || [[ ${KEEPENVASIS} == y* ]] ); then
-  KEEPENVASIS="on"
+elif [[ ${KEEPENVASIS} == t* ]] || [[ ${KEEPENVASIS} == on ]] || [[ ${KEEPENVASIS} == y* ]]; then
+  KEEPENVASIS="true"
   echo " * Keeping the existing environment paths as is."
 else
   echo " "

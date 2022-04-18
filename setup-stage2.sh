@@ -39,6 +39,9 @@ GITBRANCH="main"
 # Operating system type
 OSTYPE=$(uname -s)
 
+# Keep all environment variables intact or not
+KEEPENVASIS="off"
+
 # Ignore the stage where we look for missing packages
 IGNOREMISSINGPACKAGES=false
 
@@ -139,6 +142,8 @@ for C in "${CMD[@]}"; do
     MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *--i*-m* ]]; then
     IGNOREMISSINGPACKAGES=true
+  elif [[ ${C} == *-k*-e* ]]; then
+    KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -169,7 +174,7 @@ echo "Verifying input data"
 OSTYPE=`echo ${OSTYPE} | tr '[:upper:]' '[:lower:]'`
 CPPOPT=`echo ${CPPOPT} | tr '[:upper:]' '[:lower:]'`
 CPPDEBUG=`echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]'`
-
+KEEPENVASIS=`echo ${KEEPENVASIS} | tr '[:upper:]' '[:lower:]'`
 
 # Provide feed back and perform error checks:
 
@@ -177,6 +182,22 @@ if [[ "${IGNOREMISSINGPACKAGES}" == true ]]; then
   echo " * Do not check for missing packages"
 else
   echo " * Check for missing packages"
+fi
+
+if [[ ${KEEPENVASIS} == of* ]] || [[ ${KEEPENVASIS} == n* ]] || [[ ${KEEPENVASIS} == f* ]]; then
+  KEEPENVASIS="false"
+  echo " * Clearing the environment paths PATH, LD_LIBRARY_PATH, CPATH"
+  # We cannot clean PATH, otherwise no programs can be found anymore
+  export LD_LIBRARY_PATH=""
+  export CPATH=""
+elif [[ ${KEEPENVASIS} == on ]] || [[ ${KEEPENVASIS} == y* ]] || [[ ${KEEPENVASIS} == t* ]]; then
+  KEEPENVASIS="true"
+  echo " * Keeping the existing environment paths as is."
+else
+  echo " "
+  echo "ERROR: Unknown option for keeping MEGAlib or not: ${KEEPENVASIS}"
+  confhelp
+  exit 1
 fi
 
 if [[ ${BRANCH} != "" ]]; then
@@ -410,7 +431,7 @@ else
   
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-root.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=no 2>&1 | tee BuildLogROOT.txt
+  bash ${SETUPPATH}/build-root.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
@@ -507,7 +528,7 @@ else
   echo "Switching to build-geant4.sh script..."
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-geant4.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=no 2>&1 | tee BuildLogGeant4.txt
+  bash ${SETUPPATH}/build-geant4.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Geant4 dir, copy the build log there
