@@ -11,11 +11,17 @@ You can setup the environment by simply executing this command:
 This script will likely run until a point where it tells you to install a few packages.
 After you do that, just start the script again, and it will complete the setup.
 
-## Examples on how to get the COSItools installed on various supercomputing evironments
+## Examples on how to get the COSItools installed on various system
 
+### Ubuntu and macOS Monterey
+
+The single line setup script from above work out of the box on Ubuntu 20.04 and macOS Monterey with M1 chip.
+Other systems are still under testing.
+
+### Cluster's and supercomputers
 Since the COSItools might be installed on a few systems where the user has not full control over the setup, and cannot install individual packages, below are a few examples on how to handle these cases.
 
-### UC Berkeley's savio cluster
+#### UC Berkeley's savio cluster
 
 This approach worked last on 4/15/2022.
 
@@ -36,10 +42,10 @@ bash setup.sh --heasoft=off --ignore-missing-packages --max-threads=6
 ```
 This should install a working version of the COSItools.
 
-### LBNL's cori supercomputer
+#### LBNL's cori supercomputer
 
 
-### Clemson's Palmetto cluster
+#### Clemson's Palmetto cluster
 
 
 
