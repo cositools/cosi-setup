@@ -15,15 +15,16 @@ After you do that, just start the script again, and it will complete the setup.
 
 ### Ubuntu and macOS Monterey
 
-The single line setup script from above work out of the box on Ubuntu 20.04 and macOS Monterey with M1 chip.
-Other systems are still under testing.
+The single line setup script from above should work out of the box on Ubuntu 20.04 and macOS Monterey with M1 chip.
+Other systems are still being tested.
 
 ### Cluster's and supercomputers
+
 Since the COSItools might be installed on a few systems where the user has not full control over the setup, and cannot install individual packages, below are a few examples on how to handle these cases.
 
 #### UC Berkeley's savio cluster
 
-This approach worked last on 4/20022.
+This approach worked last on 4/20/2022.
 
 The Savio cluster uses scientific linux as well as "environment modules" to load specific software packages. In order, to compile COSItools, you need to load the following modules:
 
