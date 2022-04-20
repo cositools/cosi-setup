@@ -36,7 +36,7 @@ Then launch the script once to setup the basic directory structure:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
 ```
-Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to not keep all environment paths as is, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
+Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to keep all environment search paths intact, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
 ```
 cd COSItools/cosi-setup
 bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
@@ -57,7 +57,7 @@ Then launch the script once to setup the basic directory structure:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
 ```
-Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to not keep all environment paths as is, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
+Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to keep all environment search paths intact, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
 ```
 cd COSItools/cosi-setup
 bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
