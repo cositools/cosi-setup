@@ -405,7 +405,7 @@ if [ -d ${GEANT4DIR} ]; then
     
     
     if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] && [ "${SAMEPATCH}" != "" ] ); then
-      echo "Your already have a usable Geant4 version installed!"
+      echo "You already have a usable Geant4 version installed!"
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the Geant4 directory in the MEGAlib source script..."
         echo "GEANT4DIR=`pwd`" >> ${ENVFILE}
