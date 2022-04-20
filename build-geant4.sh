@@ -61,10 +61,10 @@ confhelp() {
   echo "    Use this tarball instead of downloading it from the Geant4 website" 
   echo " "
   echo "--geant4version=[e.g. 10.02 (but not 10.02.p03)]"
-  echo "    Specifiy the Geant4 version (ignores MEGAlib's requested version), if empty read he requested one from the MEGAlib directory"
+  echo "    Specifiy the Geant4 version (ignores the requested version), if empty read he default version stated oin the setup scripts"
   echo " "
   echo "--sourcescript=[file name of new environment script]"
-  echo "    File in which the Geant4 path will be stored. This is used by the MEGAlib setup script" 
+  echo "    File in which the Geant4 path will be stored. This is used by the setup script" 
   echo " "
   echo "--debug=[off/no, on/yes - default: off]"
   echo "    Compile with degugging options."
@@ -77,7 +77,7 @@ confhelp() {
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
   echo "--patch=[yes or no - default no]"
-  echo "    Apply MEGAlib internal (!) Geant4 patches, if there are any."
+  echo "    Apply Geant4 patches, if there are any."
   echo " "
   echo "--cleanup=[off/no, on/yes - default: off]"
   echo "    Remove intermediate build files"
@@ -122,7 +122,7 @@ for C in ${CMD}; do
     TARBALL=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-s*=* ]] || [[ ${C} == *-e*=* ]]; then
     ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
-    echo "Using this MEGALIB environment file: ${ENVFILE}"
+    echo "Using this environment file: ${ENVFILE}"
   elif [[ ${C} == *-m*=* ]]; then
     MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-d*=* ]]; then
@@ -210,10 +210,10 @@ fi
 PATCH=`echo ${PATCH} | tr '[:upper:]' '[:lower:]'`
 if ( [[ ${PATCH} == of* ]] || [[ ${PATCH} == n* ]] ); then
   PATCH="off"
-  echo " * Don't apply MEGAlib internal ROOT and Geant4 patches"
+  echo " * Don't apply internal ROOT and Geant4 patches"
 elif ( [[ ${PATCH} == on ]] || [[ ${PATCH} == y* ]] ); then
   PATCH="on"
-  echo " * Apply MEGAlib internal ROOT and Geant4 patches"
+  echo " * Apply internal ROOT and Geant4 patches"
 else
   echo " "
   echo "ERROR: Unknown option for updates: ${PATCH}"
@@ -249,7 +249,7 @@ elif [[ ${KEEPENVASIS} == t* ]] || [[ ${KEEPENVASIS} == on ]] || [[ ${KEEPENVASI
   echo " * Keeping the existing environment paths as is."
 else
   echo " "
-  echo "ERROR: Unknown option for keeping MEGAlib or not: ${KEEPENVASIS}"
+  echo "ERROR: Unknown option for keeping the environment or not: ${KEEPENVASIS}"
   confhelp
   exit 1
 fi
@@ -376,9 +376,9 @@ if [ -d ${GEANT4DIR} ]; then
     
     SAMEPATCH=""
     PATCHPRESENT="no"
-    if [ -f "${MEGALIB}/resource/patches/${GEANT4CORE}.patch" ]; then
+    if [ -f "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" ]; then
       PATCHPRESENT="yes"
-      PATCHPRESENTMD5=`openssl md5 "${MEGALIB}/resource/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
+      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
     fi
     PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
     if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
@@ -407,7 +407,7 @@ if [ -d ${GEANT4DIR} ]; then
     if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] && [ "${SAMEPATCH}" != "" ] ); then
       echo "You already have a usable Geant4 version installed!"
       if [ "${ENVFILE}" != "" ]; then
-        echo "Storing the Geant4 directory in the MEGAlib source script..."
+        echo "Storing the Geant4 directory in the source script..."
         echo "GEANT4DIR=`pwd`" >> ${ENVFILE}
       fi
       exit 0
@@ -458,11 +458,11 @@ fi
 PATCHAPPLIED="Patch not applied"
 if [[ ${PATCH} == on ]]; then
   echo "Patching..."
-  if [ -f "${MEGALIB}/resource/patches/${GEANT4CORE}.patch" ]; then
-    patch -p1 < ${MEGALIB}/resource/patches/${GEANT4CORE}.patch
-    PATCHMD5=`openssl md5 "${MEGALIB}/resource/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
+  if [ -f "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" ]; then
+    patch -p1 < ${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch
+    PATCHMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
-    echo "Applied patch: ${MEGALIB}/resource/patches/${GEANT4CORE}.patch"
+    echo "Applied patch: ${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch"
   fi
 fi
 
@@ -566,7 +566,7 @@ chmod -R go+rX ${GEANT4DIR}
 
 
 if [ "${ENVFILE}" != "" ]; then
-  echo "Storing the Geant4 directory in the MEGAlib source script..."
+  echo "Storing the Geant4 directory in the source script..."
   echo "GEANT4DIR=`pwd`/${GEANT4DIR}" >> ${ENVFILE}
 fi
 

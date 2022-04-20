@@ -267,10 +267,10 @@ fi
 PATCH=`echo ${PATCH} | tr '[:upper:]' '[:lower:]'`
 if ( [[ ${PATCH} == of* ]] || [[ ${PATCH} == n* ]] ); then
   PATCH="off"
-  echo " * Don't apply MEGAlib internal ROOT and Geant4 patches"
+  echo " * Don't apply internal ROOT and Geant4 patches"
 elif ( [[ ${PATCH} == on ]] || [[ ${PATCH} == y* ]] ); then
   PATCH="on"
-  echo " * Apply MEGAlib internal ROOT and Geant4 patches"
+  echo " * Apply internal ROOT and Geant4 patches"
 else
   echo " "
   echo "ERROR: Unknown option for updates: ${PATCH}"
@@ -312,7 +312,7 @@ elif [[ ${KEEPENVASIS} == t* ]] || [[ ${KEEPENVASIS} == on ]] || [[ ${KEEPENVASI
   echo " * Keeping the existing environment paths as is."
 else
   echo " "
-  echo "ERROR: Unknown option for keeping MEGAlib or not: ${KEEPENVASIS}"
+  echo "ERROR: Unknown option for keeping environemnt or not: ${KEEPENVASIS}"
   confhelp
   exit 1
 fi
@@ -468,9 +468,9 @@ if [ -d ${ROOTDIR} ]; then
 
     SAMEPATCH=""
     PATCHPRESENT="no"
-    if [ -f "${MEGALIB}/resource/patches/${ROOTCORE}.patch" ]; then
+    if [ -f "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" ]; then
       PATCHPRESENT="yes"
-      PATCHPRESENTMD5=`openssl md5 "${MEGALIB}/resource/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
+      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
     fi
     PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
     if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
@@ -499,7 +499,7 @@ if [ -d ${ROOTDIR} ]; then
     if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] && [ "${SAMEPATCH}" != "" ] ); then
       echo "Your already have a usable ROOT version installed!"
       if [ "${ENVFILE}" != "" ]; then
-        echo "Storing the ROOT directory in the MEGAlib source script..."
+        echo "Storing the ROOT directory in the source script..."
         echo "ROOTDIR=`pwd`" >> ${ENVFILE}
       fi
       exit 0
@@ -535,11 +535,11 @@ mkdir ${ROOTBUILDDIR}
 PATCHAPPLIED="Patch not applied"
 if [[ ${PATCH} == on ]]; then
   echo "Patching..."
-  if [ -f "${MEGALIB}/resource/patches/${ROOTCORE}.patch" ]; then
-    patch -p1 < ${MEGALIB}/resource/patches/${ROOTCORE}.patch
-    PATCHMD5=`openssl md5 "${MEGALIB}/resource/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
+  if [ -f "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" ]; then
+    patch -p1 < ${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch
+    PATCHMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
-    echo "Applied patch: ${MEGALIB}/resource/patches/${ROOTCORE}.patch"
+    echo "Applied patch: ${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch"
   fi
 fi
 
@@ -643,7 +643,7 @@ chmod -R go+rX ${ROOTDIR}
 
 
 if [ "${ENVFILE}" != "" ]; then
-  echo "Storing the ROOT directory in the MEGAlib source script..."
+  echo "Storing the ROOT directory in the source script..."
   echo "ROOTDIR=`pwd`/${ROOTDIR}" >> ${ENVFILE}
 fi
 
