@@ -573,17 +573,17 @@ echo " "
 echo "Installing HEASoft"
 echo " "
 
-# Until HEAsoft compiles in ARM mode, we cannot install it here:
+# Until HEASoft compiles in ARM mode, we cannot install it here:
 if [[ $(uname) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
   echo "Warning: For the time being HEAsoft cannot be compiled in arm64 mode,"
   echo "         and thus we cannot link against it with COSItools,"
   echo "         and we will not install HEAsoft."
-# Until HEAsoft compiles in ARM mode, we cannot install it here:
+# We do not want HEASoft to be installed:
 elif [[ "${HEASOFTPATH}" == "off" ]]; then
   echo " "
   echo "Command line option --heasoft=off: Do not install HEASoft"
 else 
-  # If we are given an existing HEASoft installation, check is it is compatible
+  # If we are given an existing HEASoft installation, check if it is compatible
   if [[ "${HEASOFTPATH}" != "" ]]; then
     # Check if we can use the given HEASoft version
     if [[ ! -f ${SETUPPATH}/check-heasoftversion.sh ]]; then

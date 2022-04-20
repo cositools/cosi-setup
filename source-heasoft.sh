@@ -63,25 +63,20 @@ fi
 
 __TMP_HEADASFOUND=false
 __TMP_CFITSIOFOUND=false
-for i in `ls -d ${__TMP_PATH}/*`; do
-  if [[ "${i}" == *BUILD_DIR* ]]; then
-    continue
-  fi
-  if [[ -f ${i}/headas-init.sh ]]; then 
-    export HEADAS=${i}
-    alias heainit=". ${HEADAS}/headas-init.sh"
-    source ${HEADAS}/headas-init.sh
-    __TMP_HEADASFOUND=true
-  fi
-  if [[ `uname -a` == *Linux* ]]; then
-    if [[ -f ${i}/lib/libcfitsio.so ]]; then 
-      __TMP_CFITSIOFOUND=true
-    fi
-  else
-    # Too many installation options here - don't do the check...
+if [[ -f ${__TMP_PATH}/headas-init.sh ]]; then 
+  export HEADAS=${__TMP_PATH}
+  alias heainit=". ${HEADAS}/headas-init.sh"
+  source ${HEADAS}/headas-init.sh
+  __TMP_HEADASFOUND=true
+fi
+if [[ `uname -a` == *Linux* ]]; then
+  if [[ -f ${__TMP_PATH}/lib/libcfitsio.so ]]; then 
     __TMP_CFITSIOFOUND=true
   fi
-done
+else
+  # Too many installation options here - don't do the check...
+  __TMP_CFITSIOFOUND=true
+fi
 
 if [[ ${__TMP_HEADASFOUND} == false ]]; then
   echo ""

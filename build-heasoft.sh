@@ -203,8 +203,9 @@ if [ -d heasoft_v${VER} ]; then
     if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] ); then
       echo "Your already have a usable HEASoft version installed!"
       if [ "${ENVFILE}" != "" ]; then
-        echo "Storing the HEASoft directory in the MEGAlib source script..."
-        echo "HEASOFTDIR=`pwd`" >> ${ENVFILE}
+        echo "Storing the HEASoft directory in the source script..."
+        DIR=$(find `pwd` -name "ftversion" | grep -v "heatools" | awk '{ print substr( $0, 1, length($0)-14) }')
+        echo "HEASOFTDIR=${DIR}" >> ${ENVFILE}
       else
         cd ..
         setuphelp
