@@ -18,7 +18,7 @@ After you do that, just start the script again, and it will complete the setup.
 The single line setup script from above should work out of the box on Ubuntu 20.04 and macOS Monterey with M1 chip.
 Other systems are still being tested.
 
-### Cluster's and supercomputers
+### Clusters and supercomputers
 
 Since the COSItools might be installed on a few systems where the user has not full control over the setup, and cannot install individual packages, below are a few examples on how to handle these cases.
 
@@ -26,7 +26,7 @@ Since the COSItools might be installed on a few systems where the user has not f
 
 This approach worked last on 4/20/2022.
 
-The Savio cluster uses scientific linux as well as "environment modules" to load specific software packages. In order, to compile COSItools, you need to load the following modules:
+The Savio cluster uses scientific linux as well as "environment modules" to load specific software packages. In order, to set up the COSItools, you need to load the following modules:
 
 ```
 module load gcc/6.3.0 cmake/3.22.0 git/2.11.1 blas/3.8.0 ml/tensorflow/2.5.0-py37
@@ -44,6 +44,25 @@ bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-thre
 This should install a working version of the COSItools.
 
 #### LBNL's cori supercomputer
+
+This approach worked last on 4/XYZ/2022.
+
+Lawrence Berkeley National Lab's cori supercomputer uses the SUSE Linux Enterprise as well as "environment modules" to load specific software packages. In order, to set up the COSItools, you need to load the following modules:
+
+```
+module swap PrgEnv-intel PrgEnv-gnu
+```
+
+Then launch the script once to setup the basic directory structure:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
+```
+Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to not keep all environment paths as is, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
+```
+cd COSItools/cosi-setup
+bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
+```
+This should install a working version of the COSItools.
 
 
 #### Clemson's Palmetto cluster
