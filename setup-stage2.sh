@@ -14,7 +14,7 @@
 
 
 ############################################################################################################
-# Step 1: Define default parameters
+# Define default parameters
 
 echo ""
 echo "*****************************"
@@ -89,9 +89,8 @@ echo "COSITOOLSDIR=${COSIPATH}" >> ${ENVFILE}
 
 
 
-
 ############################################################################################################
-# Step 2: helper functions
+# Helper functions
 
 
 # Use the help of the main setup script since it describes the options
@@ -112,8 +111,10 @@ absolutefilename() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
 
+
+
 ############################################################################################################
-# Step 3: extract the main parameters for the stage 1 script
+# Extract the main parameters for the stage 1 script
 
 # Check for help
 for C in "${CMD[@]}"; do
@@ -159,7 +160,7 @@ done
 
 
 ############################################################################################################
-# Step 5: Sanity checks
+# Sanity checks
 
 # Setup the path to the COSI installation
 
@@ -318,7 +319,7 @@ fi
 
 
 ############################################################################################################
-# Step 6: Install all software packages
+# Install all software packages
 
 # Setup the path to the COSI installation
 
@@ -382,8 +383,9 @@ else
 fi
 
 
+
 ############################################################################################################
-# Step 7: Install ROOT
+# Install ROOT
 
 echo ""
 echo "*****************************"
@@ -481,7 +483,7 @@ echo "SUCCESS: We have a usable ROOT version!"
 
 
 ############################################################################################################
-# Step 8: Install Geant4
+# Install Geant4
 
 echo ""
 echo "*****************************"
@@ -565,7 +567,7 @@ echo "SUCCESS: We have a usable Geant4 version!"
 
 
 ############################################################################################################
-# Step 9: Install HEASoft
+# Install HEASoft
 
 echo ""
 echo "*****************************"
@@ -662,7 +664,7 @@ fi
 
 
 ############################################################################################################
-# Step 10: Install MEGAlib
+# Install MEGAlib
 
 echo ""
 echo "*****************************"
@@ -719,7 +721,48 @@ echo "SUCCESS: MEGAlib has been installed"
 
 
 ############################################################################################################
-# Step 11: Install CosiPy
+# Install Nuclearizer
+
+echo ""
+echo "*****************************"
+echo " "
+echo "Installing nuclearizer"
+echo " "
+
+echo "Switching to file setup-retrieve-git-repository.sh"
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=nuclearizer -b=${BRANCH} -r=https://github.com/cositools/nuclearizer.git -s=${STASHNAME}
+if [ "$?" != "0" ]; then
+  echo " "
+  echo "ERROR: Something went wrong while retrieving cosipy from the repository"
+  issuereport
+  exit 1
+fi  
+echo "The Nuclearizer source code has been updated"
+
+cd ${COSIPATH}/nuclearizer
+
+echo "Compiling Nuclearizer..."
+export NUCLEARIZER=${COSIPATH}/nuclearizer
+make clean
+make -j${MAXTHREADS}
+if [ "$?" != "0" ]; then
+  echo "ERROR: Something went wrong while compiling MEGAlib!"
+  issuereport
+  exit 1
+fi
+
+
+echo "NUCLEARIZERDIR=${COSIPATH}/nuclearizer" >> ${ENVFILE}
+
+cd ${COSIPATH}
+
+echo " "
+echo "SUCCESS: Nuclearizer has been installed" 
+
+
+
+############################################################################################################
+# Install CosiPy
 
 echo ""
 echo "*****************************"
@@ -742,7 +785,7 @@ echo "SUCCESS: COSIpy has been installed"
 
 
 ############################################################################################################
-# Step 12: Install COSIpy-classic
+# Install COSIpy-classic
 
 echo ""
 echo "*****************************"
@@ -765,7 +808,7 @@ echo "SUCCESS: cosipy-classic has been installed"
 
 
 ############################################################################################################
-# Step 13: Install cosi-data-challenge
+# Install cosi-data-challenge
 
 echo ""
 echo "*****************************"
@@ -789,7 +832,7 @@ echo "SUCCESS: cosi-data-challenges has been installed"
 
 
 ############################################################################################################
-# Step 14: Install cosi-docs
+# Install cosi-docs
 
 echo ""
 echo "*****************************"
@@ -812,7 +855,7 @@ echo "SUCCESS: cosi-docs has been installed"
 
 
 ############################################################################################################
-# Step 15: Install mass models
+# Install mass models
 
 echo ""
 echo "*****************************"
@@ -857,7 +900,7 @@ cd ${COSIPATH}
 
 
 ############################################################################################################
-# Step 16: Setup python environment
+# Setup python environment
 
 echo ""
 echo "*****************************"
@@ -882,7 +925,7 @@ fi
 
 
 ############################################################################################################
-# Step 17: Finalize the setup script
+# Finalize the setup script
 
 echo ""
 echo "*****************************"
@@ -895,6 +938,7 @@ echo "# Source the inividual environment variables" >> ${ENVFILE}
 echo "# Order is important!" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-geant4.sh -p=\${GEANT4DIR}" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-megalib.sh -p=\${MEGALIBDIR}" >> ${ENVFILE}
+echo ". ${SETUPPATH}/source-nuclearizer.sh -p=\${NUCLEARIZERDIR}" >> ${ENVFILE}
 if grep -q "HEASOFTDIR" ${ENVFILE}; then  # We currently don't install HEASoft on M1 machines
   echo ". ${SETUPPATH}/source-heasoft.sh -p=\${HEASOFTDIR}" >> ${ENVFILE}
 fi
@@ -910,7 +954,7 @@ chmod +x ${COSIPATH}/source.sh
 
 
 ############################################################################################################
-# Step 18: Final remarks
+# Final remarks
 
 TIMEEND=$(date +%s)
 TIMEDIFF=$(( ${TIMEEND} - ${TIMESTART} ))
