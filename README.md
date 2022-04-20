@@ -23,22 +23,22 @@ Since the COSItools might be installed on a few systems where the user has not f
 
 #### UC Berkeley's savio cluster
 
-This approach worked last on 4/15/2022.
+This approach worked last on 4/20022.
 
 The Savio cluster uses scientific linux as well as "environment modules" to load specific software packages. In order, to compile COSItools, you need to load the following modules:
 
 ```
-module load gcc/4.8.5 cmake/3.22.0 python/3.6 git/2.11.1 blas/3.8.0 cuda tensorflow
+module load gcc/6.3.0 cmake/3.22.0 git/2.11.1 blas/3.8.0 ml/tensorflow/2.5.0-py37
 ```
 
 Then launch the script once to setup the basic directory structure:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
 ```
-Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to not install HEASoft, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
+Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to not keep all environment paths as is, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
 ```
 cd COSItools/cosi-setup
-bash setup.sh --heasoft=off --ignore-missing-packages --max-threads=6
+bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
 ```
 This should install a working version of the COSItools.
 
