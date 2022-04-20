@@ -3,6 +3,7 @@
 
 COMPILEROPTIONS=`gcc --version | head -n 1`
 
+# Additional configure options 
 CONFIGUREOPTIONS=" "
 
 # Comment this line in if you have trouble with readline
@@ -243,8 +244,8 @@ mv heasoft-${VER} heasoft_v${VER}
 echo "Configuring..."
 # Minimze the LD_LIBRARY_PATH to prevent problems with multiple readline's
 cd heasoft_v${VER}/BUILD_DIR
-export LD_LIBRARY_PATH=/usr/lib
-sh configure ${CONFIGUREOPTIONS} > config.log 2>&1
+#export LD_LIBRARY_PATH=/usr/lib
+sh configure ${CONFIGUREOPTIONS} --with-components="ftools Xspec" > config.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring HEASoft!"
   echo "       Check the file "`pwd`"/config.log"
