@@ -170,9 +170,8 @@ else
 
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
     echo "Starting the download."
-    echo "If the download fails, you can continue the download via the following commands and then call this script again - it will use the downloaded file."
+    echo "If the download fails, you can continue it via the following command and then call this script again - it will use the download file."
     echo " "
-    echo "cd $(pwd)"
     echo "curl -O -C - https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}"
     echo " "
     curl -O https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}
