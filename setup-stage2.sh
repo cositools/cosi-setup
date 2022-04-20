@@ -431,7 +431,7 @@ else
   
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-root.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
+  bash ${SETUPPATH}/build-root.sh -source=${ENVFILE} -patch=no --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
@@ -528,7 +528,7 @@ else
   echo "Switching to build-geant4.sh script..."
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-geant4.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
+  bash ${SETUPPATH}/build-geant4.sh -source=${ENVFILE} -patch=no --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Geant4 dir, copy the build log there
@@ -632,7 +632,7 @@ else
       if [[ -f ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ]]; then
         mv ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt
       fi
-      mv HEASoftBuildLog.txt ${NEWHEASOFTDIR}
+      mv BuildLogHEASoft.txt ${NEWHEASOFTDIR}
     fi
   
     # Now handle build errors
@@ -651,7 +651,7 @@ else
       exit 1
     fi
     
-    # The build-script will have added Geant4 to the environment file
+    # The build-script will have added HEAsoft to the environment file
   fi
 
   cd ${COSIPATH}
