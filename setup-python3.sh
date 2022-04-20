@@ -12,8 +12,11 @@
 ############################################################################################################
 # Step 1: Define default parameters
 
-# Th operating system
+# The operating system
 OSTYPE=$(uname -s)
+
+# We do not want any site packages, thus clear PYTHONENV
+export PYTHONPATH=""
 
 
 ############################################################################################################
