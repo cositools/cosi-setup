@@ -448,7 +448,7 @@ mkdir ${GEANT4BUILDDIR}
 
 # Some hardcoding of certain default patch conditions
 if [[ ${GEANT4CORE} == "geant4_v10.02.p03" ]]; then
-  GCC_MAIN_VERSION=$(gcc --version | grep gcc | awk '{ print $3 }' | awk -F. '{ print $1 }')
+  GCC_MAIN_VERSION=$(gcc --version | grep gcc | awk -F\) '{ print $2 }' | awk -F. '{ print $1 }' | xargs)
   if [[ ${GCC_MAIN_VERSION} != "" ]] && [ ${GCC_MAIN_VERSION} -ge 11 ]; then
     PATCH="on"
   fi
@@ -457,12 +457,14 @@ fi
 
 PATCHAPPLIED="Patch not applied"
 if [[ ${PATCH} == on ]]; then
-  echo "Patching..."
-  if [ -f "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" ]; then
-    patch -p1 < ${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch
-    PATCHMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
+  echo "Patching... "
+  if [[ -f "${SETUPPATH}/patches/${GEANT4CORE}.patch" ]]; then
+    patch -p1 < ${SETUPPATH}/patches/${GEANT4CORE}.patch
+    PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
-    echo "Applied patch: ${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch"
+    echo "Applied patch: ${SETUPPATH}/patches/${GEANT4CORE}.patch"
+  else
+    echo "No required patch found for this version of Geant4"
   fi
 fi
 
