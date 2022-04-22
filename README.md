@@ -11,12 +11,34 @@ You can setup the environment by simply executing this command:
 This script will likely run until a point where it tells you to install a few packages.
 After you do that, just start the script again, and it will complete the setup.
 
-## Examples on how to get the COSItools installed on various system
+## Examples on how to install the COSItools on various system
 
-### Ubuntu and macOS Monterey
+### Personal computers and workstations
 
-The single line setup script from above should work out of the box on Ubuntu 20.04 and macOS Monterey with M1 chip.
-Other systems are still being tested.
+#### Ubuntu
+
+Version 20.04 and 22.04 should work with the default one-line install script.
+
+#### macOS Monterey 
+
+##### M1 chip
+
+Should work with macports, homebrew is not supported
+
+##### Intel chip
+
+Coming soon...
+
+#### OpenSUSE Tumbleweed
+
+HEASoft does not compile at the moment, thus disable it and just use the system default cfitsiso library which should be installed automatically with the packages:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --heasoft=off
+```
+
+#### Other systems
+
+No other systems have been officially been tested yet
 
 ### Clusters and supercomputers
 
@@ -32,16 +54,11 @@ The Savio cluster uses scientific linux as well as "environment modules" to load
 module load gcc/6.3.0 cmake/3.22.0 git/2.11.1 blas/3.8.0 ml/tensorflow/2.5.0-py37
 ```
 
-Then launch the script once to setup the basic directory structure:
+Then launch the script with the following additional option:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
 ```
-Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to keep all environment search paths intact, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
-```
-cd COSItools/cosi-setup
-bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
-```
-This should install a working version of the COSItools.
+It ignores not installed packages since the setup script cannot find packages installed via the "environment modules", it keeps all environment search paths intact, and it limits the number of threads to 6 otherwise the savio admins might complain that you use too many resources on the login nodes.
 
 #### LBNL's cori supercomputer
 
@@ -53,16 +70,11 @@ Lawrence Berkeley National Lab's cori supercomputer uses the SUSE Linux Enterpri
 module swap PrgEnv-intel PrgEnv-gnu
 ```
 
-Then launch the script once to setup the basic directory structure:
+Then launch the script with the following additional option:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --ignore-missing-packages --keep-environment-as-is=true --heasoft=off --max-threads=6
 ```
-Ignore the request to install more packages, and switch directly into the cosi-setup directory, from where you restart the setup script with the options to ignore not installed packages (the setup script cannot find the packages installed via the "environment modules"), to keep all environment search paths intact, and to limit the number of threads to 6 (otherwise the admins might complain for using too much resources on the login nodes):
-```
-cd COSItools/cosi-setup
-bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
-```
-This should install a working version of the COSItools.
+It ignores not installed packages since the setup script cannot find packages installed via the "environment modules", it keeps all environment search paths intact, does not install HEASoft since it crashes on cori, and it limits the number of threads to 6 otherwise the cori admins will complain that you use too many resources on the login nodes.
 
 
 #### Clemson's Palmetto cluster
