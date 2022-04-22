@@ -135,7 +135,7 @@ confhelp() {
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
   echo "--patch=[yes or no - default: no]"
-  echo "    Apply MEGAlib internal (!) ROOT patches, if there are any for this version."
+  echo "    Apply internal ROOT patches, if there are any for this version."
   echo " "
   echo "--cleanup=[off/no, on/yes - default: off]"
   echo "    Remove intermediate build files"
@@ -468,9 +468,9 @@ if [ -d ${ROOTDIR} ]; then
 
     SAMEPATCH=""
     PATCHPRESENT="no"
-    if [ -f "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" ]; then
+    if [ -f "${SETUPPATH}/patches/${ROOTCORE}.patch" ]; then
       PATCHPRESENT="yes"
-      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
+      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
     fi
     PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
     if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
@@ -535,11 +535,11 @@ mkdir ${ROOTBUILDDIR}
 PATCHAPPLIED="Patch not applied"
 if [[ ${PATCH} == on ]]; then
   echo "Patching..."
-  if [ -f "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" ]; then
-    patch -p1 < ${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch
-    PATCHMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
+  if [ -f "${SETUPPATH}/patches/${ROOTCORE}.patch" ]; then
+    patch -p1 < ${SETUPPATH}/patches/${ROOTCORE}.patch
+    PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
-    echo "Applied patch: ${SETUPPATH}/cosi-setup/patches/${ROOTCORE}.patch"
+    echo "Applied patch: ${SETUPPATH}/patches/${ROOTCORE}.patch"
   fi
 fi
 

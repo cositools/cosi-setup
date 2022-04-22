@@ -359,6 +359,18 @@ GEANT4DIR=geant4_v${VER}${DEBUGSTRING}
 GEANT4SOURCEDIR=geant4_v${VER}-source   # Attention: the cleanup checks this name pattern before removing it
 GEANT4BUILDDIR=geant4_v${VER}-build     # Attention: the cleanup checks this name pattern before removing it
 
+
+# Hardcoding default patch conditions
+# Needs to be done after the Geant4 version is known and before we check the exiting installtion
+if [[ ${GEANT4CORE} == "geant4_v10.02.p03" ]]; then
+  GCC_MAIN_VERSION=$(gcc --version | grep gcc | awk -F\) '{ print $2 }' | awk -F. '{ print $1 }' | xargs)
+  if [[ ${GCC_MAIN_VERSION} != "" ]] && [ ${GCC_MAIN_VERSION} -ge 11 ]; then
+    PATCH="on"
+    echo "The current combination of compiler and Geant4 version requires an existing Geant4 patch"
+  fi
+fi
+
+
 echo "Checking for old installation..."
 if [ -d ${GEANT4DIR} ]; then
   cd ${GEANT4DIR}
@@ -376,9 +388,9 @@ if [ -d ${GEANT4DIR} ]; then
     
     SAMEPATCH=""
     PATCHPRESENT="no"
-    if [ -f "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" ]; then
+    if [ -f "${SETUPPATH}/patches/${GEANT4CORE}.patch" ]; then
       PATCHPRESENT="yes"
-      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/cosi-setup/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
+      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
     fi
     PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
     if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
@@ -444,15 +456,6 @@ cd ${GEANT4DIR}
 mv ../geant4.${VER} ${GEANT4SOURCEDIR}
 mkdir ${GEANT4BUILDDIR}
 
-
-
-# Some hardcoding of certain default patch conditions
-if [[ ${GEANT4CORE} == "geant4_v10.02.p03" ]]; then
-  GCC_MAIN_VERSION=$(gcc --version | grep gcc | awk -F\) '{ print $2 }' | awk -F. '{ print $1 }' | xargs)
-  if [[ ${GCC_MAIN_VERSION} != "" ]] && [ ${GCC_MAIN_VERSION} -ge 11 ]; then
-    PATCH="on"
-  fi
-fi
 
 
 PATCHAPPLIED="Patch not applied"
