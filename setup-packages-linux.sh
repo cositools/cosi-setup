@@ -154,9 +154,9 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     VERSIONID=$(echo ${VERSIONID} | awk -F'.' '{ print $1 }')
     #echo "VERSION: ${VERSIONID}"
     if [[ ${VERSIONID} == 42 ]]; then
-      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel"
+      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel mlocate cfitsio-devel"
     else 
-      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel"
+      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel mlocate cfitsio-devel"
 
       echo " "
       echo "This script has not yet been adapted for your version of opensuse: ${VERSIONID}"
@@ -164,6 +164,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo zypper install ${REQUIRED}"
+      echo "sudo updatedb"
       echo " "
       exit 1  
     fi
@@ -174,9 +175,9 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     VERSIONID=$(echo ${VERSIONID} | awk -F'.' '{ print $1 }')
     #echo "VERSION: ${VERSIONID}"
     if [[ ${VERSIONID} == 15 ]]; then
-      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel"
+      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel"
     else 
-      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel"
+      REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel"
 
       echo " "
       echo "This script has not yet been adapted for your version of opensuse: ${VERSIONID}"
@@ -184,13 +185,14 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo zypper install ${REQUIRED}"
+      echo "sudo updatedb"
       echo " "
       exit 1 
     fi
   elif [[ ${OS} == opensuse-tumbleweed ]]; then
-    REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++"
+    REQUIRED="git-core bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ mlocate cfitsio-devel"
   else
-    REQUIRED="git-core bash cmake gcc-c++ gcc binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel python3-devel"
+    REQUIRED="git-core bash cmake gcc-c++ gcc binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel python3-devel mlocate cfitsio-devel"
 
     echo " "
     echo "This script has not yet been adapted for your version of Linux: SUSE-derivative ${OS}"
@@ -221,6 +223,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     echo " "
     echo "Do the following to install all required packages:"
     echo "sudo zypper install ${TOBEINSTALLED}"
+    echo "sudo updatedb"
     echo " "
     exit 1
   else 
