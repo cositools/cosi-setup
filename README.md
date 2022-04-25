@@ -19,7 +19,7 @@ After you do that, just start the script again, and it will complete the setup.
 
 Version 20.04 and 22.04 should work with the default one-line install script.
 
-#### Fedore
+#### Fedora
 
 Version 35 should work with the default one-line install script.
 
