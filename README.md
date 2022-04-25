@@ -19,13 +19,17 @@ After you do that, just start the script again, and it will complete the setup.
 
 Version 20.04 and 22.04 should work with the default one-line install script.
 
-#### macOS Monterey 
+#### Fedore
 
-##### M1 chip
+Version 35 should work with the default one-line install script.
 
-Should work with macports, homebrew is not supported
+#### macOS 
 
-##### Intel chip
+##### With Apple M chip
+
+Montery should work with macports excluding HEASoft. However, homebrew is not supported.
+
+##### With Intel chip
 
 Coming soon...
 
@@ -38,7 +42,7 @@ HEASoft does not compile at the moment, thus disable it and just use the system 
 
 #### Other systems
 
-No other systems have been officially been tested yet
+No other systems have been officially been tested yet or are supported.
 
 ### Clusters and supercomputers
 
@@ -69,12 +73,12 @@ Lawrence Berkeley National Lab's cori supercomputer uses the SUSE Linux Enterpri
 ```
 module swap PrgEnv-intel PrgEnv-gnu
 ```
-
-Then launch the script with the following additional option:
+Unfortunately the cfitsio README states, that "Cray supercomputers computers are currently not supported", thus we have to compile the COSItools without HEASoft.
+Therefore, launch the script with the following additional option:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --ignore-missing-packages --keep-environment-as-is=true --heasoft=off --max-threads=6
 ```
-It ignores not installed packages since the setup script cannot find packages installed via the "environment modules", it keeps all environment search paths intact, does not install HEASoft since it crashes on cori, and it limits the number of threads to 6 otherwise the cori admins will complain that you use too many resources on the login nodes.
+It ignores not installed packages since the setup script cannot find packages installed via the "environment modules", it keeps all environment search paths intact, does not install HEASoft since the compilation crashes on cori, and it limits the number of threads to 6 otherwise the cori admins will complain that you use too many resources on the login nodes.
 
 
 #### Clemson's Palmetto cluster
