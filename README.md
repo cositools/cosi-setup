@@ -82,7 +82,7 @@ It ignores not installed packages since the setup script cannot find packages in
 
 
 #### Clemson's Palmetto cluster
-The approach last worked on 4/25/22
+This approach last worked on 4/25/22
 
 Clemson's Palmetto High Performance Cluster runs centOS Linux 8, and it uses environment modules to load specific software packages. Additionally, Anaconda can be used to create and manage environments, as well as to install software packages. 
 
@@ -117,6 +117,7 @@ Finally, make main installation:
 cd COSItools/cosi-setup
 bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
 ```
+Note: the following are listed as missing packages: glew-devel, mariadb-devel, fftw-devel, graphviz-devel, avahi-compat-libdns_sd-devel, python3-devel
 
 
 
