@@ -84,19 +84,19 @@ It ignores not installed packages since the setup script cannot find packages in
 #### Clemson's Palmetto cluster
 The approach last worked on 4/25/22
 
-Clemson's Palmetto High Performance Computer runs centOS Linux 8, and it uses environment modules to load specific software packages. Additionally, anaconda can be used to create and manage environments, as well as install software packages. 
+Clemson's Palmetto High Performance Cluster runs centOS Linux 8, and it uses environment modules to load specific software packages. Additionally, Anaconda can be used to create and manage environments, as well as to install software packages. 
 
 
-First, request an interactive node (installation can't be done on login node):
+First, request an interactive node (installation can't be done on a login node):
 ```
 qsub -I -X -l select=1:ncpus=2:mem=30gb:interconnect=1g,walltime=6:00:00
 ```
 
-Next, create your COSITools environment:
+Next, create your conda environment (which we'll call COSITools):
 ```
 module load git/2.27.0-gcc/8.3.1 anaconda3/2021.05-gcc/8.3.1
-conda create --prefix /zfs/astrohe/Software/COSITools
-source activate /zfs/astrohe/Software/COSITools
+conda create --prefix full_install_path/COSITools
+source activate full_install_path/COSITools
 cd COSITools
 ```
 
@@ -106,7 +106,7 @@ conda install -c conda-forge blas
 conda install -c conda-forge tensorflow
 ```
 
-Remove anaconda module, in order to have the correct python:
+Remove anaconda module, in order to have the correct python version:
 ```
 module rm anaconda3/2021.05-gcc/8.3.1
 ```
