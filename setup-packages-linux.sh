@@ -44,6 +44,11 @@ fi
 REQUIRED=""
 TOBEINSTALLED=""
 
+
+
+###############################################################################
+# Debian / Ubuntu and clones
+
 if [[ ${IsDebianClone} -eq 1 ]]; then
   
   # Check if this is Ubuntu:
@@ -139,7 +144,8 @@ fi
 
 
 
-# OPENSUSE Clones
+###############################################################################
+# OpenSUSE & clones
 
 if [[ ${IsOpenSuseClone} -eq 1 ]]; then
 
@@ -235,7 +241,8 @@ fi
 
 
 
-# REDHAT Clones
+###############################################################################
+# Redhat & clones
 
 if [[ ${IsRedhatClone} -eq 1 ]]; then
 
@@ -301,6 +308,10 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       echo "sudo dnf config-manager --set-enabled powertools"
       echo ""
 
+    elif [[ ${VERSIONID} == 9 ]]; then
+      REQUIRED="openssl git cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel fftw-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel"
+
+
     else 
       REQUIRED="openssl git cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel"
 
@@ -355,7 +366,9 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
 fi
 
 
-# Arch Clones
+
+###############################################################################
+# Arch & clones
 
 if [[ ${IsArchClone} -eq 1 ]]; then
 
