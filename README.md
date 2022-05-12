@@ -11,6 +11,71 @@ You can setup the environment by simply executing this command:
 This script will likely run until a point where it tells you to install a few packages.
 After you do that, just start the script again, and it will complete the setup.
 
+## Advanced guide
+
+### Accessing the options
+
+The setup script has serveral advanced options accessible. Using the above one-line install script, you can add options the following way (pay attention to the underscore:
+
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --options --here
+```
+
+Alternatively, do the following:
+```
+mkdir COSItools
+cd COSItools
+git clone https://github.com/cositools/cosi-setup cosi-setup
+cd cosi-setup
+git checkout feature/initialsetup
+bash setup.sh --options --here
+```
+
+### Options
+
+The follwoing options are a copy-and-paste from ```bash setup.sh --help```:
+
+```
+--cositoolspath=[path to CSOItools - first launch default: "COSItools"]
+    This is the path to where the COSItools will be installed. If the path exists, we will try to update them.
+ 
+--branch=[name of a git branch]
+    Choose a specific branch of the COSItools git repositories.
+    If the option is not given the latest release will be used.
+    If the branch does not exist for all repositories use the main/master branch.
+ 
+--ignore-missing-packages
+    Do not check for missing packages.
+ 
+--keep-environment=[off/no, on/yes - first launch default: off]
+    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty
+    to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not.
+    If you use this flag make sure the COSItools source script has not been called in the terminal you are using.
+ 
+--root=[options: empty (default), path to existing ROOT installation]
+    If empty (or the option has not been given at all), download and install the latest compatible version
+    If a path to an existing ROOT installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error.
+ 
+--geant=[options: empty (default), path to existing GEANT4 installation]
+    If empty (or the option has not been given at all), download and install the latest compatible version
+    If a path to an existing GEANT4 installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error.
+ 
+--heasoft=[options: off (default), empty, path to existing HEASoft installation]
+    If empty (or the option has not been given at all), download and install the latest compatible version
+    If the string "off" is given, do not install HEASoft. This will affect some tertiary tools of MEGAlib, such as storing the data in fits files.
+    If a path to an existing HEASoft installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error.
+ 
+--maxthreads=[integer >=1]
+    The maximum number of threads to be used for compilation. Default is the number of cores in your system.
+ 
+--debug=[off/no, on/yes - first launch default: off]
+    Debugging options for C++ programs (MEGAlib, Nuclearizer), ROOT, Geant4.
+ 
+--optimization=[off/no, normal/on/yes, strong/hard (requires gcc 4.2 or higher) - first launch default: on]
+    Compilation optimization for MEGAlib ONLY (Default is normal)
+```
+
+
 ## Examples on how to install the COSItools on various system
 
 ### Linux
@@ -63,7 +128,7 @@ Coming soon...
 
 ### Windows
 
-Please use Ubuntu 20.04 opr 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access.
+Please use Ubuntu 20.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access.
 
 
 ### Clusters and supercomputers
