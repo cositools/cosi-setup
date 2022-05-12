@@ -104,6 +104,42 @@ It ignores not installed packages since the setup script cannot find packages in
 
 
 #### Clemson's Palmetto cluster
+This approach last worked on 4/25/22
+
+Clemson's Palmetto High Performance Cluster runs centOS Linux 8, and it uses environment modules to load specific software packages. Additionally, Anaconda can be used to create and manage environments, as well as to install software packages. 
+
+
+First, request an interactive node (installation can't be done on a login node):
+```
+qsub -I -X -l select=1:ncpus=2:mem=30gb:interconnect=1g,walltime=6:00:00
+```
+
+Next, create your conda environment (which we'll call COSITools):
+```
+module load git/2.27.0-gcc/8.3.1 anaconda3/2021.05-gcc/8.3.1
+conda create --prefix full_install_path/COSITools
+source activate full_install_path/COSITools
+cd COSITools
+```
+
+Use conda to install blas and tensorflow:
+```
+conda install -c conda-forge blas
+conda install -c conda-forge tensorflow
+```
+
+Remove anaconda module, in order to have the correct python version:
+```
+module rm anaconda3/2021.05-gcc/8.3.1
+```
+
+Finally, make main installation:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)
+cd COSItools/cosi-setup
+bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
+```
+Note: the following are listed as missing packages: glew-devel, mariadb-devel, fftw-devel, graphviz-devel, avahi-compat-libdns_sd-devel, python3-devel
 
 
 
