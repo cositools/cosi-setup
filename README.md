@@ -13,36 +13,58 @@ After you do that, just start the script again, and it will complete the setup.
 
 ## Examples on how to install the COSItools on various system
 
-### Personal computers and workstations
+### Linux
 
-#### Ubuntu
+We recommend to stick with long(ish)-term support versions such as Ubuntu LTE.
 
-Version 20.04 and 22.04 should work with the default one-line install script.
+#### Ubuntu & derivatives
 
-#### Fedora
+Version 20.04 and 22.04 should work with the default one-line install script. We have no indications sofar that any distributions derived from Ubuntu are not working. We only test long-term support (LTE) versions.
 
-Version 35 should work with the default one-line install script.
+#### Redhat derivatives
 
-#### macOS 
+##### Fedora
 
-##### With Apple M chip
+Version 32-35 should work with the default one-line install script
 
-Montery should work with macports excluding HEASoft. However, homebrew is not supported.
+##### Centos Stream
 
-##### With Intel chip
+Version 9 should work.
 
-Coming soon...
+#### openSUSE 
 
-#### OpenSUSE Tumbleweed
+##### Leap
 
-HEASoft does not compile at the moment, thus disable it and just use the system default cfitsiso library which should be installed automatically with the packages:
+Leap 15.3 should work out of the box.
+
+##### Tumbleweed
+
+Tumbleweed is a cutting edge rolling release thus not recommended for COSItools. HEASoft does not compile at the moment, thus disable it and just use the system default cfitsiso library which should be installed automatically with the packages:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --heasoft=off
 ```
 
 #### Other systems
 
-No other systems have been officially been tested yet or are supported.
+No other systems have been been tested yet or are supported. Especially avoid any cutting edge rolling releases such as Arch (it sometimes compiles there, sometimes not), Gentoo, Tumbleweed, etc.
+
+### macOS 
+
+Only macOS Monterey is tested at the moment.
+
+#### With Apple M chip
+
+Montery should work with macports excluding HEASoft. However, homebrew is not supported.
+
+#### With Intel chip
+
+Coming soon...
+
+
+### Windows
+
+Please use Ubuntu 20.04 opr 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access.
+
 
 ### Clusters and supercomputers
 
@@ -66,7 +88,7 @@ It ignores not installed packages since the setup script cannot find packages in
 
 #### LBNL's cori supercomputer
 
-This approach worked last on 4/XYZ/2022.
+This approach worked last on 5/10/2022.
 
 Lawrence Berkeley National Lab's cori supercomputer uses the SUSE Linux Enterprise as well as "environment modules" to load specific software packages. In order, to set up the COSItools, you need to load the following modules:
 
