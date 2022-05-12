@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# This bash script is part of the COSItools.
-
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
+#
 # Development lead: Andreas Zoglauer
-# License: Apache 2.0
-
+#
 # Description:
-# This script checks if all required macports packages are installed 
+# This script installs a python3 environment for the python3-based analysis tools.
+#
 
 
 ############################################################################################################

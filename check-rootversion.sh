@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# This bash file is part of the COSItools.
-#
-# The original file is part of MEGAlib.
-# Port to COSItools and license change approved by original author, Andreas Zoglauer  
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
 #
 # Development lead: Andreas Zoglauer
-# License: Apache 2.0
-
+#
 # Description:
 # This script checks for allowed ROOT versions
 

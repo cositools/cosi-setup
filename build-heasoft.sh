@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
+#
+# Development lead: Andreas Zoglauer
+#
+# Description:
+# This script downloads, compiles, and installs HEASoft
+
 
 COMPILEROPTIONS=`gcc --version | head -n 1`
 
@@ -47,7 +55,7 @@ confhelp() {
   echo "    Use this tarball instead of downloading it from the HEASoft website"
   echo " "
   echo "--sourcescript=[file name of new environment script]"
-  echo "    File in which the HEASoft path is stored. This is used by the MEGAlib setup script"
+  echo "    The source script which sets all environment variables for HEASoft."
   echo " "
   echo "--help or -h"
   echo "    Show this help."
@@ -58,7 +66,7 @@ confhelp() {
 setuphelp() {
   if ( [[ ${SHELL} == *ash ]] || [[ ${SHELL} == *csh ]] ); then
     echo " "
-    echo "If you are not using the MEGAlib source script,"
+    echo "If you are not using the source script,"
     echo "then you can use the following lines to setup HEASoft: "
     echo " "
 
@@ -69,7 +77,7 @@ setuphelp() {
       echo "setenv HEADAS "`pwd`"/${HEASOFTPATH}"
       echo "alias heainit \"source \$HEADAS/headas-init.csh\""
       echo " "
-      echo "And then also add \"heainit\" to your setup script or call it each time before you use HEASoft/MEGAlib"
+      echo "And then also add \"heainit\" to your setup script or call it each time before you use this software package."
       echo " "
     elif [[ ${SHELL} == *ash ]]; then
       echo "You seem to use a bourne shell variant so, in your \$HOME/.bashrc or \$HOME/.login or \$HOME/.profile do:"
@@ -77,7 +85,7 @@ setuphelp() {
       echo "export HEADAS="`pwd`"/${HEASOFTPATH}"
       echo "alias heainit=\"source \$HEADAS/headas-init.sh\""
       echo " "
-      echo "And then also add \"heainit\" to your setup script or call it each time before you use HEASoft/MEGAlib"
+      echo "And then also add \"heainit\" to your setup script or call it each time before you use this software package."
       echo " "
     fi
   fi
@@ -110,7 +118,7 @@ for C in ${CMD}; do
     echo "Using this tarball: ${TARBALL}"
   elif [[ ${C} == *-s* ]]; then
     ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
-    echo "Using this MEGALIB environment file: ${ENVFILE}"
+    echo "Using this environment file: ${ENVFILE}"
   elif [[ ${C} == *-h* ]]; then
     echo ""
     confhelp
@@ -303,7 +311,7 @@ chown -R ${USER}:${GROUP} heasoft_v${VER}
 chmod -R go+rX heasoft_v${VER}
 
 if [ "${ENVFILE}" != "" ]; then
-  echo "Storing the HEASoft directory in the MEGAlib source script..."
+  echo "Storing the HEASoft directory in the source script..."
   DIR=$(find `pwd`/heasoft_v${VER} -name "ftversion" | grep -v "heatools" | awk '{ print substr( $0, 1, length($0)-14) }')
   echo "HEASOFTDIR=${DIR}" >> ${ENVFILE}
 else

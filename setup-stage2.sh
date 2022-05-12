@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# This bash script file is part of the COSItools.
-#
-# The original file is part of MEGAlib.
-# Port to COSItools and license change approved by original author, Andreas Zoglauer  
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
 #
 # Development lead: Andreas Zoglauer
-# License: Apache 2.0
-
+#
 # Description:
 # This is the stage 2 script to setup the COSI tools
 # It sets up all of the COSItools 
@@ -951,7 +948,8 @@ echo "Renaming and moving the environment script"
 mv ${ENVFILE} ${COSIPATH}/source.sh
 chmod +x ${COSIPATH}/source.sh
 
-
+echo "Linking it at the default MEGAlib location"
+ln -s ${COSIPATH}/source.sh ${COSIPATH}/megalib/bin/source-megalib.sh  
 
 ############################################################################################################
 # Final remarks

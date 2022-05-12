@@ -33,7 +33,7 @@ bash setup.sh --options --here
 
 ### Options
 
-The follwoing options are a copy-and-paste from ```bash setup.sh --help```:
+The following options are a copy-and-paste from ```bash setup.sh --help```:
 
 ```
 --cositoolspath=[path to CSOItools - first launch default: "COSItools"]

@@ -1,15 +1,14 @@
 #!/bin/bash
 
-# This bash script is part of the COSItools.
-#
-# The original file is part of MEGAlib.
-# Port to COSItools and license change approved by original author, Andreas Zoglauer  
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
 #
 # Development lead: Andreas Zoglauer
-# License: Apache 2.0
-
+#
 # Description:
-# This script check is all required macports packages are installed 
+# This script checks if all required macports packages are installed 
+
+
 
 TOOLS_GENERAL="hdf5"
 TOOLS_PYTHON="py38-gnureadline py38-jupyter py38-metakernel py38-numpy python38"
@@ -54,7 +53,7 @@ fi
 
 if [[ ${TODO} != "" ]]; then
   echo ""
-  echo "Not all packages required for COSItools are present or correctly selected."
+  echo "Not all required packages are present or correctly selected."
   echo "Please do the following:"
   echo ""
   echo -e "${TODO}"

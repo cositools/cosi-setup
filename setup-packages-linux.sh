@@ -1,15 +1,13 @@
 #!/bin/bash
 
-# This bash script is part of the COSItools.
-#
-# The original file is part of MEGAlib.
-# Port to COSItools and license change approved by original author, Andreas Zoglauer  
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
 #
 # Development lead: Andreas Zoglauer
-# License: Apache 2.0
-
+#
 # Description:
-# This script check is all required Linux packages are installed 
+# This script checks if all required Linux packages are installed considering different Linux versions.
+#
 
 IsDebianClone=0
 IsRedhatClone=0
@@ -76,7 +74,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       REQUIRED="git gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev libboost-all-dev mlocate libcfitsio-dev "
       
       echo "This script has not yet been adapted for your version of Ubuntu: ${VERSIONID}"
-      echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+#       echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo apt-get update; sudo apt-get install ${REQUIRED}"
@@ -90,7 +88,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       REQUIRED="git gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python python3-dev python3-tk python3-venv libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc"
       
       echo "This script has not yet been adapted for your version of ${OS}: ${VERSIONID}"
-      echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo apt-get update; sudo apt-get install ${REQUIRED}"
@@ -101,7 +99,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     REQUIRED="bc git gawk dpkg-dev make g++ gcc gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python python3-dev python3-tk python3-venv libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev libboost-all-dev "
  
     echo "This script has not yet been adapted for your version of Linux: Debian-derivative ${OS}"
-    echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+    echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
     echo " "
     echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
     echo "sudo apt-get update; sudo apt-get install ${REQUIRED}"
@@ -166,7 +164,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
 
       echo " "
       echo "This script has not yet been adapted for your version of opensuse: ${VERSIONID}"
-      echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo zypper install ${REQUIRED}"
@@ -187,7 +185,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
 
       echo " "
       echo "This script has not yet been adapted for your version of opensuse: ${VERSIONID}"
-      echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo zypper install ${REQUIRED}"
@@ -202,7 +200,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
 
     echo " "
     echo "This script has not yet been adapted for your version of Linux: SUSE-derivative ${OS}"
-    echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+    echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
     echo " "
     echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
     echo "sudo zypper install ${REQUIRED}"
@@ -263,7 +261,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
 
       echo " "
       echo "This script has not yet been adapted for your version of SL ${VERSIONID}"
-      echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo yum install ${REQUIRED}"
@@ -283,7 +281,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
 
       echo " "
       echo "This script has not yet been adapted for your version of SL ${VERSIONID}"
-      echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo yum install ${REQUIRED}"
@@ -317,7 +315,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
 
       echo " "
       echo "This script has not yet been adapted for your version of Centos ${VERSIONID}"
-      echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
       echo " "
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo yum install ${REQUIRED}"
@@ -329,7 +327,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
 
     echo " "
     echo "This script has not yet been adapted for your version of Linux: Redhat-derivative ${OS}"
-    echo "Feel free to write the MEGAlib maintainers an email to update this script and send them the content of the file: /etc/os-release"
+    echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
     echo " "
     echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
     echo "sudo yum install ${REQUIRED}"

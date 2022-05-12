@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# This file is part of MEGAlib.
-# Copyright (C) by Andreas Zoglauer.
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
 #
-# Please see the MEGAlib software license and documentation for more informations.
+# Development lead: Andreas Zoglauer
+#
+# Description:
+# This script downloads, compiles, and installs ROOT
+
 
 # Path to where this file is located
 SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
@@ -119,10 +123,10 @@ confhelp() {
   echo "    Use this tarball instead of downloading it from the ROOT website"
   echo " "
   echo "--rootversion=[e.g. 5.34, 6.10]"
-  echo "    Use the given ROOT version instead of the one required by MEGAlib."
+  echo "    Use the given ROOT version instead of the required one."
   echo " "
   echo "--sourcescript=[file name of new environment script]"
-  echo "    File in which the MEGAlib environment is/will be stored. This is used by the MEGAlib setup script"
+  echo "    The source script which sets all environment variables for HEASoft."
   echo " "
   echo "--debug=[off/no, on/yes - default: off]"
   echo "    Compile with degugging options."

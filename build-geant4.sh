@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
+#
+# Development lead: Andreas Zoglauer
+#
+# Description:
+# This script downloads, compiles, and installs Geant4
+
 
 # Path to where this file is located
 SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
@@ -64,7 +72,7 @@ confhelp() {
   echo "    Specifiy the Geant4 version (ignores the requested version), if empty read he default version stated oin the setup scripts"
   echo " "
   echo "--sourcescript=[file name of new environment script]"
-  echo "    File in which the Geant4 path will be stored. This is used by the setup script" 
+  echo "    The source script which sets all environment variables for Geant4." 
   echo " "
   echo "--debug=[off/no, on/yes - default: off]"
   echo "    Compile with degugging options."

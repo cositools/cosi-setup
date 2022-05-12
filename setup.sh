@@ -1,18 +1,16 @@
 #!/bin/bash
 
-# This bash file is part of the COSItools.
-#
-# The original file is part of MEGAlib.
-# Port to COSItools and license change approved by original author, Andreas Zoglauer  
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
 #
 # Development lead: Andreas Zoglauer
-# License: Apache 2.0
-
+#
 # Description:
 # This is the stage 1 script to setup the COSI tools
 # It sets up up the main directory if it not exists and 
 # then either updates or clones the cosi-setup repository,
 # and finally hands off the setup to the newly downloaded stage 2 script
+#
 
 
 ############################################################################################################
@@ -45,7 +43,7 @@ confhelp() {
   #echo "Remark: This script stores the last used options and will read it the next time it is started."
   #echo "        Thus if you restart it, make sure to overwrite any options you want to change!"
   #echo " "
-  echo "--cositoolspath=[path to CSOItools - first launch default: \"COSItools\"]"
+  echo "--cositoolspath=[path to COSItools - first launch default: \"COSItools\"]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
   echo " "
   echo "--branch=[name of a git branch]"
@@ -63,25 +61,25 @@ confhelp() {
   echo " "
   echo "--root=[options: empty (default), path to existing ROOT installation]"
   echo "    If empty (or the option has not been given at all), download and install the latest compatible version"
-  echo "    If a path to an existing ROOT installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error."
+  echo "    If a path to an existing ROOT installation is given, then use this one. If it is not compatible, the script will stop with an error."
   echo " "
   echo "--geant=[options: empty (default), path to existing GEANT4 installation]"
   echo "    If empty (or the option has not been given at all), download and install the latest compatible version"
-  echo "    If a path to an existing GEANT4 installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error."
+  echo "    If a path to an existing GEANT4 installation is given, then use this one. If it is not compatible, the script will stop with an error."
   echo " "
   echo "--heasoft=[options: off (default), empty, path to existing HEASoft installation]"
   echo "    If empty (or the option has not been given at all), download and install the latest compatible version"
-  echo "    If the string \"off\" is given, do not install HEASoft. This will affect some tertiary tools of MEGAlib, such as storing the data in fits files."
-  echo "    If a path to an existing HEASoft installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error."
+  echo "    If the string \"off\" is given, do not install HEASoft."
+  echo "    If a path to an existing HEASoft installation is given, then use this one. If it is not compatible, the script will stop with an error."
   echo " "
   echo "--maxthreads=[integer >=1]"
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
-  echo "--debug=[off/no, on/yes - first launch default: off]"
-  echo "    Debugging options for C++ programs (MEGAlib, Nuclearizer), ROOT, Geant4."
+  echo "--debug=[off/no, on/yes - default: off]"
+  echo "    Debugging options for C++ programs ROOT, Geant4 & MEGAlib."
   echo " "
-  echo "--optimization=[off/no, normal/on/yes, strong/hard (requires gcc 4.2 or higher) - first launch default: on]"
-  echo "    Compilation optimization for MEGAlib ONLY (Default is normal)"
+  echo "--optimization=[off/no, normal/on/yes, strong/hard (requires gcc 4.2 or higher) - default: on]"
+  echo "    Compilation optimization for MEGAlib only."
   echo " "
   echo "--help or -h"
   echo "    Show this help."

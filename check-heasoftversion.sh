@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# This file is part of MEGAlib.
-# Copyright (C) by Andreas Zoglauer.
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
 #
-# Please see the MEGAlib software license and documentation for more informations.
+# Development lead: Andreas Zoglauer
+#
+# Description:
+# This script checks for allowed HEASoft versions
 
-
-# Allowed versions
 
 confhelp() {
   echo ""

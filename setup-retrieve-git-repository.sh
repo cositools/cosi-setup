@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# This bash script is part of the COSItools.
-
+# This bash script is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
+#
 # Development lead: Andreas Zoglauer
-# License: Apache 2.0
-
+#
 # Description:
-# This script check is all required packages are installed 
+# This script retrieves a specified branch from a specified git repository .
+#
 
 
 ############################################################################################################
@@ -28,8 +29,6 @@ STASHNAME=""
 
 confhelp() {
   echo ""
-  echo "Setup script for COSItools"
-  echo " "
   echo "This script retrieves a software tool from github"
   echo " "
   echo "Usage: ./setup-retrieve-git-repository.sh [options - all are mandatory]";
@@ -38,7 +37,7 @@ confhelp() {
   echo "Options:"
   echo " "
   echo "--name=[name of the repository in the COSItools directory]"
-  echo "    The name the repostory should be given in the COSItools folder."
+  echo "    The name the repository should be given in the COSItools folder."
   echo " "
   echo "--branch=[name of a git branch]"
   echo "    Choose a specific branch of the COSItools git repositories."

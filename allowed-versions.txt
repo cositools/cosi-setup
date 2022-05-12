@@ -1,4 +1,10 @@
-# Allowed versions of specific packages
+# This file is part of the MEGAlib & COSItools setup procedure.
+# As such it is dual licenced under Apache 2.0 for COSItools and LGPL 3.0 for MEGAlib
+#
+# Development lead: Andreas Zoglauer
+#
+# Description:
+# This script contains a list of allowed versions of ROOT, Geant4, and HEAsoft
 
 # ROOT: 6.18 till 6.24
 ROOT-Min:618
