@@ -237,6 +237,8 @@ fi
 
 if [[ "${HEASOFTPATH}" == "off" ]]; then
   echo " * Do not install HEASoft"
+elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
+  echo " * Download the latest version of cfitsio"
 else
   if [[ "${HEASOFTPATH}" != "" ]]; then
     HEASOFTPATH=`absolutefilename ${HEASOFTPATH}`
@@ -564,12 +566,12 @@ echo "SUCCESS: We have a usable Geant4 version!"
 
 
 ############################################################################################################
-# Install HEASoft
+# Install HEASoft/cfitsio
 
 echo ""
 echo "*****************************"
 echo " "
-echo "Installing HEASoft"
+echo "Installing HEASoft/cfitsio"
 echo " "
 
 # Until HEASoft compiles in ARM mode, we cannot install it here:
@@ -577,10 +579,62 @@ if [[ $(uname) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
   echo "Warning: For the time being HEAsoft cannot be compiled in arm64 mode,"
   echo "         and thus we cannot link against it with COSItools,"
   echo "         and we will not install HEAsoft."
+
 # We do not want HEASoft to be installed:
 elif [[ "${HEASOFTPATH}" == "off" ]]; then
+
   echo " "
   echo "Command line option --heasoft=off: Do not install HEASoft"
+
+# Compile cfitsio instead og full HEASoft
+elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
+
+  # Download and build a new cfitsio version
+  if [[ ! -f ${SETUPPATH}/build-cfitsio.sh ]]; then
+    echo ""  
+    echo "ERROR: Unable to find the script to build cfistio!"
+    exit 1
+  fi
+  
+  echo "Switching to build-cfitsio.sh script..."
+  cd ${EXTERNALPATH}
+
+  ${SETUPPATH}/build-cfitsio.sh -source=${ENVFILE} 2>&1 | tee BuildLogCFitsIO.txt
+  RESULT=${PIPESTATUS[0]}
+  
+  
+  # If we have a new cfitsio dir, copy the build log there
+  NEWCFITSIODIR=`grep CFITSIODIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  if [[ -d ${NEWCFITSIODIR} ]]; then
+    if [[ -f ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ]]; then
+      mv ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ${NEWCFITSIODIR}/BuildLogCFitsIO_before$(date +'%y%m%d%H%M%S').txt
+    fi
+    mv BuildLogCFitsIO.txt ${NEWCFITSIODIR}
+  fi
+  
+  # Now handle build errors
+  if [ "${RESULT}" != "0" ]; then
+    echo " "
+    echo "ERROR: Something went wrong during the cfitsio setup."
+    issuereport
+    exit 1
+  fi
+  
+  # Source cfitsio to be available for later installs
+  . ${SETUPPATH}/source-cfitsio.sh -p=${NEWCFITSIODIR}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source cfitsio"
+    exit 1
+  fi
+    
+  # The build-script will have added cfitsio to the environment file
+
+  cd ${COSIPATH}
+
+  echo " "
+  echo "SUCCESS: We have a usable cfitsio version!"
+
 else 
   # If we are given an existing HEASoft installation, check if it is compatible
   if [[ "${HEASOFTPATH}" != "" ]]; then
@@ -936,7 +990,10 @@ echo "# Order is important!" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-geant4.sh -p=\${GEANT4DIR}" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-megalib.sh -p=\${MEGALIBDIR}" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-nuclearizer.sh -p=\${NUCLEARIZERDIR}" >> ${ENVFILE}
-if grep -q "HEASOFTDIR" ${ENVFILE}; then  # We currently don't install HEASoft on M1 machines
+if grep -q "CFITSIODIR" ${ENVFILE}; then
+  echo ". ${SETUPPATH}/source-cfitsio.sh -p=\${CFITSIODIR}" >> ${ENVFILE}
+fi
+if grep -q "HEASOFTDIR" ${ENVFILE}; then
   echo ". ${SETUPPATH}/source-heasoft.sh -p=\${HEASOFTDIR}" >> ${ENVFILE}
 fi
 echo ". ${SETUPPATH}/source-root.sh -p=\${ROOTDIR}" >> ${ENVFILE}
