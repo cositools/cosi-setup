@@ -228,6 +228,15 @@ if [ "${CURRENTBRANCH}" != "${GITBRANCH}" ]; then
   fi
 fi
 
+
+# Do a final pull
+git pull
+if [ "$?" != "0" ]; then
+  echo " "
+  echo "ERROR: Unable to perform a final pull."
+  exit 1
+fi 
+
 cd ${COSIPATH}
 
 exit 0

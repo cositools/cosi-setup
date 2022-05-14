@@ -350,10 +350,17 @@ else
     else
       type brew >/dev/null 2>&1
       if [ $? -eq 0 ]; then
-        echo ""
-        echo "ERROR: Brew is currently not supported to install the required packages for COSItools!"
-        echo "       Please use macports: https://www.macports.org/install.php"
-        exit 1
+        if [[ ! -f ${SETUPPATH}/setup-packages-brew.sh ]]; then
+          echo ""
+          echo "ERROR: Unable to find the brew package script!"
+          exit 1
+        fi
+
+        ${SETUPPATH}/setup-packages-brew.sh
+        if [ "$?" != "0" ]; then
+          # The error message is part of the above script
+          exit 1
+        fi 
       else
         echo ""
         echo "ERROR: Please install macports to install the required COSItools packages:"
@@ -574,19 +581,13 @@ echo " "
 echo "Installing HEASoft/cfitsio"
 echo " "
 
-# Until HEASoft compiles in ARM mode, we cannot install it here:
-if [[ $(uname) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
-  echo "Warning: For the time being HEAsoft cannot be compiled in arm64 mode,"
-  echo "         and thus we cannot link against it with COSItools,"
-  echo "         and we will not install HEAsoft."
-
-# We do not want HEASoft to be installed:
-elif [[ "${HEASOFTPATH}" == "off" ]]; then
+# We do not want to install HEASoft
+if [[ "${HEASOFTPATH}" == "off" ]]; then
 
   echo " "
   echo "Command line option --heasoft=off: Do not install HEASoft"
 
-# Compile cfitsio instead og full HEASoft
+# Compile cfitsio instead of full HEASoft
 elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
 
   # Download and build a new cfitsio version
@@ -641,7 +642,7 @@ else
     # Check if we can use the given HEASoft version
     if [[ ! -f ${SETUPPATH}/check-heasoftversion.sh ]]; then
       echo ""
-      echo "ERROR: Unable to find the script to check the Geant4 version!"
+      echo "ERROR: Unable to find the script to check the HEASoft version!"
       exit 1
     fi
   
@@ -668,7 +669,7 @@ else
     # Download and build a new HEASoft version
     if [[ ! -f ${SETUPPATH}/build-heasoft.sh ]]; then
       echo ""  
-      echo "ERROR: Unable to find the script to check the Geant4 version!"
+      echo "ERROR: Unable to find the script to check the HEASoft version!"
       exit 1
     fi
   
@@ -1006,6 +1007,9 @@ mv ${ENVFILE} ${COSIPATH}/source.sh
 chmod +x ${COSIPATH}/source.sh
 
 echo "Linking it at the default MEGAlib location"
+if [ -f ${COSIPATH}/megalib/bin/source-megalib.sh ]; then
+  rm ${COSIPATH}/megalib/bin/source-megalib.sh
+fi
 ln -s ${COSIPATH}/source.sh ${COSIPATH}/megalib/bin/source-megalib.sh  
 
 ############################################################################################################
