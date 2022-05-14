@@ -36,10 +36,10 @@ bash setup.sh --options --here
 The following options are a copy-and-paste from ```bash setup.sh --help```:
 
 ```
---cositoolspath=[path to CSOItools - first launch default: "COSItools"]
+--cositoolspath=[path to COSItools - default: "COSItools"]
     This is the path to where the COSItools will be installed. If the path exists, we will try to update them.
  
---branch=[name of a git branch]
+--branch=[name of a git branch - default: feature/initialsetup]
     Choose a specific branch of the COSItools git repositories.
     If the option is not given the latest release will be used.
     If the branch does not exist for all repositories use the main/master branch.
@@ -47,32 +47,36 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 --ignore-missing-packages
     Do not check for missing packages.
  
---keep-environment=[off/no, on/yes - first launch default: off]
+--keep-environment=[off/no, on/yes - default: off]
     By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty
     to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not.
     If you use this flag make sure the COSItools source script has not been called in the terminal you are using.
  
 --root=[options: empty (default), path to existing ROOT installation]
-    If empty (or the option has not been given at all), download and install the latest compatible version
-    If a path to an existing ROOT installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error.
+    --root=            Download and install the latest compatible version
+    --root=[path]      Use the version of ROOT found in the path. If it is not compatible, the script will stop with an error.
  
 --geant=[options: empty (default), path to existing GEANT4 installation]
-    If empty (or the option has not been given at all), download and install the latest compatible version
-    If a path to an existing GEANT4 installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error.
+    --geant=           Download and install the latest compatible version.
+    --geant=[path]     Use the version of Geant4 found in the path. If it is not compatible, the script will stop with an error.
  
---heasoft=[options: off (default), empty, path to existing HEASoft installation]
-    If empty (or the option has not been given at all), download and install the latest compatible version
-    If the string "off" is given, do not install HEASoft. This will affect some tertiary tools of MEGAlib, such as storing the data in fits files.
-    If a path to an existing HEASoft installation is given, then use this one. If it is not compatible with MEGAlib, the script will stop with an error.
+--heasoft=[options: empty (default), off, cfitsio, path to existing HEASoft installation]
+    --heasoft=         Download and install the latest compatible version.
+    --heasoft=off      Do not install HEASoft.
+    --heasoft=cfitsio  Download and install the latest cfitsio version.
+    --heasoft=[path]   Use the version of HEASoft found in the path. If it is not compatible, the script will stop with an error.
  
 --maxthreads=[integer >=1]
     The maximum number of threads to be used for compilation. Default is the number of cores in your system.
  
---debug=[off/no, on/yes - first launch default: off]
-    Debugging options for C++ programs (MEGAlib, Nuclearizer), ROOT, Geant4.
+--debug=[off/no (default), on/yes]
+    Debugging compiler flags for C++ programs ROOT, Geant4 & MEGAlib.
  
---optimization=[off/no, normal/on/yes, strong/hard (requires gcc 4.2 or higher) - first launch default: on]
-    Compilation optimization for MEGAlib ONLY (Default is normal)
+--optimization=[off/no, normal/on/yes (default), strong/hard]
+    Compilation optimization compiler flags for MEGAlib only.
+ 
+--help or -h
+    Show this help.
 ```
 
 
@@ -109,17 +113,20 @@ Tumbleweed is a cutting edge rolling release thus not recommended for COSItools.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --heasoft=off
 ```
 
-#### Other systems
+#### Other Linux systems
 
 No other systems have been been tested yet or are supported. Especially avoid any cutting edge rolling releases such as Arch (it sometimes compiles there, sometimes not), Gentoo, Tumbleweed, etc.
 
 ### macOS 
 
-Only macOS Monterey is tested at the moment.
+Only macOS Monterey is supported at the moment. You need either have macports or homebrew installed.
 
 #### With Apple M chip
 
-Montery should work with macports excluding HEASoft. However, homebrew is not supported.
+The full HEASoft install is not working at the moment (in arm64 mode), thus just compile cfitsio for the time being:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --heasoft=cfitsio
+```
 
 #### With Intel chip
 
