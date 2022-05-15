@@ -130,7 +130,7 @@ The full HEASoft install is not working at the moment (in arm64 mode), thus just
 
 #### With Intel chip
 
-Coming soon...
+Intel Mac's should work woth the defaukt one line setup.
 
 
 ### Windows
