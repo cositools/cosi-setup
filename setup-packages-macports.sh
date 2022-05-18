@@ -13,7 +13,7 @@
 TOOLS_GENERAL="hdf5"
 TOOLS_PYTHON="py38-gnureadline py38-jupyter py38-metakernel py38-numpy python38"
 TOOLS_ROOT="cmake OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libgcc-devel libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
-TOOLS_GEANT4="cmake pkgconfig zlib"
+TOOLS_GEANT4="cmake pkgconfig zlib xercesc3"
 TOOLS_MEGALIB="doxygen imagemagick cfitsio openmpi"
 
 # Not working tools:

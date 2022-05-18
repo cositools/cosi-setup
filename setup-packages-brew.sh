@@ -11,7 +11,7 @@
 TOOLS_GENERAL="hdf5"
 TOOLS_PYTHON="python@3.8 jupyterlab numpy"
 TOOLS_ROOT="cmake openblas davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 openssl@3 pcre tbb libtiff xrootd xxhash xz"
-TOOLS_GEANT4="cmake pkg-config zlib"
+TOOLS_GEANT4="cmake pkg-config zlib xerces-c"
 TOOLS_MEGALIB="doxygen imagemagick cfitsio open-mpi"
 
 # Not working tools:
