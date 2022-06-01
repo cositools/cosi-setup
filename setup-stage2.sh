@@ -333,6 +333,34 @@ if [[ "${IGNOREMISSINGPACKAGES}" == true ]]; then
 else 
   # macOS
   if [[ ${OSTYPE} == *arwin* ]]; then
+  
+    # First check if Xcode and the XCode command line tools are installed
+    type xcode-select >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "ERROR: Cannot find Xcode. Please install XCode first form the App Store."
+      echo " "
+      exit 1
+    fi
+    CLTPATH=$(xcode-select -p)
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "ERROR: Cannot find the Xcode command line tools. Please install them via:"
+      echo " "
+      echo "xcode-select --install"
+      echo " "
+      exit 1
+    fi
+    if [[ ! -d "${CLTPATH}" ]]; then
+      echo ""
+      echo "ERROR: Cannot find the path to the Xcode command line tools. Please install them via:"
+      echo " "
+      echo "xcode-select --install"
+      echo " "
+      exit 1
+    fi
+    
+  
     # Look for macports
     type port >/dev/null 2>&1
     if [ $? -eq 0 ]; then
