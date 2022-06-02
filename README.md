@@ -119,7 +119,13 @@ No other systems have been been tested yet or are supported. Especially avoid an
 
 ### macOS 
 
-Only macOS Monterey is supported at the moment. You need either have macports or homebrew installed.
+Only macOS Monterey is supported at the moment. 
+Xcode must be installed from the App store, and then install the command line tools via:
+```
+xcode-select --install
+```
+In addition, you must open Xcode at least once after installing it.
+Finally, you must have either macports or homebrew installed.
 
 #### With Apple M chip
 
@@ -130,7 +136,7 @@ The full HEASoft install is not working at the moment (in arm64 mode), thus just
 
 #### With Intel chip
 
-Intel Mac's should work woth the defaukt one line setup.
+Intel Mac's should work using the default one line setup.
 
 
 ### Windows
