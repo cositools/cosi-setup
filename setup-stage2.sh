@@ -1027,6 +1027,8 @@ if grep -q "HEASOFTDIR" ${ENVFILE}; then
 fi
 echo ". ${SETUPPATH}/source-root.sh -p=\${ROOTDIR}" >> ${ENVFILE}
 echo " " >> ${ENVFILE}
+echo "export COSITOOLSDIR=\"${COSIPATH}\"" >> ${ENVFILE}
+echo " " >> ${ENVFILE}
 echo "alias cosi='cd ${COSIPATH}; source python-env/bin/activate'" >> ${ENVFILE}
 echo " "
 
