@@ -16,6 +16,9 @@
 ############################################################################################################
 # Step 1: Define default parameters
 
+# The start time
+TIMESTART=$(date +%s)
+
 # The command line
 CMD=( "$@" )
 
@@ -235,6 +238,22 @@ fi
 if [ "$?" != "0" ]; then
   exit 1
 fi
+
+
+
+############################################################################################################
+# Step 8: Finalize
+
+TIMEEND=$(date +%s)
+TIMEDIFF=$(( ${TIMEEND} - ${TIMESTART} ))
+
+echo ""
+if [ $((TIMEDIFF/3600)) -gt 0 ]; then 
+  printf 'Setup finished after %d hours, %d minutes, and %d seconds\n' $((TIMEDIFF/3600)) $((TIMEDIFF%3600/60)) $((TIMEDIFF%60)); 
+else 
+  printf 'Setup finished after %d minutes and %d seconds\n' $((TIMEDIFF/60)) $((TIMEDIFF%60));
+fi
+echo ""
 
 exit 0
 
