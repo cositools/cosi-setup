@@ -14,10 +14,13 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Start with the configure options, since we want to compare them to what was done previously
 CONFIGUREOPTIONS=""
-type g++ >/dev/null 2>&1
-if [ $? -eq 0 ]; then
+# On Linux use the default gcc compiler, but not on mac
+if [[ $(uname -a) != *arwin* ]]; then
+  type g++ >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
     # echo "g++ compiler found - using it as default!";
     CONFIGUREOPTIONS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
+  fi
 fi
 CONFIGUREOPTIONS="${CONFIGUREOPTIONS} -DCMAKE_INSTALL_PREFIX=.. -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=OFF -DGEANT4_INSTALL_DATA_TIMEOUT=14400 -DGEANT4_USE_SYSTEM_EXPAT=OFF -DGEANT4_BUILD_CXXSTD=c++11"
 # For compilation with ROOT 6.06 

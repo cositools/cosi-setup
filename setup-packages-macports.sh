@@ -11,18 +11,18 @@
 
 
 TOOLS_GENERAL="hdf5"
-TOOLS_PYTHON="py38-gnureadline py38-jupyter py38-metakernel py38-numpy python38"
-TOOLS_ROOT="cmake OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libgcc-devel libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
+TOOLS_PYTHON="python38 py38-gnureadline py38-jupyter py38-metakernel py38-numpy"
+TOOLS_ROOT="cmake git OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
 TOOLS_GEANT4="cmake pkgconfig zlib xercesc3"
-TOOLS_MEGALIB="doxygen imagemagick cfitsio openmpi"
+TOOLS_MEGALIB="git doxygen imagemagick cfitsio"
+
+TOOLS_GCC="gcc11" # must be single gcc version, don't add anything
+
+
+
 
 # Not working tools:
-TOOLS_NOTWORKING="valgrind-macos-devel gcc11"
-
-# Special for Apple M1:
-if [[ $(uname) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
-  TOOLS_GENERAL+=" cfitsio"
-fi
+TOOLS_NOTWORKING="valgrind-macos-devel"
 
 TOOLS_ALL=""
 
@@ -30,7 +30,7 @@ INSTALLED=$(port installed | grep \(active\) | awk '{print tolower($1) }')
 
 TOBEINSTALLED=""
 
-for TOOL in ${TOOLS_GENERAL} ${TOOLS_ROOT} ${TOOLS_GEANT4} ${TOOLS_MEGALIB} ${TOOLS_PYTHON}; do
+for TOOL in ${TOOLS_GENERAL} ${TOOLS_PYTHON} ${TOOLS_ROOT} ${TOOLS_GEANT4} ${TOOLS_MEGALIB} ${TOOLS_GCC}; do
   TOOLTOLOWER=$(echo ${TOOL} | awk '{print tolower($0)}')
   if [[ $(echo "${INSTALLED}" | grep -x ${TOOLTOLOWER}) != ${TOOLTOLOWER} ]]; then
     TOBEINSTALLED+="${TOOL} "
@@ -43,13 +43,20 @@ if [[ ${TOBEINSTALLED} != "" ]]; then
   TODO="sudo port -N install ${TOBEINSTALLED}\n"
 fi
 
-if [[ $(port select --show python) != *python38* ]]; then
+if [[ $(port select --show python 2> /dev/null) != *python38* ]]; then
   TODO+="sudo port select --set python python38\n"
 fi
 
-if [[ $(port select --show python3) != *python38* ]]; then
+if [[ $(port select --show python3 2> /dev/null) != *python38* ]]; then
   TODO+="sudo port select --set python3 python38\n"
 fi
+
+if [[ $(port select --show gcc 2> /dev/null) != *${TOOLS_GCC}* ]]; then
+  GCC=$(port select --list gcc | grep -v version | grep -v none | grep ${TOOLS_GCC} | sort | head -n 1 | xargs)
+  if [[ ${GCC} != "" ]]; then
+    TODO+="sudo port select --set gcc ${GCC}\n"
+  fi
+fi  
 
 if [[ ${TODO} != "" ]]; then
   echo ""
