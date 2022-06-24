@@ -12,6 +12,10 @@
 # Path to where this file is located
 SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
+# Operating system type
+OSTYPE=$(uname -s)
+
+# The configuration options
 CONFIGUREOPTIONS=" "
 # Install path relative to the build path --- simply one up in this script
 CONFIGUREOPTIONS+=" -DCMAKE_INSTALL_PREFIX=.."
@@ -70,6 +74,18 @@ if [[ $? -eq 0 ]]; then
   CONFIGUREOPTIONS+=" -Dcuda=ON"
 fi
 
+# pkg-config is not always found
+#type pkg-config >/dev/null 2>&1
+#if [[ $? -eq 0 ]]; then
+#  PPATH=$(which pkg-config)
+#  if [[ -f ${PPATH} ]]; then
+#    if [[ ${PPATH} == *pkg-config* ]]; then
+#      CONFIGUREOPTIONS+=" -DPKG_CONFIG_EXECUTABLE=${PPATH}"
+#    fi
+#  fi
+#fi
+
+
 # In case ROOT complains about your python version
 # CONFIGUREOPTIONS+=" -Dpython=OFF"
 # CONFIGUREOPTIONS+=" -Dpython3=OFF"
@@ -78,7 +94,7 @@ fi
 CONFIGUREOPTIONS+=" -Dalien=OFF -Dbonjour=OFF -Dcastor=OFF -Ddavix=OFF -Dfortran=OFF -Dfitsio=OFF -Dchirp=OFF -Ddcache=OFF -Dgfal=OFF -Dglite=off -Dhdfs=OFF -Dkerb5=OFF -Dldap=OFF -Dmonalisa=OFF -Dodbc=OFF -Doracle=OFF -Dpch=OFF -Dpgsql=OFF -Dpythia6=OFF -Dpythia8=OFF -Drfio=OFF -Dsapdb=OFF -Dshadowpw=OFF -Dsqlite=OFF -Dsrp=OFF -Dssl=OFF -Dxrootd=OFF"
 
 # Explictly add gcc -- cmake seems to sometimes digg up other compilers on the system, not the default one...
-if [[ $(uname -a) != *arwin* ]]; then
+if [[ ${OSTYPE} != *arwin* ]]; then
   CONFIGUREOPTIONS+=" -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_CXX_COMPILER=$(which g++)"
 fi
 
@@ -554,7 +570,7 @@ fi
 echo "Configuring..."
 cd ${ROOTBUILDDIR}
 export ROOTSYS=${ROOTDIR}
-#if [[ ${OSTYPE} == darwin* ]]; then
+#if [[ ${OSTYPE} == *arwin* ]]; then
 #  export CPLUS_INCLUDE_PATH=`xcrun --show-sdk-path`/usr/include
 #  export LIBRARY_PATH=$LIBRARY_PATH:`xcrun --show-sdk-path`/usr/lib
 #fi
@@ -568,7 +584,7 @@ fi
 
 
 CORES=1;
-if [[ ${OSTYPE} == darwin* ]]; then
+if [[ ${OSTYPE} == *arwin* ]]; then
   CORES=`sysctl -n hw.logicalcpu_max`
 elif [[ ${OSTYPE} == linux* ]]; then
   CORES=`grep processor /proc/cpuinfo | wc -l`

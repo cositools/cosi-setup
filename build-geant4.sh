@@ -496,10 +496,10 @@ fi
 
 
 CORES=1;
-if [[ ${OSTYPE} == darwin* ]]; then
-    CORES=`sysctl -n hw.logicalcpu_max`
+if [[ ${OSTYPE} == *arwin* ]]; then
+  CORES=`sysctl -n hw.logicalcpu_max`
 elif [[ ${OSTYPE} == linux* ]]; then 
-    CORES=`grep processor /proc/cpuinfo | wc -l`
+  CORES=`grep processor /proc/cpuinfo | wc -l`
 fi
 if [ "$?" != "0" ]; then
   CORES=1
