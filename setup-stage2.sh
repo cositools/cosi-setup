@@ -950,30 +950,53 @@ fi
 
 # First retrieve the mass model repositories
 
-echo "Switching to file setup-retrieve-git-repository.sh"
+echo "Retrieving Coserl"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-coserl -b=${BRANCH} -r=https://github.com/cositools/massmodel-coserl.git -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving massmodel-coserl from the repository"
   issuereport
   exit 1
+fi
+
+VERSIONEDBRANCHES=$(git -C massmodels/massmodel-coserl branch -r | sed 's/origin\///g' | awk '{$1=$1;print}' | grep "^v")
+for V in ${VERSIONEDBRANCHES}; do
+  if [[ ! -d massmodels/massmodel-coserl-${V} ]]; then
+    git clone -c advice.detachedHead=false --branch ${V} https://github.com/cositools/massmodel-coserl massmodels/massmodel-coserl-${V}
+    if [ "$?" != "0" ]; then
+      echo " "
+      echo "ERROR: Something went wrong while retrieving massmodel-coserl (${V}) from the repository"
+      issuereport
+      exit 1
+    fi  
+    rm -rf massmodels/massmodel-coserl-${V}/.git
+  fi
+done
+echo ""
+
+echo "Retrieving COSI balloon"
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-cosi-balloon -b=${BRANCH} -r=https://github.com/cositools/massmodel-cosi-balloon.git -s=${STASHNAME}
+if [ "$?" != "0" ]; then
+  echo " "
+  echo "ERROR: Something went wrong while retrieving massmodel-cosi-balloon from the repository"
+  issuereport
+  exit 1
 fi  
 
-# Then extract mass model release versions relevant for the data analysis into their own directories
-# This is a curated list for the moment
-
-cd massmodels
-
-if [[ ! -d massmodel-coserl-v1 ]]; then
-  git clone -c advice.detachedHead=false --branch v1.0 https://github.com/cositools/massmodel-coserl massmodel-coserl-v1
-  if [ "$?" != "0" ]; then
-    echo " "
-    echo "ERROR: Something went wrong while retrieving massmodel-coserl (v1) from the repository"
-    issuereport
-    exit 1
-  fi  
-  rm -rf massmodel-coserl-v1/.git
-fi
+VERSIONEDBRANCHES=$(git -C massmodels/massmodel-cosi-balloon branch -r | sed 's/origin\///g' | awk '{$1=$1;print}' | grep "^v")
+for V in ${VERSIONEDBRANCHES}; do
+  if [[ ! -d massmodels/massmodel-cosi-balloon-${V} ]]; then
+    git clone -c advice.detachedHead=false --branch ${V} https://github.com/cositools/massmodel-cosi-balloon massmodels/massmodel-cosi-balloon-${V}
+    if [ "$?" != "0" ]; then
+      echo " "
+      echo "ERROR: Something went wrong while retrieving massmodel-cosi-balloon (${V}) from the repository"
+      issuereport
+      exit 1
+    fi  
+    rm -rf massmodels/massmodel-cosi-balloon-${V}/.git
+  fi
+done
+echo ""
 
 cd ${COSIPATH}
 
