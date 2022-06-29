@@ -76,13 +76,13 @@ done
 for C in "${CMD[@]}"; do
   if [[ ${C} == *-c*=* ]]; then
     COSIPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-b* ]]; then
+  elif [[ ${C} == *-b*=* ]]; then
     GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-r* ]]; then
+  elif [[ ${C} == *-r*=* ]]; then
     GITPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-n* ]]; then
+  elif [[ ${C} == *-n*=* ]]; then
     NAME=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-s* ]]; then
+  elif [[ ${C} == *-s*=* ]]; then
     STASHNAME=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
