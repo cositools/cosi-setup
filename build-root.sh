@@ -13,7 +13,7 @@
 SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Operating system type
-OSTYPE=$(uname -s)
+OSTYPE=$(uname -s | awk '{print tolower($0)}')
 
 # The configuration options
 CONFIGUREOPTIONS=" "
@@ -586,7 +586,7 @@ fi
 CORES=1;
 if [[ ${OSTYPE} == *arwin* ]]; then
   CORES=`sysctl -n hw.logicalcpu_max`
-elif [[ ${OSTYPE} == linux* ]]; then
+elif [[ ${OSTYPE} == *inux* ]]; then
   CORES=`grep processor /proc/cpuinfo | wc -l`
 fi
 if [ "$?" != "0" ]; then

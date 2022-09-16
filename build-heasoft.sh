@@ -8,7 +8,10 @@
 # Description:
 # This script downloads, compiles, and installs HEASoft
 
+# Operating system type
+OSTYPE=$(uname -s | awk '{print tolower($0)}')
 
+# The basic compiler options
 COMPILEROPTIONS=`gcc --version | head -n 1`
 
 # Additional configure options 

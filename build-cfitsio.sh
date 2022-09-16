@@ -9,6 +9,10 @@
 # This script downloads, compiles, and installs cfitsio
 
 
+# Operating system type
+OSTYPE=$(uname -s | awk '{print tolower($0)}')
+
+# The basic compiler options
 COMPILEROPTIONS=`gcc --version | head -n 1`
 
 # Additional configure options 
@@ -16,8 +20,6 @@ CONFIGUREOPTIONS=" "
 
 # Comment this line in if you have trouble with readline
 # CONFIGUREOPTIONS="--enable-readline "
-
-
 
 # Check if some of the frequently used software is installed:
 type gfortran >/dev/null 2>&1

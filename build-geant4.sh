@@ -12,6 +12,9 @@
 # Path to where this file is located
 SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
+# Operating system type
+OSTYPE=$(uname -s | awk '{print tolower($0)}')
+
 # Start with the configure options, since we want to compare them to what was done previously
 CONFIGUREOPTIONS=""
 # On Linux use the default gcc compiler, but not on mac
