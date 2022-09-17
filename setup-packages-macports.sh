@@ -12,7 +12,7 @@
 
 TOOLS_GENERAL="hdf5"
 TOOLS_PYTHON="python38 py38-gnureadline py38-jupyter py38-metakernel py38-numpy"
-TOOLS_ROOT="cmake git OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
+TOOLS_ROOT="cmake git git-lfs OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
 TOOLS_GEANT4="cmake pkgconfig zlib xercesc3"
 TOOLS_MEGALIB="git doxygen imagemagick cfitsio"
 TOOLS_GCC="gcc11" # must be single gcc version, don't add anything
