@@ -334,7 +334,7 @@ else
   # macOS
   if [[ ${OSTYPE} == *arwin* ]]; then
   
-    # First check if Xcode and the XCode command line tools are installed
+    # Check if Xcode is installed
     type xcode-select >/dev/null 2>&1
     if [ $? -ne 0 ]; then
       echo ""
@@ -342,6 +342,8 @@ else
       echo " "
       exit 1
     fi
+ 
+    # Check if the Xcode command line tools are installed
     CLTPATH=$(xcode-select -p)
     if [ $? -ne 0 ]; then
       echo ""
@@ -356,6 +358,29 @@ else
       echo "ERROR: Cannot find the path to the Xcode command line tools. Please install them via:"
       echo " "
       echo "xcode-select --install"
+      echo " "
+      exit 1
+    fi
+    
+    # Check if the license has been accepted
+    CURRENT_VERSION=`xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'`
+    ACCEPTED_LICENSE_VERSION=`defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '"' -f 2`
+    if [[ "${CURRENT_VERSION}" != "${ACCEPTED_LICENSE_VERSION}" ]]; then
+      echo " "
+      echo "Error: You have not accepted the XCode license!"
+      echo "       Either open XCode to accept the license, or run:"
+      echo "       sudo xcodebuild -license accept" 
+      exit 1
+    fi
+    
+    # Check if the latest version is installed:
+    UPDATEREQUIRED=$(softwareupdate --list 2>&1 | grep "Command Line Tools")
+    if [[ ${UPDATEREQUIRED} != "" ]]; then
+      echo ""
+      echo "ERROR: There are missing updates for the command line tools."
+      echo "       Please install them either via the normal macOS software update interface (preferred) or via (does not always work):"
+      echo " "
+      echo "softwareupdate --install -a"
       echo " "
       exit 1
     fi
@@ -391,8 +416,7 @@ else
         fi 
       else
         echo ""
-        echo "ERROR: Please install macports to install the required COSItools packages:"
-        echo "       https://www.macports.org/install.php"s
+        echo "ERROR: Please install homebrew (preferred) or macports to install the required COSItools packages"
         exit 1
       fi
     fi
@@ -415,6 +439,17 @@ else
     exit 1
   fi
 fi
+
+# Make sure git lfs is setup
+echo ""
+echo "Setting up git lfs"
+git lfs install
+if [ "$?" != "0" ]; then
+  echo ""
+  echo "ERROR: Unable to setup git lfs"
+  exit 1
+fi
+
 
 
 
