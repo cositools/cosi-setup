@@ -400,6 +400,12 @@ else
   MAX_TRIALS=3
   for s in `seq -w 00 2 98`; do
     TESTTARBALL="root_v${WANTEDVERSION}.${s}.source.tar.gz"
+    # If a version is blacklisted, we ignore it right here:
+    ${SETUPPATH}/check-rootversion.sh --good-version=${WANTEDVERSION}.${s} > /dev/null
+    if [ "$?" != "0" ]; then
+      echo "Skipping blacklisted ${TESTTARBALL}..."
+      continue
+    fi
     echo "Trying to find ${TESTTARBALL}..."
     EXISTS=`curl -s --head https://root.cern.ch/download/${TESTTARBALL} | grep gzip`
     if [[ ${EXISTS} == "" ]]; then # sometimes version 00 does not exist...

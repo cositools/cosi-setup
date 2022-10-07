@@ -9,11 +9,14 @@
 # ROOT: 6.18 till 6.24
 ROOT-Min:618
 ROOT-Max:624
+ROOT-Blacklist:62408,62410,62412
 
 # Geant4: Only 10.2
 Geant4-Min:102
 Geant4-Max:102
+Geant4-Blacklist:notimplemented
 
 # HEASoft:
 HEASoft-Min:630
 HEASoft-Max:699
+HEASoft-Blacklist:notimplemented

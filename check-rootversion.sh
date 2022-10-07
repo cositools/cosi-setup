@@ -101,6 +101,7 @@ done
 
 RootVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Min" | awk -F":" '{ print $2 }')
 RootVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Max" | awk -F":" '{ print $2 }')
+RootBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Blacklist")
 
 RootVersionMinString="${RootVersionMin:(-3):1}.${RootVersionMin:(-2):2}"
 RootVersionMaxString="${RootVersionMax:(-3):1}.${RootVersionMax:(-2):2}"
@@ -115,13 +116,28 @@ if [ "${GET}" == "true" ]; then
 fi
 
 if [ "${GOOD}" == "true" ]; then
-  version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-  release=`echo ${TESTVERSION} | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'| sed 's/0*//'`;
+  if [[ ${TESTVERSION} == */* ]]; then
+    version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
+    release=`echo ${TESTVERSION} | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }' | sed 's/0*//'`;
+    patch=`echo ${TESTVERSION} | awk -F/ '{ print $2 }'`;
+  else
+    version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
+    release=`echo ${TESTVERSION} | awk -F. '{ print $2 }' | sed 's/0*//'`;
+    patch=`echo ${TESTVERSION} | awk -F. '{ print $3 }'`;
+  fi
+  
   RootVersion=$((100*${version} + ${release}))
   
   if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then
-    echo "Found a good ROOT version: ${TESTVERSION}"
-    exit 0
+    if [[ ${RootBlackList} == *${RootVersion}${patch}* ]]; then
+      echo ""
+      echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
+      echo "       It has been black listed as not working."
+      exit 1
+    else 
+      echo "Found a good ROOT version: ${TESTVERSION}"
+      exit 0
+    fi
   else
     echo ""
     echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
@@ -144,8 +160,15 @@ if [ "${CHECK}" == "true" ]; then
   RootVersion=$((100*${version} + ${release}))
 
   if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then
-    echo "The given ROOT version is acceptable."
-    exit 0
+    if [[ ${RootBlackList} == *${RootVersion}.${patch}* ]]; then
+      echo ""
+      echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
+      echo "       It has been black listed as not working."
+      exit 1
+    else 
+      echo "Found a good ROOT version: ${TESTVERSION}"
+      exit 0
+    fi 
   else
     echo ""
     echo "ERROR: No acceptable ROOT version found: ${RootVersion}"
