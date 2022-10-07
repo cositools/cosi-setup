@@ -26,6 +26,7 @@ INSTALLED=$(port installed | grep \(active\) | awk '{print tolower($1) }')
 
 TOBEINSTALLED=""
 
+# Check which tools need to be installed
 for TOOL in ${TOOLS_GENERAL} ${TOOLS_PYTHON} ${TOOLS_ROOT} ${TOOLS_GEANT4} ${TOOLS_MEGALIB} ${TOOLS_GCC}; do
   TOOLTOLOWER=$(echo ${TOOL} | awk '{print tolower($0)}')
   if [[ $(echo "${INSTALLED}" | grep -x ${TOOLTOLOWER}) != ${TOOLTOLOWER} ]]; then
@@ -65,5 +66,5 @@ if [[ ${TODO} != "" ]]; then
 fi
   
 echo " "
-echo "All required packages seem to be already installed!"
+echo "All required macports packages seem to be already installed!"
 exit 0

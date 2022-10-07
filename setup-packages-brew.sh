@@ -23,6 +23,7 @@ INSTALLED=$(brew list | awk '{print tolower($1) }')
 
 TOBEINSTALLED=""
 
+# Check which tools need to be installed
 for TOOL in ${TOOLS_GENERAL} ${TOOLS_ROOT} ${TOOLS_GEANT4} ${TOOLS_MEGALIB} ${TOOLS_PYTHON}; do
   TOOLTOLOWER=$(echo ${TOOL} | awk '{print tolower($0)}')
   if [[ $(echo "${INSTALLED}" | grep -x ${TOOLTOLOWER}) != ${TOOLTOLOWER} ]]; then
@@ -47,5 +48,5 @@ if [[ ${TODO} != "" ]]; then
 fi
   
 echo " "
-echo "All required packages seem to be already installed!"
+echo "All required homebrew packages seem to be already installed!"
 exit 0
