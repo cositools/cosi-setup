@@ -365,7 +365,7 @@ else
     # Check if the license has been accepted
     CURRENT_VERSION=`xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'`
     ACCEPTED_LICENSE_VERSION=`defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '"' -f 2`
-    if [[ "${CURRENT_VERSION}" != "${ACCEPTED_LICENSE_VERSION}" ]]; then
+    if [[ "${CURRENT_VERSION}" != "${ACCEPTED_LICENSE_VERSION}"* ]]; then
       echo " "
       echo "Error: You have not accepted the XCode license!"
       echo "       Either open XCode to accept the license, or run:"
