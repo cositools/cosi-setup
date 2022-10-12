@@ -17,6 +17,9 @@ COMPILEROPTIONS=`gcc --version | head -n 1`
 # Additional configure options 
 CONFIGUREOPTIONS=" "
 
+# Components
+COMPONENTS="ftools nustar Xspec"
+
 # Comment this line in if you have trouble with readline
 # CONFIGUREOPTIONS="--enable-readline "
 
@@ -212,7 +215,11 @@ if [ -d heasoft_v${VER} ]; then
     if [ "${SAMECOMPILER}" == "" ]; then
       echo "The old installation used a different compiler..."
     fi
-    if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] ); then
+    SAMECOMPONENTS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPONENTS}"`
+    if [ "${SAMECOMPONENTS}" == "" ]; then
+      echo "The old installation used different components..."
+    fi
+    if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] && [ "${SAMECOMPONENTS}" != "" ] ); then
       echo "Your already have a usable HEASoft version installed!"
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the HEASoft directory in the source script..."
@@ -256,7 +263,7 @@ echo "Configuring..."
 # Minimze the LD_LIBRARY_PATH to prevent problems with multiple readline's
 cd heasoft_v${VER}/BUILD_DIR
 #export LD_LIBRARY_PATH=/usr/lib
-sh configure ${CONFIGUREOPTIONS} --with-components="ftools Xspec" > config.log 2>&1
+sh configure ${CONFIGUREOPTIONS} --with-components="${COMPONENTS}" > config.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring HEASoft!"
   echo "       Check the file "`pwd`"/config.log"
@@ -305,7 +312,7 @@ cd ../..
 rm -f COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
-
+echo "${COMPONENTS}" >> COMPILE_SUCCESSFUL
 
 
 echo "Setting permissions..."
