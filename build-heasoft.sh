@@ -297,18 +297,23 @@ fi
 
 
 # Create a libcfitsio.so, etc. link
-cd ../*86*/lib
-CFITSIO=`find . -name "libcfitsio.[so|a|dylib|dll]"`
-LONGCFITSIO=`find . -name "libcfitsio_*[so|a|dylib|dll]"`
-if ( [ "${CFITSIO}" == "" ] && [ "${LONGCFITSIO}" != "" ] ); then
+LIBDIR=""
+if [ -d ../*libc*/lib ]; then
+  LIBDIR=../*libc*/lib
+fi
+if [[ ${LIBDIR} != "" ]]; then
+  cd ${LIBDIR}
+  CFITSIO=`find . -name "libcfitsio.[so|a|dylib|dll]"`
+  LONGCFITSIO=`find . -name "libcfitsio_*[so|a|dylib|dll]"`
+  if ( [ "${CFITSIO}" == "" ] && [ "${LONGCFITSIO}" != "" ] ); then
     NEWCFITSIO=`echo ${LONGCFITSIO} | awk -F'[/]|[.]|[_]' '{ print $3"."$6 }'`
     ln -s ${LONGCFITSIO} ${NEWCFITSIO}
+  fi
+  cd ../..
 fi
 
 
-
 echo "Store our success story..."
-cd ../..
 rm -f COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
