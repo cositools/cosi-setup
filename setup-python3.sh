@@ -105,7 +105,7 @@ fi
 
 
 # All the default installations
-ALLREQUIREMENTSFILES=$(find .. -maxdepth 2 -name "Requirements.txt")
+ALLREQUIREMENTSFILES=$(find .. -maxdepth 2 -iname "Requirements.txt")
 
 for REQFILE in ${ALLREQUIREMENTSFILES}; do
   echo "Installing requirements file ${REQFILE}"
