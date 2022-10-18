@@ -198,10 +198,10 @@ fi
 FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "${GITBRANCH}")
 if [[ ${FOUNDBRANCH} != ${GITBRANCH} ]]; then
   echo " "
-  echo "WARNING: The desired branch \"${GITBRANCH}\" does not exit in the repository"
+  echo "INFO: The desired branch \"${GITBRANCH}\" does not exit in the repository"
   FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "main")
   if [[ ${FOUNDBRANCH} == main ]]; then    
-    echo "         Switching to the main branch..."
+    echo "      Switching to the main branch..."
     GITBRANCH="main"
   else
     FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "master")
