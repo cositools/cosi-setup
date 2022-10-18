@@ -53,7 +53,7 @@ confhelp() {
   echo " "
   echo "--extras=[list of extra packages not installed by default]"
   echo "     Add a few extra packages not installed by default since, e.g., they are too large"
-  echo "     Example: --extras=cosi-data-challenge-1,cosi-data-challenge-2]"
+  echo "     Example: --extras=cosi-data-challenge-1,cosi-data-challenge-2"
   echo " "
   echo "--ignore-missing-packages"
   echo "    Do not check for missing packages."
