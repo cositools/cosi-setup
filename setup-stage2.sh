@@ -33,6 +33,9 @@ SETUPPATH="${COSIPATH}/cosi-setup"
 GITBASEDIR="https://github.com/cositools"
 GITBRANCH="main"
 
+# Extra repositories to download
+EXTRAS=""
+
 # Operating system type
 OSTYPE=$(uname -s)
 
@@ -142,6 +145,9 @@ for C in "${CMD[@]}"; do
     IGNOREMISSINGPACKAGES=true
   elif [[ ${C} == *-k*-e* ]]; then
     KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
+  elif [[ ${C} == *-e* ]]; then
+    EXTRAS=`echo ${C} | awk -F"=" '{ print $2 }'`
+    EXTRAS=${EXTRAS/,/ }
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -656,7 +662,7 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
   # Download and build a new cfitsio version
   if [[ ! -f ${SETUPPATH}/build-cfitsio.sh ]]; then
     echo ""  
-    echo "ERROR: Unable to find the script to build cfistio!"
+    echo "ERROR: Unable to find the script to build cfitsio!"
     exit 1
   fi
   
@@ -776,6 +782,7 @@ else
   echo " "
   echo "SUCCESS: We have a usable HEASoft version!"
 fi
+
 
 
 ############################################################################################################
@@ -945,7 +952,6 @@ echo "SUCCESS: cosi-data-challenges has been installed"
 
 
 
-
 ############################################################################################################
 # Install cosi-docs
 
@@ -959,7 +965,7 @@ echo "Switching to file setup-retrieve-git-repository.sh"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-docs -b=${BRANCH} -r=https://github.com/cositools/cosi-docs.git -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
-  echo "ERROR: Something went wrong while retrieving cosi-data-challenges from the repository"
+  echo "ERROR: Something went wrong while retrieving cosi-docs from the repository"
   issuereport
   exit 1
 fi  
@@ -1035,6 +1041,31 @@ echo ""
 
 cd ${COSIPATH}
 
+
+
+############################################################################################################
+# Install extra repositories
+
+if [[ ${EXTRAS} != "" ]]; then
+  for REPO in ${EXTRAS}; do 
+    echo ""
+    echo "*****************************"
+    echo " "
+    echo "Installing extra repository ${REPO}"
+    echo " "
+    echo "Switching to file setup-retrieve-git-repository.sh"
+    ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=${REPO} -b=${BRANCH} -r=https://github.com/cositools/${REPO}.git -s=${STASHNAME}
+    if [ "$?" != "0" ]; then
+      echo " "
+      echo "ERROR: Something went wrong while retrieving ${REPO} from the repository"
+      issuereport
+      exit 1
+    fi  
+
+    echo " "
+    echo "SUCCESS: ${REPO} has been installed" 
+  done
+fi
 
 
 ############################################################################################################
