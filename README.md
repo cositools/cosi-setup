@@ -43,7 +43,11 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
     Choose a specific branch of the COSItools git repositories.
     If the option is not given the latest release will be used.
     If the branch does not exist for all repositories use the main/master branch.
- 
+
+--extras=[list of extra packages not installed by default]
+     Add a few extra packages not installed by default since, e.g., they are too large
+     Example: --extras=cosi-data-challenge-1,cosi-data-challenge-2
+
 --ignore-missing-packages
     Do not check for missing packages.
  
