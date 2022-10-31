@@ -109,10 +109,28 @@ ALLREQUIREMENTSFILES=$(find .. -maxdepth 2 -iname "Requirements.txt")
 
 for REQFILE in ${ALLREQUIREMENTSFILES}; do
   echo "Installing requirements file ${REQFILE}"
-  pip3 install -r ${REQFILE}
+  
+  # Filter everything into a temporary file:
+  REQTEMP=$(mktemp cositoolreqfile.XXXXXXXXX)
+  if [[ ${OSTYPE} == *inux ]]; then
+    # On Ubuntu 22.04 or higher, filter pystan
+    OS=$(cat /etc/os-release | grep "^ID\=" | awk -F= '{ print $2 }')
+    VERSIONID=$(cat /etc/os-release | grep "^VERSION_ID\=" | awk -F= '{ print $2 }')
+    VERSIONID=${VERSIONID//\"/}
+    VERSIONID=${VERSIONID/./}
+    if [[ ${OS} == ubuntu ]]; then
+      if [ ${VERSIONID} -ge 2204 ]; then
+        echo "Filtering pystan since we are on Ubuntu (=${OS}) and release is >= 22.04 (=${VERSIONID})"
+        cat ${REQFILE} | grep -v "pystan" > ${REQTEMP}
+      fi
+    fi
+  fi
+
+
+  pip3 install -r ${REQTEMP}
   if [[ "$?" != "0" ]]; then
     echo ""
-    echo "ERROR: Unable to install a requirements file"
+    echo "ERROR: Unable to install requirements file ${REQFILE}"
     exit 1; 
   fi
 done
