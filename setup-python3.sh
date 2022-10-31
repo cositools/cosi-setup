@@ -129,6 +129,10 @@ for REQFILE in ${ALLREQUIREMENTSFILES}; do
         REQTEMP=${REQTEMP2}
       fi
     fi
+  elif [[ ${OSTYPE} == *arwin ]]; then
+    REQTEMP2=$(mktemp /tmp/cositoolsrequirementsfile.XXXXXXXXX)
+    cat ${REQTEMP} | grep -v "pystan" > ${REQTEMP2}
+    REQTEMP=${REQTEMP2}
   fi
 
 
