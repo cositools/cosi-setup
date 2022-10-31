@@ -112,6 +112,7 @@ for REQFILE in ${ALLREQUIREMENTSFILES}; do
   
   # Filter everything into a temporary file:
   REQTEMP=$(mktemp cositoolreqfile.XXXXXXXXX)
+  cat ${REQFILE} > ${REQTEMP}
   if [[ ${OSTYPE} == *inux ]]; then
     # On Ubuntu 22.04 or higher, filter pystan
     OS=$(cat /etc/os-release | grep "^ID\=" | awk -F= '{ print $2 }')
@@ -121,7 +122,7 @@ for REQFILE in ${ALLREQUIREMENTSFILES}; do
     if [[ ${OS} == ubuntu ]]; then
       if [ ${VERSIONID} -ge 2204 ]; then
         echo "Filtering pystan since we are on Ubuntu (=${OS}) and release is >= 22.04 (=${VERSIONID})"
-        cat ${REQFILE} | grep -v "pystan" > ${REQTEMP}
+        cat ${REQTEMP} | grep -v "pystan" > ${REQTEMP}
       fi
     fi
   fi
