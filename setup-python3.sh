@@ -108,10 +108,12 @@ fi
 ALLREQUIREMENTSFILES=$(find .. -maxdepth 2 -iname "Requirements.txt")
 
 for REQFILE in ${ALLREQUIREMENTSFILES}; do
+  echo ""
+  echo ""
   echo "Installing requirements file ${REQFILE}"
   
   # Filter everything into a temporary file:
-  REQTEMP=$(mktemp cositoolreqfile.XXXXXXXXX)
+  REQTEMP=$(mktemp /tmp/cositoolsrequirementsfile.XXXXXXXXX)
   cat ${REQFILE} > ${REQTEMP}
   if [[ ${OSTYPE} == *inux ]]; then
     # On Ubuntu 22.04 or higher, filter pystan
@@ -122,7 +124,9 @@ for REQFILE in ${ALLREQUIREMENTSFILES}; do
     if [[ ${OS} == ubuntu ]]; then
       if [ ${VERSIONID} -ge 2204 ]; then
         echo "Filtering pystan since we are on Ubuntu (=${OS}) and release is >= 22.04 (=${VERSIONID})"
-        cat ${REQTEMP} | grep -v "pystan" > ${REQTEMP}
+        REQTEMP2=$(mktemp /tmp/cositoolsrequirementsfile.XXXXXXXXX)
+        cat ${REQTEMP} | grep -v "pystan" > ${REQTEMP2}
+        REQTEMP=${REQTEMP2}
       fi
     fi
   fi
