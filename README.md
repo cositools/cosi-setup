@@ -138,6 +138,14 @@ The full HEASoft install is not working at the moment (in arm64 mode), thus just
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --heasoft=cfitsio
 ```
 
+The following error may occur even if the XCode license has been accepted due to a mismatch between the installed version of XCode and the version of the cached license agreement:
+```
+Error: You have not accepted the XCode license!
+    Either open XCode to accept the license, or run:
+    sudo xcodebuild -license accept
+```
+If this occurs, the cached license can be cleared by deleting the XCode plist file located at /Library/Preferences/com.apple.dt.Xcode.plist. Once the file has been removed, accept the license again to resolve the mismatch.
+
 #### With Intel chip
 
 Intel Mac's should work using the default one line setup.
