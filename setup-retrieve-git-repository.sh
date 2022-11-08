@@ -21,6 +21,7 @@ COSIPATH=""
 NAME=""
 GITPATH=""
 GITBRANCH=""
+GITPULLBEHAVIOR="stash"
 STASHNAME=""
 
 
@@ -46,10 +47,16 @@ confhelp() {
   echo "--repositorypath=[name of the git path]"
   echo "    The path to the git repository"
   echo " "
+  echo "--pull-behavior-git=[stash (default), merge]"
+  echo "     Choose how to handle changes in git repositories:"
+  echo "     \"stash\": stash the changes and pull the latest version"
+  echo "     \"merge\": merge the changes -- the script will stop on error"
+  echo "     \"no\": Do not change existing repositories in any way (no pull, no branch switch, etc.)"
+  echo " "
   echo "--cositoolspath=[absolute path to COSItools]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
   echo " "
-  echo "--stashname=[name under which to stash chnages in the repository]"
+  echo "--stashname=[name under which to stash changes in the repository if --pull-behavior-git=stash]"
   echo "    This is the name under which existing chnages to the repository are stashed."
   echo " "
   echo "--help or -h"
@@ -80,6 +87,8 @@ for C in "${CMD[@]}"; do
     GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-r*=* ]]; then
     GITPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+  elif [[ ${C} == *-p*=* ]]; then
+    GITPULLBEHAVIOR=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-n*=* ]]; then
     NAME=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-s*=* ]]; then
@@ -141,6 +150,15 @@ if [[ ${GITBRANCH} == "" ]]; then
   exit 1
 fi
 
+if ( [[ ${GITPULLBEHAVIOR} == merge ]] || [[ ${GITPULLBEHAVIOR} == stash ]] || [[ ${GITPULLBEHAVIOR} == no ]] ); then
+  echo " * Use the following git pull behavior: ${GITPULLBEHAVIOR}"
+else
+  echo " "
+  echo "ERROR: Unknown git pull behavior: ${GITPULLBEHAVIOR}"
+  confhelp
+  exit 1
+fi
+
 
 
 ############################################################################################################
@@ -159,22 +177,29 @@ if [[ ! -d ${NAME} ]]; then
   fi
   cd ${NAME}
     
-# The repository does exist - stash potential changes
-else   
+# The repository does exist 
+else
   echo "The repository ${NAME} already exists"
-  echo "Stashing any potential modifications if there are any"
   cd ${NAME}
-  git stash push -m ${STASHNAME}
-  if [ "$?" != "0" ]; then
-    echo " "
-    echo "Warning: Unable to stash with \"push -m\" -- your git version might be too old. Trying just git stash"
-    git stash
+  # Stash potential changes
+  if [[ ${GITPULLBEHAVIOR} == "stash" ]]; then
+    echo "Stashing any potential modifications if there are any"
+    git stash push -m ${STASHNAME}
     if [ "$?" != "0" ]; then
       echo " "
-      echo "ERROR: Unable to stash any changes in your code"
-      exit 1
+      echo "Warning: Unable to stash with \"push -m\" -- your git version might be too old. Trying just git stash"
+      git stash
+      if [ "$?" != "0" ]; then
+        echo " "
+        echo "ERROR: Unable to stash any changes in your code"
+        exit 1
+      fi
     fi
-  fi   
+  elif [[ ${GITPULLBEHAVIOR} == "no" ]]; then
+    echo "Keeping existing repository as is"
+    cd ${COSIPATH}
+    exit 0
+  fi
 fi
 
 

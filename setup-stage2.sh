@@ -32,6 +32,7 @@ SETUPPATH="${COSIPATH}/cosi-setup"
 # The path to the COSItools install
 GITBASEDIR="https://github.com/cositools"
 GITBRANCH="main"
+GITPULLBEHAVIOR="stash"
 
 # Extra repositories to download
 EXTRAS=""
@@ -139,6 +140,8 @@ for C in "${CMD[@]}"; do
     CPPOPT=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-d*=* ]]; then
     CPPDEBUG=`echo ${C} | awk -F"=" '{ print $2 }'`
+  elif [[ ${C} == *-p*=* ]]; then
+    GITPULLBEHAVIOR=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-ma*=* ]]; then
     MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *--i*-m* ]]; then
@@ -179,6 +182,7 @@ OSTYPE=`echo ${OSTYPE} | tr '[:upper:]' '[:lower:]'`
 CPPOPT=`echo ${CPPOPT} | tr '[:upper:]' '[:lower:]'`
 CPPDEBUG=`echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]'`
 KEEPENVASIS=`echo ${KEEPENVASIS} | tr '[:upper:]' '[:lower:]'`
+GITPULLBEHAVIOR=`echo ${GITPULLBEHAVIOR} | tr '[:upper:]' '[:lower:]'`
 
 # Provide feed back and perform error checks:
 
@@ -310,6 +314,16 @@ else
 fi
 
 
+if ( [[ ${GITPULLBEHAVIOR} == merge ]] || [[ ${GITPULLBEHAVIOR} == stash ]] || [[ ${GITPULLBEHAVIOR} == no ]]  ); then
+  echo " * Use the following git pull behavior: ${GITPULLBEHAVIOR}"
+else
+  echo " "
+  echo "ERROR: Unknown git pull behavior: ${GITPULLBEHAVIOR}"
+  confhelp
+  exit 1
+fi
+
+
 if [ ! -z "${MAXTHREADS##[0-9]*}" ] 2>/dev/null; then
   echo "ERROR: The maximum number of threads must be a number and not ${MAXTHREADS}!"
   exit 1
@@ -346,6 +360,8 @@ else
       echo ""
       echo "ERROR: Cannot find Xcode. Please install XCode first form the App Store."
       echo " "
+      echo "       Debugging: Failed test: Cannot find program xcode-select"
+      echo " "
       exit 1
     fi
  
@@ -355,7 +371,9 @@ else
       echo ""
       echo "ERROR: Cannot find the Xcode command line tools. Please install them via:"
       echo " "
-      echo "xcode-select --install"
+      echo "       xcode-select --install"
+      echo " "
+      echo "       Debugging: Failed test: \"xcode-select -p\" does not return 0 as it would on success)"
       echo " "
       exit 1
     fi
@@ -363,7 +381,9 @@ else
       echo ""
       echo "ERROR: Cannot find the path to the Xcode command line tools. Please install them via:"
       echo " "
-      echo "xcode-select --install"
+      echo "       xcode-select --install"
+      echo " "
+      echo "       Debugging: Failed test: \"xcode-select -p\" does not return the path to the Xcode command line tools"
       echo " "
       exit 1
     fi
@@ -375,7 +395,16 @@ else
       echo " "
       echo "Error: You have not accepted the XCode license!"
       echo "       Either open XCode to accept the license, or run:"
-      echo "       sudo xcodebuild -license accept" 
+      echo " "
+      echo "       sudo xcodebuild -license accept"
+      echo " "
+      echo "       Debugging: Current version ${CURRENT_VERSION} from \"xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'\""
+      echo "                  Accepted version ${ACCEPTED_LICENSE_VERSION} from \" defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '\"' -f 2"
+      echo " "
+      echo "       If this error persists, please delete the file which stores which license has been accepted, and accept again:"
+      echo "       sudo rm /Library/Preferences/com.apple.dt.Xcode.plist"
+      echo "       sudo xcodebuild -license accept"
+      echo " "
       exit 1
     fi
     
@@ -384,9 +413,11 @@ else
     if [[ ${UPDATEREQUIRED} != "" ]]; then
       echo ""
       echo "ERROR: There are missing updates for the command line tools."
-      echo "       Please install them either via the normal macOS software update interface (preferred) or via (does not always work):"
+      echo "       Please install them either via the normal macOS software update interface (preferred) or via the command line (does not always work):"
       echo " "
-      echo "softwareupdate --install -a"
+      echo "       softwareupdate --install -a"
+      echo " "
+      echo "       Debugging: Failed test: \"(softwareupdate --list 2>&1 | grep \"Command Line Tools\"\" contained the string \"Command Line Tools\""
       echo " "
       exit 1
     fi
@@ -801,7 +832,7 @@ if [[ ! -f ${SETUPPATH}/setup-retrieve-git-repository.sh ]]; then
   exit 1
 fi
 
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=megalib -b=${BRANCH} -r=https://github.com/zoglauer/megalib.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=megalib -b=${BRANCH} -r=https://github.com/zoglauer/megalib.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving MEGAlib from the repository"
@@ -852,7 +883,7 @@ echo "Installing nuclearizer"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=nuclearizer -b=${BRANCH} -r=https://github.com/cositools/nuclearizer.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=nuclearizer -b=${BRANCH} -r=https://github.com/cositools/nuclearizer.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosipy from the repository"
@@ -893,7 +924,7 @@ echo "Installing cosipy"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy -b=${BRANCH} -r=https://github.com/cositools/cosipy.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy -b=${BRANCH} -r=https://github.com/cositools/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosipy from the repository"
@@ -916,7 +947,7 @@ echo "Installing cosipy-classic"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy-classic -b=${BRANCH} -r=https://github.com/tsiegert/cosipy.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy-classic -b=${BRANCH} -r=https://github.com/tsiegert/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosipy-classic from the repository"
@@ -939,7 +970,7 @@ echo "Installing cosi-data-challenges"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-data-challenges -b=${BRANCH} -r=https://github.com/cositools/cosi-data-challenges.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-data-challenges -b=${BRANCH} -r=https://github.com/cositools/cosi-data-challenges.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosi-data-challenges from the repository"
@@ -962,7 +993,7 @@ echo "Installing cosi-docs"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-docs -b=${BRANCH} -r=https://github.com/cositools/cosi-docs.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-docs -b=${BRANCH} -r=https://github.com/cositools/cosi-docs.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosi-docs from the repository"
@@ -992,7 +1023,7 @@ fi
 # First retrieve the mass model repositories
 
 echo "Retrieving Coserl"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-coserl -b=${BRANCH} -r=https://github.com/cositools/massmodel-coserl.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-coserl -b=${BRANCH} -r=https://github.com/cositools/massmodel-coserl.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving massmodel-coserl from the repository"
@@ -1016,7 +1047,7 @@ done
 echo ""
 
 echo "Retrieving COSI balloon"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-cosi-balloon -b=${BRANCH} -r=https://github.com/cositools/massmodel-cosi-balloon.git -s=${STASHNAME}
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-cosi-balloon -b=${BRANCH} -r=https://github.com/cositools/massmodel-cosi-balloon.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving massmodel-cosi-balloon from the repository"
@@ -1054,7 +1085,7 @@ if [[ ${EXTRAS} != "" ]]; then
     echo "Installing extra repository ${REPO}"
     echo " "
     echo "Switching to file setup-retrieve-git-repository.sh"
-    ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=${REPO} -b=${BRANCH} -r=https://github.com/cositools/${REPO}.git -s=${STASHNAME}
+    ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=${REPO} -b=${BRANCH} -r=https://github.com/cositools/${REPO}.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
     if [ "$?" != "0" ]; then
       echo " "
       echo "ERROR: Something went wrong while retrieving ${REPO} from the repository"
