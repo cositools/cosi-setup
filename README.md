@@ -123,13 +123,19 @@ No other systems have been been tested yet or are supported. Especially avoid an
 
 ### macOS 
 
-Only macOS Monterey is supported at the moment. 
+Only macOS Monterey and Ventura are supported. 
+
+#### Xcode
+
 Xcode must be installed from the App store, and then install the command line tools via:
 ```
 xcode-select --install
 ```
 In addition, you must open Xcode at least once after installing it.
-Finally, you must have either macports or homebrew installed.
+
+#### macports, homebrew & conda
+
+You need to have either homebrew (preferred) or macports installed. Conda is not supported at the moment. In addition, you can only have *one* of the three (homebrew, macports, conda) active. If you have more than one installed, then please comment the others out in your .zprofile file (or .bash_profile or whatever you use) for the installation. You can try to comment them in again after the installation and see if everything works (depending on the complexity of your overall setup, it might or might not work). 
 
 #### With Apple M chip
 
