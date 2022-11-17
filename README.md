@@ -137,11 +137,11 @@ In addition, you must open Xcode at least once after installing it.
 
 You need to have either homebrew (preferred) or macports installed. Conda is not supported at the moment. In addition, you can only have *one* of the three (homebrew, macports, conda) active. If you have more than one installed, then please comment the others out in your .zprofile file (or .bash_profile or whatever you use) for the installation. You can try to comment them in again after the installation and see if everything works (depending on the complexity of your overall setup, it might or might not work). 
 
-#### With Apple M chip
+#### Installation (Apple & Intel silicon)
 
-The full HEASoft install is not working at the moment (in arm64 mode), thus just compile cfitsio for the time being:
+The installation should work using the default one line setup:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --heasoft=cfitsio
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
 ```
 
 The following error may occur even if the XCode license has been accepted due to a mismatch between the installed version of XCode and the version of the cached license agreement:
@@ -151,10 +151,6 @@ Error: You have not accepted the XCode license!
     sudo xcodebuild -license accept
 ```
 If this occurs, the cached license can be cleared by deleting the XCode plist file located at /Library/Preferences/com.apple.dt.Xcode.plist. Once the file has been removed, accept the license again to resolve the mismatch.
-
-#### With Intel chip
-
-Intel Mac's should work using the default one line setup.
 
 
 ### Windows
