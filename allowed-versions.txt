@@ -17,6 +17,6 @@ Geant4-Max:102
 Geant4-Blacklist:notimplemented
 
 # HEASoft:
-HEASoft-Min:630
+HEASoft-Min:631
 HEASoft-Max:699
 HEASoft-Blacklist:notimplemented
