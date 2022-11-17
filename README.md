@@ -6,7 +6,7 @@ This repository contains the tools to setup a full working COSItools development
 
 You can setup the environment by simply executing this command:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)"
 ```
 This script will likely run until a point where it tells you to install a few packages.
 After you do that, just start the script again, and it will complete the setup.
@@ -18,7 +18,7 @@ After you do that, just start the script again, and it will complete the setup.
 The setup script has serveral advanced options accessible. Using the above one-line install script, you can add options the following way (pay attention to the underscore:
 
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --options --here
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --options --here
 ```
 
 Alternatively, do the following:
@@ -27,7 +27,7 @@ mkdir COSItools
 cd COSItools
 git clone https://github.com/cositools/cosi-setup cosi-setup
 cd cosi-setup
-git checkout feature/initialsetup
+git checkout main
 bash setup.sh --options --here
 ```
 
@@ -39,7 +39,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 --cositoolspath=[path to COSItools - default: "COSItools"]
     This is the path to where the COSItools will be installed. If the path exists, we will try to update them.
  
---branch=[name of a git branch - default: feature/initialsetup]
+--branch=[name of a git branch - default: main]
     Choose a specific branch of the COSItools git repositories.
     If the option is not given the latest release will be used.
     If the branch does not exist for all repositories use the main/master branch.
@@ -114,7 +114,7 @@ Leap 15.3 should work out of the box.
 
 Tumbleweed is a cutting edge rolling release thus not recommended for COSItools. HEASoft does not compile at the moment, thus disable it and just use the system default cfitsiso library which should be installed automatically with the packages:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --heasoft=off
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --heasoft=off
 ```
 
 #### Other Linux systems
@@ -141,7 +141,7 @@ You need to have either homebrew (preferred) or macports installed. Conda is not
 
 The installation should work using the default one line setup:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)"
 ```
 
 The following error may occur even if the XCode license has been accepted due to a mismatch between the installed version of XCode and the version of the cached license agreement:
@@ -174,7 +174,7 @@ module load gcc/6.3.0 cmake/3.22.0 git/2.11.1 blas/3.8.0 ml/tensorflow/2.5.0-py3
 
 Then launch the script with the following additional option:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
 ```
 It ignores not installed packages since the setup script cannot find packages installed via the "environment modules", it keeps all environment search paths intact, and it limits the number of threads to 6 otherwise the savio admins might complain that you use too many resources on the login nodes.
 
@@ -190,7 +190,7 @@ module swap PrgEnv-intel PrgEnv-gnu
 Unfortunately the cfitsio README states, that "Cray supercomputers computers are currently not supported", thus we have to compile the COSItools without HEASoft.
 Therefore, launch the script with the following additional option:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)" _ --ignore-missing-packages --keep-environment-as-is=true --heasoft=off --max-threads=6
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --ignore-missing-packages --keep-environment-as-is=true --heasoft=off --max-threads=6
 ```
 It ignores not installed packages since the setup script cannot find packages installed via the "environment modules", it keeps all environment search paths intact, does not install HEASoft since the compilation crashes on cori, and it limits the number of threads to 6 otherwise the cori admins will complain that you use too many resources on the login nodes.
 
@@ -227,7 +227,7 @@ module rm anaconda3/2021.05-gcc/8.3.1
 
 Finally, make main installation:
 ```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/feature/initialsetup/setup.sh)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)
 cd COSItools/cosi-setup
 bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-threads=6
 ```

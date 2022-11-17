@@ -25,7 +25,7 @@ CMD=( "$@" )
 # The path to the COSItools install
 COSIPATH=""
 GITBASEDIR="https://github.com/cositools"
-GITBRANCH="feature/initialsetup"
+GITBRANCH="main"
 
 
 
@@ -46,7 +46,7 @@ confhelp() {
   echo "--cositoolspath=[path to COSItools - default: \"COSItools\"]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
   echo " "
-  echo "--branch=[name of a git branch - default: feature/initialsetup]"
+  echo "--branch=[name of a git branch - default: main]"
   echo "    Choose a specific branch of the COSItools git repositories."
   echo "    If the option is not given the latest release will be used."
   echo "    If the branch does not exist for all repositories use the main/master branch."
