@@ -309,11 +309,12 @@ if [[ ${LIBDIR} != "" ]]; then
     NEWCFITSIO=`echo ${LONGCFITSIO} | awk -F'[/]|[.]|[_]' '{ print $3"."$6 }'`
     ln -s ${LONGCFITSIO} ${NEWCFITSIO}
   fi
-  cd ../..
+  cd ..
 fi
 
 
 echo "Store our success story..."
+cd ..
 rm -f COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
