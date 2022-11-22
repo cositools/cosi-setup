@@ -242,7 +242,7 @@ fi
 git checkout ${GITSETUPBRANCH}
 if [ "$?" != "0" ]; then
   echo ""
-  echo "ERROR: Unable to checkout branch ${GITBRANCH} from cosi-setup!"
+  echo "ERROR: Unable to checkout branch ${GITSETUPBRANCH} from cosi-setup!"
   exit 1
 fi
 

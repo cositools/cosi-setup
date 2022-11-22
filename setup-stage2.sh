@@ -421,11 +421,52 @@ else
       echo " "
       exit 1
     fi
-    
-  
-    # Look for macports
+   
+    NUMBEROFPACKAGEMANAGERS=0
+    HASMACPORTS=FALSE 
+    HASHOMEBREW=FALSE
+    HASCONDA=FALSE
     type port >/dev/null 2>&1
     if [ $? -eq 0 ]; then
+      HASMACPORTS=TRUE
+      NUMBEROFPACKAGEMANAGERS=$(( NUMBEROFPACKAGEMANAGERS + 1 ))
+    fi
+    type brew >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      HASHOMEBREW=TRUE
+      NUMBEROFPACKAGEMANAGERS=$(( NUMBEROFPACKAGEMANAGERS + 1 ))
+    fi
+    type conda >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      HASCONDA=TRUE
+      NUMBEROFPACKAGEMANAGERS=$(( NUMBEROFPACKAGEMANAGERS + 1 ))
+    fi
+    if [[ ${HASCONDA} == "TRUE" ]]; then
+      echo ""
+      echo "ERROR: You cannot have conda installed while you are installing COSItools."
+      echo "       Please remove its initialization from your .zprofile/.zrcsh file, and start this script again in a new termial."
+      exit 1
+    fi
+
+    if [ ${NUMBEROFPACKAGEMANAGERS} -eq 0 ]; then
+      echo ""
+      echo "ERROR: You need a package manager to install all required packages to compile the COSItools."
+      echo "       Please install either homebrew (preferred) or macports."
+      exit 1
+    fi
+
+    if [ ${NUMBEROFPACKAGEMANAGERS} -gt 1 ]; then
+      FOUNDPACKAGEMANAGERS=""
+      if [[ ${HASMACPORTS} == "TRUE" ]]; then FOUNDPACKAGEMANAGERS="macports "; fi
+      if [[ ${HASHOMEBREW} == "TRUE" ]]; then FOUNDPACKAGEMANAGERS="homebrew "; fi
+      if [[ ${HASCONDA} == "TRUE" ]]; then FOUNDPACKAGEMANAGERS="conda "; fi
+      echo ""
+      echo "ERROR: You can only have one package manager installed. You have: ${FOUNDPACKAGEMANAGERS}"
+      exit 1
+    fi
+
+    # macports
+    if [[ ${HASMACPORTS} == "TRUE" ]]; then
       if [[ ! -f ${SETUPPATH}/setup-packages-macports.sh ]]; then
         echo ""
         echo "ERROR: Unable to find the macports package script!"
@@ -437,26 +478,39 @@ else
         # The error message is part of the above script
         exit 1
       fi
-    else
-      type brew >/dev/null 2>&1
-      if [ $? -eq 0 ]; then
-        if [[ ! -f ${SETUPPATH}/setup-packages-brew.sh ]]; then
-          echo ""
-          echo "ERROR: Unable to find the brew package script!"
-          exit 1
-        fi
+    fi
 
-        ${SETUPPATH}/setup-packages-brew.sh
-        if [ "$?" != "0" ]; then
-          # The error message is part of the above script
-          exit 1
-        fi 
-      else
+    # homebrew
+    if [[ ${HASHOMEBREW} == "TRUE" ]]; then
+      if [[ ! -f ${SETUPPATH}/setup-packages-brew.sh ]]; then
         echo ""
-        echo "ERROR: Please install homebrew (preferred) or macports to install the required COSItools packages"
+        echo "ERROR: Unable to find the brew package script!"
+        exit 
+      fi
+
+      ${SETUPPATH}/setup-packages-brew.sh
+      if [ "$?" != "0" ]; then
+        # The error message is part of the above script
+        exit 1
+      fi 
+    fi
+
+    # conda
+    if [[ ${HASCONDA} == "TRUE" ]]; then
+      if [[ ! -f ${SETUPPATH}/setup-packages-conda.sh ]]; then
+        echo ""
+        echo "ERROR: Unable to find the conda package script!"
+        exit
+      fi
+
+      ${SETUPPATH}/setup-packages-conda.sh
+      if [ "$?" != "0" ]; then
+        # The error message is part of the above script
         exit 1
       fi
     fi
+
+
   # Any Linux
   elif [[ ${OSTYPE} == *inux* ]]; then
     if [[ ! -f ${SETUPPATH}/setup-packages-linux.sh ]]; then

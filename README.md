@@ -125,13 +125,13 @@ No other systems have been been tested yet or are supported. Especially avoid an
 
 Only macOS Monterey and Ventura are supported. 
 
-#### Xcode
+#### Xcode Command Line Tools
 
-Xcode must be installed from the App store, and then install the command line tools via:
+The Xcode Command Line Tools must be installed via:
 ```
 xcode-select --install
 ```
-In addition, you must open Xcode at least once after installing it.
+While you do not need to install Xcode, in the case you have installed Xcode, you must open Xcode at least once after installing it.
 
 #### macports, homebrew & conda
 

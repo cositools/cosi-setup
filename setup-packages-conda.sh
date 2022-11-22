@@ -6,20 +6,26 @@
 # Development lead: Andreas Zoglauer
 #
 # Description:
-# This script checks if all required brew packages are installed 
+# This script checks if all required coda packages are installed 
 
 TOOLS_GENERAL="hdf5"
-TOOLS_PYTHON="python@3.8 jupyterlab numpy"
-TOOLS_ROOT="cmake openblas davix expat giflib git git-lfs gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 openssl@3 pcre tbb libtiff xrootd xxhash xz"
+TOOLS_PYTHON="python jupyterlab numpy"
+TOOLS_ROOT="cmake openblas davix expat giflib git git-lfs gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 openssl pcre tbb libtiff xrootd xxhash xz"
 TOOLS_GEANT4="cmake pkg-config zlib xerces-c"
-TOOLS_MEGALIB="doxygen imagemagick cfitsio healpix open-mpi"
+TOOLS_MEGALIB="doxygen imagemagick cfitsio healpix_cxx openmpi"
 
 # Not working tools:
 TOOLS_NOTWORKING="valgrind-macos-devel gcc11"
 
 TOOLS_ALL=""
 
-INSTALLED=$(brew list | awk '{print tolower($1) }')
+# Make sure the conda-forge channel is installed:
+# conda update -n base -c defaults conda
+# conda config --add channels conda-forg
+# conda config --set channel_priority strict
+
+
+INSTALLED=$(conda list | awk '{print tolower($1) }')
 
 TOBEINSTALLED=""
 
@@ -34,7 +40,7 @@ done
 TODO=""
 
 if [[ ${TOBEINSTALLED} != "" ]]; then
-  TODO+="brew update; brew upgrade; brew install ${TOBEINSTALLED}\n"
+  TODO="conda install ${TOBEINSTALLED}\n"
 fi
 
 if [[ ${TODO} != "" ]]; then
@@ -48,5 +54,5 @@ if [[ ${TODO} != "" ]]; then
 fi
   
 echo " "
-echo "All required homebrew packages seem to be already installed!"
+echo "All required conda packages seem to be already installed!"
 exit 0

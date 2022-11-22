@@ -59,12 +59,7 @@ type python3 >/dev/null 2>&1
 if [[ $? -eq 0 ]]; then
   PPATH=$(which python3)
   if [[ -f ${PPATH} ]]; then
-    if [[ ${PPATH} == *conda* ]]; then
-      echo "ERROR: You cannot use a python version installed via (ana)conda with ROOT."
-      exit 1
-    else
-      CONFIGUREOPTIONS+=" -DPYTHON_EXECUTABLE:FILEPATH=${PPATH} -Dpython3=ON"
-    fi
+    CONFIGUREOPTIONS+=" -DPYTHON_EXECUTABLE:FILEPATH=${PPATH} -Dpython3=ON"
   fi
 fi
 
