@@ -25,6 +25,7 @@ CMD=( "$@" )
 # The path to the COSItools install
 COSIPATH=""
 GITBASEDIR="https://github.com/cositools"
+GITSETUPBRANCH="feature/beyonddc1"
 GITBRANCH="main"
 
 
@@ -45,6 +46,12 @@ confhelp() {
   echo " "
   echo "--cositoolspath=[path to COSItools - default: \"COSItools\"]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
+  echo " "
+  echo "--setup-branch=[name of a git branch - default: main]"
+  echo "    Choose a specific branch of the COSItools setup repository."
+  echo "    If the option is not given the branch stated in --branch will be used."
+  echo "    If the branch does not exist the main branch will be used."
+  echo " "
   echo " "
   echo "--branch=[name of a git branch - default: main]"
   echo "    Choose a specific branch of the COSItools git repositories."
@@ -122,10 +129,17 @@ for C in "${CMD[@]}"; do
     COSIPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-b* ]]; then
     GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    GITSETUPBRANCH=${GITBRANCH}
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
+  fi
+done
+# Do the setup branch last in order to first set it with a potentially given --branch option 
+for C in "${CMD[@]}"; do
+  if [[ ${C} == *-s* ]]; then
+    GITSETUPBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   fi
 done
 
@@ -225,7 +239,7 @@ else
 fi
 # At this stage we need to be in the cosi-setup directory
 
-git checkout ${GITBRANCH}
+git checkout ${GITSETUPBRANCH}
 if [ "$?" != "0" ]; then
   echo ""
   echo "ERROR: Unable to checkout branch ${GITBRANCH} from cosi-setup!"

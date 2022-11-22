@@ -44,16 +44,20 @@ if [[ "$?" != "0" ]]; then
   exit 1; 
 fi
 
-# Upgrade pip
-python3 -m pip install --upgrade pip
+# Upgrade pip and some of its support tools
+python3 -m pip install --upgrade pip setuptools wheel
 if [[ "$?" != "0" ]]; then
   echo ""
-  echo "ERROR: Unable to upgrade pip!"
+  echo "ERROR: Unable to upgrade pip and its support tools!"
   exit 1; 
 fi
 
-# Install tensorflow & torch the special way to take care of issues on Apple M1 machines
+# Install tensorflow & torch the special way to take care of issues on Apple Silicon
 if [[ $(uname -s) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
+
+  # Temporary fix for grpcio install issues on macOS on ARM64
+  GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=0 GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 pip install grpcio
+
   # HDF5 is troublesome, thus do this first
   P=$(which port); P=${P%/bin/port}
   if [[ -f ${P}/lib/libhdf5.dylib ]]; then

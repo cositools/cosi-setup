@@ -358,7 +358,7 @@ else
     type xcode-select >/dev/null 2>&1
     if [ $? -ne 0 ]; then
       echo ""
-      echo "ERROR: Cannot find Xcode. Please install XCode first form the App Store."
+      echo "ERROR: Cannot find the tool to install the Xcode command line tools, xcode-select. Try to install Xcode first."
       echo " "
       echo "       Debugging: Failed test: Cannot find program xcode-select"
       echo " "
@@ -389,7 +389,7 @@ else
     fi
     
     # Check if the license has been accepted
-    CURRENT_VERSION=`xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'`
+    CURRENT_VERSION=`xcodebuild -version 2>&1 | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'`
     ACCEPTED_LICENSE_VERSION=`defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '"' -f 2`
     if [[ "${CURRENT_VERSION}" != "${ACCEPTED_LICENSE_VERSION}"* ]]; then
       echo " "
