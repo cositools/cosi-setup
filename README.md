@@ -88,7 +88,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 
 ### Linux
 
-We recommend to stick with long(ish)-term support versions such as Ubuntu LTE.
+We recommend to stick with long(ish)-term support versions such as Ubuntu LTE. 
 
 #### Ubuntu & derivatives
 
@@ -98,28 +98,44 @@ Version 20.04 and 22.04 should work with the default one-line install script. We
 
 ##### Fedora
 
-Version 32-35 should work with the default one-line install script
+The one-line install should work. Latest tested version is 35.
 
 ##### Centos Stream
 
-Version 9 should work.
+The one-line install should work. Latest tested version is 9.
 
-#### openSUSE 
+##### Scientific Linux and Centos 8 or earlier
+
+Not supported. These versions are too old to run COSItools.
+
+#### SUSE 
 
 ##### Leap
 
-Leap 15.3 should work out of the box.
+The one-line install should work. Latest tested version is 15.4.
 
 ##### Tumbleweed
 
-Tumbleweed is a cutting edge rolling release thus not recommended for COSItools. HEASoft does not compile at the moment, thus disable it and just use the system default cfitsiso library which should be installed automatically with the packages:
+Tumbleweed is a cutting edge rolling release thus not recommended for COSItools, as it might break at any moment in time. 
+
+As of February 2023, it is not compiling.
+
+On June 2022 is was compiling, except HEASoft did not compile. The solution was to disable it and just use the system default cfitsiso library which should be installed automatically with the packages:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --heasoft=off
 ```
 
+##### SLES
+
+The SUSE Linux Enterprise Server Distribution is a hit and miss, and depends on your actual server environment.
+
+#### Debian
+
+The one-line install should work. Latest tested version is 11.
+
 #### Other Linux systems
 
-No other systems have been been tested yet or are supported. Especially avoid any cutting edge rolling releases such as Arch (it sometimes compiles there, sometimes not), Gentoo, Tumbleweed, etc.
+No other systems have been been tested yet or are supported. Especially avoid any cutting edge rolling releases such as Arch (it sometimes compiles there, sometimes not), Gentoo, etc.
 
 ### macOS 
 
@@ -127,7 +143,7 @@ Only macOS Monterey and Ventura are supported.
 
 #### Xcode
 
-Xcode must be installed from the App store, and then install the command line tools via:
+Xcode must be installed from the App store. Afterwards install the command line tools via:
 ```
 xcode-select --install
 ```
@@ -178,6 +194,7 @@ Then launch the script with the following additional option:
 ```
 It ignores not installed packages since the setup script cannot find packages installed via the "environment modules", it keeps all environment search paths intact, and it limits the number of threads to 6 otherwise the savio admins might complain that you use too many resources on the login nodes.
 
+
 #### LBNL's cori supercomputer
 
 This approach worked last on 5/10/2022.
@@ -196,7 +213,8 @@ It ignores not installed packages since the setup script cannot find packages in
 
 
 #### Clemson's Palmetto cluster
-This approach last worked on 4/25/22
+
+This approach last worked on 4/25/22.
 
 Clemson's Palmetto High Performance Cluster runs centOS Linux 8, and it uses environment modules to load specific software packages. Additionally, Anaconda can be used to create and manage environments, as well as to install software packages. 
 
