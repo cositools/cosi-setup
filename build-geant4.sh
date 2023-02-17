@@ -377,11 +377,11 @@ GEANT4BUILDDIR=geant4_v${VER}-build     # Attention: the cleanup checks this nam
 # Hardcoding default patch conditions
 # Needs to be done after the Geant4 version is known and before we check the exiting installtion
 if [[ ${GEANT4CORE} == "geant4_v10.02.p03" ]]; then
-  GCC_MAIN_VERSION=$(gcc --version | grep gcc | awk -F\) '{ print $2 }' | awk -F. '{ print $1 }' | xargs)
-  if [[ ${GCC_MAIN_VERSION} != "" ]] && [ ${GCC_MAIN_VERSION} -ge 11 ]; then
+  #GCC_MAIN_VERSION=$(gcc --version | grep gcc | awk -F\) '{ print $2 }' | awk -F. '{ print $1 }' | xargs)
+  #if [[ ${GCC_MAIN_VERSION} != "" ]] && [ ${GCC_MAIN_VERSION} -ge 11 ]; then
     PATCH="on"
-    echo "The current combination of compiler and Geant4 version requires an existing Geant4 patch"
-  fi
+    #echo "The current combination of compiler and Geant4 version requires an existing Geant4 patch"
+  #fi
 fi
 
 
