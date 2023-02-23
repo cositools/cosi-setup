@@ -50,6 +50,9 @@ IGNOREMISSINGPACKAGES=false
 CPPOPT="normal"
 CPPDEBUG="off"
 
+# The python path
+PATHTOPYTHON=""
+
 # Path to potentially existing ROOT, Geant4, and HEASoft installs
 ROOTPATH=""
 GEANT4PATH=""
@@ -450,7 +453,17 @@ else
         if [ "$?" != "0" ]; then
           # The error message is part of the above script
           exit 1
-        fi 
+        fi
+        
+        # We need a specific version of python for the next steps, and brew does not set it, thus we have to do it:
+        PATHTOPYTHON=$(${SETUPPATH}/setup-packages-brew.sh --python-path)
+        if [[ ${PATHTOPYTHON} == *libexec* ]]; then
+          export PATH=${PATHTOPYTHON}:${PATH}
+        else
+          echo ""
+          echo "ERROR: Unable to retrieve python path"
+          exit 1
+        fi
       else
         echo ""
         echo "ERROR: Please install homebrew (preferred) or macports to install the required COSItools packages"
@@ -1149,6 +1162,10 @@ echo ". ${SETUPPATH}/source-root.sh -p=\${ROOTDIR}" >> ${ENVFILE}
 echo " " >> ${ENVFILE}
 echo "export COSITOOLSDIR=\"${COSIPATH}\"" >> ${ENVFILE}
 echo " " >> ${ENVFILE}
+if [[ ${PATHTOPYTHON} != "" ]]; then
+  echo "export PATH=${PATHTOPYTHON}:${PATH}" >> ${ENVFILE}
+  echo " " >> ${ENVFILE}
+fi
 echo "alias cosi='cd ${COSIPATH}; source python-env/bin/activate'" >> ${ENVFILE}
 echo " "
 
