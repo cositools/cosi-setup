@@ -252,10 +252,10 @@ if [[ "${HEASOFTPATH}" == "off" ]]; then
   echo " * Do not install HEASoft"
 elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
   echo " * Download the latest version of cfitsio"
+elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]] ; then
+  echo " * Download the latest version of HEASoft"
 else
-  if [[ "${HEASOFTPATH}" != "" ]]; then
-    HEASOFTPATH=`absolutefilename ${HEASOFTPATH}`
-  fi
+  HEASOFTPATH=`absolutefilename ${HEASOFTPATH}`
   if [[ "${HEASOFTPATH}" != "${HEASOFTPATH% *}" ]]; then
     echo "ERROR: HEASoft needs to be installed in a path without spaces,"
     echo "       but you chose: \"${HEASOFTPATH}\""
@@ -700,6 +700,7 @@ if [[ "${HEASOFTPATH}" == "off" ]]; then
   echo " "
   echo "Command line option --heasoft=off: Do not install HEASoft"
 
+
 # Compile cfitsio instead of full HEASoft
 elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
 
@@ -749,78 +750,84 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
   echo " "
   echo "SUCCESS: We have a usable cfitsio version!"
 
-else 
-  # If we are given an existing HEASoft installation, check if it is compatible
-  if [[ "${HEASOFTPATH}" != "" ]]; then
-    # Check if we can use the given HEASoft version
-    if [[ ! -f ${SETUPPATH}/check-heasoftversion.sh ]]; then
-      echo ""
-      echo "ERROR: Unable to find the script to check the HEASoft version!"
-      exit 1
-    fi
-  
-    ${SETUPPATH}/check-heasoftversion.sh --check=${HEASOFTPATH}
-    if [[ "$?" != "0" ]]; then
-      echo " "
-      echo "ERROR: The directory ${HEASOFTPATH} cannot be used as your HEASoft install for COSItools."
-      exit 1
-    fi
-  
-    # Add HEASoft to the environment file
-    echo "HEASOFTDIR=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})" >> ${ENVFILE}
-  
-    # Source HEASoft to be available for later installs
-    . ${SETUPPATH}/source-heasoft.sh -p=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})
-    if [[ "$?" != "0" ]]; then
-      echo " "
-      echo "ERROR: Unable to source HEAsoft"
-      exit 1
-    fi
-  
-  # Install a new version of HEASoft
-  else
-    # Download and build a new HEASoft version
-    if [[ ! -f ${SETUPPATH}/build-heasoft.sh ]]; then
-      echo ""  
-      echo "ERROR: Unable to find the script to check the HEASoft version!"
-      exit 1
-    fi
-  
-    echo "Switching to build-heasoft.sh script..."
-    cd ${EXTERNALPATH}
 
-    ${SETUPPATH}/build-heasoft.sh -source=${ENVFILE} 2>&1 | tee BuildLogHEASoft.txt
-    RESULT=${PIPESTATUS[0]}
-  
-  
-    # If we have a new HEASoft dir, copy the build log there
-    NEWHEASOFTDIR=`grep HEASOFTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
-    if [[ -d ${NEWHEASOFTDIR} ]]; then
-      if [[ -f ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ]]; then
-        mv ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt
-      fi
-      mv BuildLogHEASoft.txt ${NEWHEASOFTDIR}
-    fi
-  
-    # Now handle build errors
-    if [ "${RESULT}" != "0" ]; then
-      echo " "
-      echo "ERROR: Something went wrong during the HEASoft setup."
-      issuereport
-      exit 1
-    fi
-  
-    # Source HEASoft to be available for later installs
-    . ${SETUPPATH}/source-heasoft.sh -p=${NEWHEASOFTDIR}
-    if [[ "$?" != "0" ]]; then
-      echo " "
-      echo "ERROR: Unable to source HEAsoft"
-      exit 1
-    fi
-    
-    # The build-script will have added HEAsoft to the environment file
+# Compile HEASoft
+elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]]; then
+
+  # Download and build a new HEASoft version
+  if [[ ! -f ${SETUPPATH}/build-heasoft.sh ]]; then
+    echo ""
+    echo "ERROR: Unable to find the script to check the HEASoft version!"
+    exit 1
   fi
 
+  echo "Switching to build-heasoft.sh script..."
+  cd ${EXTERNALPATH}
+
+  ${SETUPPATH}/build-heasoft.sh -source=${ENVFILE} 2>&1 | tee BuildLogHEASoft.txt
+  RESULT=${PIPESTATUS[0]}
+
+
+  # If we have a new HEASoft dir, copy the build log there
+  NEWHEASOFTDIR=`grep HEASOFTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  if [[ -d ${NEWHEASOFTDIR} ]]; then
+    if [[ -f ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ]]; then
+      mv ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt
+    fi
+    mv BuildLogHEASoft.txt ${NEWHEASOFTDIR}
+  fi
+
+  # Now handle build errors
+  if [ "${RESULT}" != "0" ]; then
+    echo " "
+    echo "ERROR: Something went wrong during the HEASoft setup."
+    issuereport
+    exit 1
+  fi
+
+  # Source HEASoft to be available for later installs
+  . ${SETUPPATH}/source-heasoft.sh -p=${NEWHEASOFTDIR}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source HEAsoft"
+    exit 1
+  fi
+
+  # The build-script will have added HEAsoft to the environment file
+
+  cd ${COSIPATH}
+
+  echo " "
+  echo "SUCCESS: We have a usable HEASoft version!"
+
+
+# If we are given an existing HEASoft installation, check if it is compatible
+else
+  # Check if we can use the given HEASoft version
+  if [[ ! -f ${SETUPPATH}/check-heasoftversion.sh ]]; then
+    echo ""
+    echo "ERROR: Unable to find the script to check the HEASoft version!"
+    exit 1
+  fi
+  
+  ${SETUPPATH}/check-heasoftversion.sh --check=${HEASOFTPATH}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: The directory ${HEASOFTPATH} cannot be used as your HEASoft install for COSItools."
+    exit 1
+  fi
+  
+  # Add HEASoft to the environment file
+  echo "HEASOFTDIR=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})" >> ${ENVFILE}
+  
+  # Source HEASoft to be available for later installs
+  . ${SETUPPATH}/source-heasoft.sh -p=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source HEAsoft"
+    exit 1
+  fi
+  
   cd ${COSIPATH}
 
   echo " "

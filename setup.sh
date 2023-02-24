@@ -77,10 +77,11 @@ confhelp() {
   echo "    --geant=           Download and install the latest compatible version."
   echo "    --geant=[path]     Use the version of Geant4 found in the path. If it is not compatible, the script will stop with an error."
   echo " "
-  echo "--heasoft=[options: empty (default), off, cfitsio, path to existing HEASoft installation]"
+  echo "--heasoft=[options: empty or heasoft, off, cfitsio (default), path to existing HEASoft installation]"
   echo "    --heasoft=         Download and install the latest compatible version."
-  echo "    --heasoft=off      Do not install HEASoft."
+  echo "    --heasoft=heasoft  Download and install the latest compatible version."
   echo "    --heasoft=cfitsio  Download and install the latest cfitsio version."
+  echo "    --heasoft=off      Do not install HEASoft."
   echo "    --heasoft=[path]   Use the version of HEASoft found in the path. If it is not compatible, the script will stop with an error."
   echo " "
   echo "--maxthreads=[integer >=1]"
@@ -244,7 +245,15 @@ if [[ ! -f setup-stage2.sh ]]; then
   exit 1
 fi
 
-./setup-stage2.sh "$@" --br=${GITBRANCH}
+ADDITIONALOPTIONS=""
+# Check if we should set a new git branch
+ADDITIONALOPTIONS+=" --br=${GITBRANCH}"
+# If the heasoft flag is not given we just install cfitsio
+if [[ $@ != *-hea* ]]; then
+  ADDITIONALOPTIONS+=" --heasoft=cfitsio"
+fi
+
+./setup-stage2.sh "$@" ${ADDITIONALOPTIONS}
 if [ "$?" != "0" ]; then
   exit 1
 fi
