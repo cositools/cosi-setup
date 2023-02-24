@@ -38,11 +38,17 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 ```
 --cositoolspath=[path to COSItools - default: "COSItools"]
     This is the path to where the COSItools will be installed. If the path exists, we will try to update them.
- 
+
 --branch=[name of a git branch - default: main]
     Choose a specific branch of the COSItools git repositories.
     If the option is not given the latest release will be used.
     If the branch does not exist for all repositories use the main/master branch.
+
+--pull-behavior-git=[stash (default), merge]
+     Choose how to handle changes in git repositories:
+     "stash": stash the changes and pull the latest version
+     "merge": merge the changes -- the script will stop on error
+     "no": Do not change existing repositories in any way (no pull, no branch switch, etc.)
 
 --extras=[list of extra packages not installed by default]
      Add a few extra packages not installed by default since, e.g., they are too large
@@ -50,35 +56,36 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 
 --ignore-missing-packages
     Do not check for missing packages.
- 
+
 --keep-environment=[off/no, on/yes - default: off]
     By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty
     to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not.
     If you use this flag make sure the COSItools source script has not been called in the terminal you are using.
- 
+
 --root=[options: empty (default), path to existing ROOT installation]
     --root=            Download and install the latest compatible version
     --root=[path]      Use the version of ROOT found in the path. If it is not compatible, the script will stop with an error.
- 
+
 --geant=[options: empty (default), path to existing GEANT4 installation]
     --geant=           Download and install the latest compatible version.
     --geant=[path]     Use the version of Geant4 found in the path. If it is not compatible, the script will stop with an error.
- 
---heasoft=[options: empty (default), off, cfitsio, path to existing HEASoft installation]
+
+--heasoft=[options: empty or heasoft, off, cfitsio (default), path to existing HEASoft installation]
     --heasoft=         Download and install the latest compatible version.
-    --heasoft=off      Do not install HEASoft.
+    --heasoft=heasoft  Download and install the latest compatible version.
     --heasoft=cfitsio  Download and install the latest cfitsio version.
+    --heasoft=off      Do not install HEASoft.
     --heasoft=[path]   Use the version of HEASoft found in the path. If it is not compatible, the script will stop with an error.
- 
+
 --maxthreads=[integer >=1]
     The maximum number of threads to be used for compilation. Default is the number of cores in your system.
- 
+
 --debug=[off/no (default), on/yes]
     Debugging compiler flags for C++ programs ROOT, Geant4 & MEGAlib.
- 
+
 --optimization=[off/no, normal/on/yes (default), strong/hard]
     Compilation optimization compiler flags for MEGAlib only.
- 
+
 --help or -h
     Show this help.
 ```
@@ -117,13 +124,7 @@ The one-line install should work. Latest tested version is 15.4.
 ##### Tumbleweed
 
 Tumbleweed is a cutting edge rolling release thus not recommended for COSItools, as it might break at any moment in time. 
-
 As of February 2023, it is not compiling.
-
-On June 2022 is was compiling, except HEASoft did not compile. The solution was to disable it and just use the system default cfitsiso library which should be installed automatically with the packages:
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --heasoft=off
-```
 
 ##### SLES
 
@@ -155,10 +156,7 @@ You need to have either homebrew (preferred) or macports installed. Conda is not
 
 #### Installation (Apple & Intel silicon)
 
-The installation should work using the default one line setup:
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)"
-```
+The installation should work using the default one line setup.
 
 The following error may occur even if the XCode license has been accepted due to a mismatch between the installed version of XCode and the version of the cached license agreement:
 ```
@@ -171,7 +169,7 @@ If this occurs, the cached license can be cleared by deleting the XCode plist fi
 
 ### Windows
 
-Please use Ubuntu 20.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access.
+Please use Ubuntu 20.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access. There is a known bug in WSL2 which makes the MEGAlib/ROOT menu bars show up at random places on the screen.
 
 
 ### Clusters and supercomputers
