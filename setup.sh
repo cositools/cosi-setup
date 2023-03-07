@@ -238,12 +238,18 @@ fi
 ############################################################################################################
 # Step 7: Switch to the newly downloaded stage 2 file
 
-pwd
 if [[ ! -f setup-stage2.sh ]]; then
   echo ""
   echo "ERROR: Unable to find the stage 2 setup script!"
   exit 1
 fi
+
+
+# Create a log directory
+if [[ ! -d log ]]; then
+  mkdir log
+fi
+
 
 ADDITIONALOPTIONS=""
 # Check if we should set a new git branch
@@ -253,7 +259,8 @@ if [[ $@ != *-hea* ]]; then
   ADDITIONALOPTIONS+=" --heasoft=cfitsio"
 fi
 
-./setup-stage2.sh "$@" ${ADDITIONALOPTIONS}
+
+./setup-stage2.sh "$@" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  
 if [ "$?" != "0" ]; then
   exit 1
 fi
