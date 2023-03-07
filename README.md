@@ -11,6 +11,8 @@ You can setup the environment by simply executing this command:
 This script will likely run until a point where it tells you to install a few packages.
 After you do that, just start the script again, and it will complete the setup.
 
+A log file is stored in $COSITOOLS/cosi-setup/log. Please attach that to any bug report.
+
 ## Advanced guide
 
 ### Accessing the options
