@@ -94,6 +94,17 @@ if [[ ${OSTYPE} == *inux* ]]; then
   echo -e "${SEPARATOR}"
   echo -e "Memory:\n"
   lsmem | grep "Total online" | awk -F: '{ print $2 }' | xargs
+elif [[ ${OSTYPE} == *arwin* ]]; then
+  echo -e "${SEPARATOR}"
+  echo -e "CPU:\n"
+  sysctl -a | grep "cpu.brand_string" | awk -F: '{ print $2 }' | xargs
+
+  echo -e "${SEPARATOR}"
+  echo -e "Memory:\n"
+  MEM=$(sysctl -a | grep mem | grep hw.memsize | awk -F: '{ print $2 }' | xargs)
+  MEM=$(echo "${MEM}/1024/1024/1024" | bc)
+  echo "${MEM} GB"
+
 fi
 
 
@@ -112,15 +123,27 @@ fi
 
 echo -e "${SEPARATOR}"
 echo -e "PATH variable:\n"
-echo "${PATH}"
+if [[ ${PATH} != "" ]]; then
+  echo "${PATH}"
+else
+  echo "PATH not set"
+fi
 
 echo -e "${SEPARATOR}"
 echo -e "LD_LIBRARY_PATH variable:\n"
-echo "${LD_LIBRARY_PATH}"
+if [[ ${LD_LIBRARY_PATH} != "" ]]; then
+  echo "${LD_LIBRARY_PATH}"
+else 
+  echo "LD_LIBRARY_PATH not set"
+fi
 
 echo -e "${SEPARATOR}"
 echo -e "DYLD_LIBRARY_PATH variable:\n"
-echo "${DYLD_LIBRARY_PATH}"
+if [[ ${DYLD_LIBRARY_PATH} != "" ]]; then
+  echo "${DYLD_LIBRARY_PATH}"
+else 
+  echo "DYLD_LIBRARY_PATH not set"
+fi
 
 echo -e "${SEPARATOR}"
 echo -e "gcc --version:\n"
@@ -142,7 +165,7 @@ fi
 
 if [[ ${OSTYPE} == *arwin* ]]; then
   echo -e "${SEPARATOR}"
-  echo "brew, port, conda:\n"
+  echo -e "brew, port, conda:\n"
   type brew >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "brew not found"
