@@ -14,7 +14,7 @@ After you do that, just start the script again, and it will complete the setup.
 A log file is stored in $COSITOOLS/cosi-setup/log. Please attach that to any bug report.
 
 If the installation fails or you have an unsupported system, please try the docker:
-https://github.com/cositool/cosi-docker
+https://github.com/cositools/cosi-docker
 
 ## Advanced guide
 
