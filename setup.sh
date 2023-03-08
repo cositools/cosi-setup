@@ -250,6 +250,22 @@ if [[ ! -d log ]]; then
   mkdir log
 fi
 
+NOW=$(date +"%Y%m%d-%H%M%S")
+LOGFILE="log/Build_${NOW}.log"
+
+echo "*********************************************" >> ${LOGFILE}
+echo "" >> ${LOGFILE}
+echo "COSItools build log file from ${NOW}" >> ${LOGFILE}
+echo "" >> ${LOGFILE}
+echo "*********************************************" >> ${LOGFILE}
+echo "" >> ${LOGFILE}
+echo "" >> ${LOGFILE}
+./setup-system-info.sh >> ${LOGFILE}
+if [ "$?" != "0" ]; then
+  echo "" >> ${LOGFILE}
+  echo "Error: Unable to find the system info setup script!" >> ${LOGFILE}
+  exit 1
+fi
 
 ADDITIONALOPTIONS=""
 # Check if we should set a new git branch
