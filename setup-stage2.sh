@@ -20,6 +20,12 @@ echo "Starting stage 2 of the setup"
 
 TIMESTART=$(date +%s)
 
+echo ""
+echo "*****************************"
+echo ""
+echo "Call options:"
+echo "$@"
+
 # The command line
 CMD=( "$@" )
 
