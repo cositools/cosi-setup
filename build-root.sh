@@ -138,7 +138,7 @@ confhelp() {
   echo "--tarball=[file name of ROOT tar ball]"
   echo "    Use this tarball instead of downloading it from the ROOT website"
   echo " "
-  echo "--rootversion=[e.g. 5.34, 6.10]"
+  echo "--rootversion=[e.g. 5.34, 6.10, v6-28-02, master]"
   echo "    Use the given ROOT version instead of the required one."
   echo " "
   echo "--sourcescript=[file name of new environment script]"
@@ -337,52 +337,16 @@ else
   exit 1
 fi
 
+echo " * Choosing this ROOT version: ${WANTEDVERSION}"
 
 echo " "
 echo " "
 echo "Getting ROOT..."
 VER=""
 ROOTTOPDIR=""
-if [ "${TARBALL}" != "" ]; then
-  # Use given ROOT tarball
-  echo "The given ROOT tarball is ${TARBALL}"
 
-  # Determine the name of the top level directory in the tar ball
-  ROOTTOPDIR=`tar tzf ${TARBALL} | sed -e 's@/.*@@' | uniq`
-  RESULT=$?
-  if [ "${RESULT}" != "0" ]; then
-    echo "ERROR: Cannot find top level directory in the tar ball!"
-    exit 1
-  fi
-
-  # Check if it has the correct version:
-  VER=`tar xfzO ${TARBALL} ${ROOTTOPDIR}/build/version_number | sed 's|/|.|g'`
-  RESULT=$?
-  if [ "${RESULT}" != "0" ]; then
-    echo "ERROR: Something went wrong unpacking the ROOT tarball!"
-    exit 1
-  fi
-  if echo ${VER} | grep -E '[ "]' >/dev/null; then
-    echo "ERROR: Something terrible is wrong with your version string..."
-    exit 1
-  fi
-  echo "Version of ROOT is: ${VER}"
-
-  if [[ ${WANTEDVERSION} != "" ]]; then
-    if [[ ${VER} != ${WANTEDVERSION}.* ]]; then
-      echo "ERROR: The ROOT tarball has not the same version ${VER} you wanted on the command line ${WANTEDVERSION}!"
-      exit 1
-    fi
-  else
-    ${SETUPPATH}/check-rootversion.sh --good-version=${VER}
-    if [ "$?" != "0" ]; then
-      echo "ERROR: The ROOT tarball you supplied does not contain an acceptable ROOT version!"
-      exit 1
-    fi
-  fi
-else
-  # Download it
-
+# Make sure we have a tar ball
+if [[ ${TARBALL} == "" ]]; then
   # Get desired version:
   if [[ ${WANTEDVERSION} == "" ]]; then
     WANTEDVERSION=`${SETUPPATH}/check-rootversion.sh --get-max`
@@ -391,85 +355,135 @@ else
       exit 1
     fi
   fi
-  echo "Looking for ROOT version ${WANTEDVERSION} with latest patch on the ROOT website --- sometimes this takes a few minutes..."
+  echo "Looking for ROOT version ${WANTEDVERSION} on the ROOT GitHub website --- sometimes this takes a few minutes..."
 
-  # Now check root repository for the selected version:
-  TARBALL=""
-  MAX_TRIALS=3
-  for s in `seq -w 00 2 98`; do
-    TESTTARBALL="root_v${WANTEDVERSION}.${s}.source.tar.gz"
-    # If a version is blacklisted, we ignore it right here:
-    ${SETUPPATH}/check-rootversion.sh --good-version=${WANTEDVERSION}.${s} > /dev/null
-    if [ "$?" != "0" ]; then
-      echo "Skipping blacklisted ${TESTTARBALL}..."
-      continue
+  #
+  NEWWANTED=""
+  NEWWANTED_GITNAME=""
+  if [[ ${WANTEDVERSION} == v* ]]; then
+    # Get all good tags and check if ours is in there
+    ALLROOTVER=$(git ls-remote https://github.com/root-project/root | awk -F/ '{ print $NF }' | awk '(length($1) == 8 || length($1) == 16) { print $1 }')
+    if [[ ${ALLROOTVER} != *${WANTEDVERSION}* ]]; then
+      echo "ERROR: Unable to find this ROOT version (i.e. its tag) on GitHub: ${WANTEDVERSION}"
+      exit 1
     fi
-    echo "Trying to find ${TESTTARBALL}..."
-    EXISTS=`curl -s --head https://root.cern.ch/download/${TESTTARBALL} | grep gzip`
-    if [[ ${EXISTS} == "" ]]; then # sometimes version 00 does not exist...
-      MAX_TRIALS=$(( MAX_TRIALS - 1 ))
-      if [[ ${MAX_TRIALS} -eq 0 ]]; then
+    NEWWANTED_GITNAME=${WANTEDVERSION}
+    NEWWANTED=${WANTEDVERSION//v/}
+    NEWWANTED=${NEWWANTED//-/.}
+  elif [[ ${WANTEDVERSION} == master ]]; then
+    NEWWANTED_GITNAME=${WANTEDVERSION}
+    NEWWANTED=${WANTEDVERSION}
+  else
+    RVER=$(echo "${WANTEDVERSION}" | awk -F. '{ print $1 }')
+    RREV=$(echo "${WANTEDVERSION}" | awk -F. '{ print $2 }')
+
+    ALLROOTVER=$(git ls-remote https://github.com/root-project/root | grep v${RVER}-${RREV} | grep -v "\^" | grep -v "rc" | awk -F/ '{ print $NF }' | sort -r)
+
+    # The versions are sorted reverse thus use the first not blacklisted one
+    for V in ${ALLROOTVER}; do
+      NEWWANTED=${V//v/}
+      NEWWANTED=${NEWWANTED//-/.}
+      ${SETUPPATH}/check-rootversion.sh --good-version=${NEWWANTED} > /dev/null
+      if [ "$?" != "0" ]; then
+        echo "Skipping blacklisted ${NEWWANTED}..."
+        continue
+      else
+        NEWWANTED_GITNAME=${V}
         break
       fi
-    else 
-      TARBALL=${TESTTARBALL}
+    done
+
+    if [[ ${NEWWANTED_GITNAME} = "" ]]; then
+      echo "ERROR: Unable to find this ROOT version (i.e. its tag) on GitHub: ${WANTEDVERSION}"
+      exit 1
     fi
-  done
-  if [[ -z ${TARBALL} ]]; then
-    echo "ERROR: Unable to find a suitable ROOT tar ball"
-    exit 1
   fi
-  echo "Using ROOT tar ball ${TARBALL}"
+
+  # Create tar ball name
+  TARBALL="root_v${NEWWANTED}.source.tar.gz"
 
   # Check if it already exists locally
   REQUIREDOWNLOAD="true"
   if [ -f ${TARBALL} ]; then
-    # ... and has the same size
-    LOCALSIZE=`wc -c < ${TARBALL} | tr -d ' '`
-    SAMESIZE=`curl -s --head https://root.cern.ch/download/${TARBALL}`
+    # check if the gziped file is not corrupted
+    gunzip -t ${TARBALL} >/dev/null 2>&1
     if [ "$?" != "0" ]; then
-      echo "ERROR: Unable to determine remote tarball size"
-      exit 1
-    fi
-    SAMESIZE=`echo ${SAMESIZE} | grep ${LOCALSIZE}`
-    if [ "${SAMESIZE}" != "" ]; then
-      REQUIREDOWNLOAD="false"
-      echo "File is already present and has same size, thus no download required!"
+      echo "Tarball already exists, but is corrupted. Requiring re-download."
+    else
+      # These two types of tarballs will change, thus we need to redownload them
+      if [[ ${TARBALL} == *master* ]] || [[ ${TARBALL} == *patches* ]]; then
+        REQUIREDOWNLOAD="true"
+        echo "Tarball exists, but is that of an active development branch. Requiring re-download."
+      else
+        echo "Tarball already exists and is good. No download required."
+      fi
     fi
   fi
 
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
-    echo "Starting the download."
-    echo "If the download fails, you can continue it via the following command and then call this script again - it will use the downloaded file."
+    echo "Starting the download from GitHub."
     echo " "
-    echo "curl -O -C - https://root.cern.ch/download/${TARBALL}"
-    echo " "
-    curl -O https://root.cern.ch/download/${TARBALL}
+    curl -L https://github.com/root-project/root/tarball/${NEWWANTED_GITNAME} -o ${TARBALL}
     if [ "$?" != "0" ]; then
-      echo "ERROR: Unable to download the tarball from the ROOT website!"
+      echo "ERROR: Unable to download the tarball from GitHub!"
       exit 1
     fi
   fi
-
-  # Determine the name of the top level directory in the tar ball
-  ROOTTOPDIR=`tar tzf ${TARBALL} | sed -e 's@/.*@@' | uniq`
-  RESULT=$?
-  if [ "${RESULT}" != "0" ]; then
-    echo "ERROR: Cannot find top level directory in the tar ball!"
-    exit 1
-  fi
-
-  VER=`tar xfzO ${TARBALL} ${ROOTTOPDIR}/build/version_number | sed 's|/|.|g'`
-  if [ "$?" != "0" ]; then
-    echo "ERROR: Something went wrong unpacking the ROOT tarball!"
-    exit 1
-  fi
-  if echo ${VER} | grep -E '[ "]' >/dev/null; then
-    echo "ERROR: Something terrible is wrong with your version string..."
-    exit 1
-  fi
-  echo "Version of ROOT is: ${VER}"
 fi
+
+# Check if the tarball exists
+if [ ! -f ${TARBALL} ]; then
+  echo "ERROR: The tar ball \"${TARBALL}\" does not exist!"
+  exit 1
+fi
+
+
+# Use given ROOT tarball
+echo "The given ROOT tarball is ${TARBALL}"
+
+# Determine the name of the top level directory in the tar ball
+ROOTTOPDIR=`tar tzf ${TARBALL} | sed -e 's@/.*@@' | uniq`
+RESULT=$?
+if [ "${RESULT}" != "0" ]; then
+  echo "ERROR: Cannot find top level directory in the tar ball!"
+  exit 1
+fi
+
+# Check if it has the correct version:
+VER=`tar xfzO ${TARBALL} ${ROOTTOPDIR}/build/version_number | sed 's|/|.|g'`
+RESULT=$?
+if [ "${RESULT}" != "0" ]; then
+  echo "ERROR: Something went wrong unpacking the ROOT tarball!"
+  exit 1
+fi
+if echo ${VER} | grep -E '[ "]' >/dev/null; then
+  echo "ERROR: Something terrible is wrong with your version string..."
+  exit 1
+fi
+echo "Version of ROOT is: ${VER}"
+
+if [[ ${WANTEDVERSION} != "" ]]; then
+  if [[ ${WANTEDVERSION} != master ]] && [[ ${WANTEDVERSION} != *patches* ]] && [[ ${VER} != ${WANTEDVERSION}* ]]; then
+    echo "ERROR: The ROOT tarball has not the same version (${VER}) you wanted on the command line (${WANTEDVERSION})!"
+    exit 1
+  fi
+else
+  ${SETUPPATH}/check-rootversion.sh --good-version=${VER}
+  if [ "$?" != "0" ]; then
+    if [[ ${WANTEDVERSION} != "master" ]]; then
+      echo "ERROR: The ROOT tarball does not contain an acceptable ROOT version!"
+      exit 1
+    else
+      echo ""
+      echo "WARNING: The ROOT tarball does not contain an acceptable ROOT version!"
+      echo "         However, since you request the master version, that is likely expected,"
+      echo "         and I assume you know what you are doing (e.g. testing)!"
+      echo ""
+    fi
+  fi
+fi
+
+
 
 
 ROOTCORE=root_v${VER}

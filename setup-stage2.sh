@@ -225,18 +225,10 @@ else
 fi
 
 
-if [ "${ROOTPATH}" != "" ]; then
-  ROOTPATH=`absolutefilename ${ROOTPATH}`
-fi
-if [[ "${ROOTPATH}" != "${ROOTPATH% *}" ]]; then
-  echo "ERROR: ROOT needs to be installed in a path without spaces,"
-  echo "       but you chose: \"${ROOTPATH}\""
-  exit 1
-fi
 if [ "${ROOTPATH}" == "" ]; then
   echo " * Download latest compatible version of ROOT"
 else
-  echo " * Use this installation of ROOT: ${ROOTPATH}"
+  echo " * Use this ROOT installation option: ${ROOTPATH}"
 fi
 
 
@@ -518,8 +510,31 @@ echo ""
 echo "Installing ROOT"
 echo " "
 
+ISPATH="TRUE"
+echo "${ROOTPATH}"
+if [[ ${ROOTPATH} == "" ]]; then
+  ISPATH="FALSE"
+elif [[ ${ROOTPATH} == ?.?? ]]; then
+  ISPATH="FALSE"
+elif [[ ${ROOTPATH} == master ]]; then
+  echo "master"
+  ISPATH="FALSE"
+elif [[ ${ROOTPATH} == v?-??-?? ]]; then
+  ISPATH="FALSE"
+elif [[ ${ROOTPATH} == v?-??-??-patches ]]; then
+  ISPATH="FALSE"
+fi
+
 # If we are given an existing ROOT installation, check is it is compatible
-if [ "${ROOTPATH}" != "" ]; then
+if [[ ${ISPATH} == TRUE ]]; then
+  # Make an absolute path and check for spaces
+  ROOTPATH=`absolutefilename ${ROOTPATH}`
+  if [[ "${ROOTPATH}" != "${ROOTPATH% *}" ]]; then
+    echo "ERROR: ROOT needs to be installed in a path without spaces,"
+    echo "       but you chose: \"${ROOTPATH}\""
+    exit 1
+  fi
+
   # Check if we can use the given ROOT version
   if [[ ! -f ${SETUPPATH}/check-rootversion.sh ]]; then
     echo ""
@@ -558,7 +573,7 @@ else
   
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-root.sh -source=${ENVFILE} -patch=no --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
+  bash ${SETUPPATH}/build-root.sh -root=${ROOTPATH} -source=${ENVFILE} -patch=no --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
