@@ -68,8 +68,10 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
     If you use this flag make sure the COSItools source script has not been called in the terminal you are using.
 
 --root=[options: empty (default), path to existing ROOT installation]
-    --root=            Download and install the latest compatible version
-    --root=[path]      Use the version of ROOT found in the path. If it is not compatible, the script will stop with an error.
+    --root=              Download and install the latest compatible version
+    --root=[version]     Download the given ROOT version. Format must be "x.yy"
+    --root=[GitHub tag]  Download the ROOT version with the given tag. Format must be "vx-yy-zz", "vx-yy-zz-patches", or "master"
+    --root=[path]        Use the version of ROOT found in the path. The path cannot be of the format "x.yy", "vx-yy-zz", "vx-yy-zz-patches", or "master"
 
 --geant=[options: empty (default), path to existing GEANT4 installation]
     --geant=           Download and install the latest compatible version.
