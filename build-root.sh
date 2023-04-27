@@ -408,6 +408,7 @@ if [[ ${TARBALL} == "" ]]; then
     # check if the gziped file is not corrupted
     gunzip -t ${TARBALL} >/dev/null 2>&1
     if [ "$?" != "0" ]; then
+      REQUIREDOWNLOAD="true"
       echo "Tarball already exists, but is corrupted. Requiring re-download."
     else
       # These two types of tarballs will change, thus we need to redownload them
@@ -415,6 +416,7 @@ if [[ ${TARBALL} == "" ]]; then
         REQUIREDOWNLOAD="true"
         echo "Tarball exists, but is that of an active development branch. Requiring re-download."
       else
+        REQUIREDOWNLOAD="false"
         echo "Tarball already exists and is good. No download required."
       fi
     fi
@@ -439,7 +441,7 @@ fi
 
 
 # Use given ROOT tarball
-echo "The given ROOT tarball is ${TARBALL}"
+echo "Name of the used ROOT tarball: ${TARBALL}"
 
 # Determine the name of the top level directory in the tar ball
 ROOTTOPDIR=`tar tzf ${TARBALL} | sed -e 's@/.*@@' | uniq`
