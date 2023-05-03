@@ -265,7 +265,7 @@ echo "" >> ${LOGFILE}
 ./setup-system-info.sh >> ${LOGFILE}
 if [ "$?" != "0" ]; then
   echo "" >> ${LOGFILE}
-  echo "Error: Unable to find the system info setup script!" >> ${LOGFILE}
+  echo "ERROR: Unable to find the system info setup script!" >> ${LOGFILE}
   exit 1
 fi
 
@@ -277,9 +277,12 @@ if [[ $@ != *-hea* ]]; then
   ADDITIONALOPTIONS+=" --heasoft=cfitsio"
 fi
 
-
+set -o pipefail # This ensures the $? catches any error in the pipeline
 ./setup-stage2.sh "$@" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  
 if [ "$?" != "0" ]; then
+  echo ""
+  echo "ERROR: An error occured, and COSItools was not completely installed."
+  echo ""
   exit 1
 fi
 
