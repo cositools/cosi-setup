@@ -1,4 +1,4 @@
-# cosi-setup
+# Setting up the COSItools
 
 This repository contains the tools to setup a full working COSItools development and end-user environment.
 
@@ -187,7 +187,14 @@ Since the COSItools might be installed on a few systems where the user has not f
 
 #### UC Berkeley's savio cluster
 
-This approach worked last on 4/20/2022.
+##### Using a singularity container
+
+As of 5/8/2023 the system setup is too old to run COSItools. However, the savio cluster supports running singularity containers.
+As consequence, follow the instructions given at https://github.com/cositools/cosi-singularity to setup a singularity container directly on savio -- copying an existing container will not work since the singularity version on Savio is too old.
+
+##### Compiling everything
+
+This approach worked last on 4/20/2022 but not as of 5/8/2023
 
 The Savio cluster uses scientific linux as well as "environment modules" to load specific software packages. In order, to set up the COSItools, you need to load the following modules:
 
