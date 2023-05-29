@@ -1,6 +1,8 @@
 # Setting up the COSItools
 
 This repository contains the tools to setup a full working COSItools development and end-user environment.
+You need a 64-bit operating system to (fully) install and run the COSItools. 
+The preferred operating systems are the latest LTS versions of Ubuntu and the latest two versions of macOS.
 
 ## Quick guide
 
