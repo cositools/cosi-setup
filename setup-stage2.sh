@@ -1149,18 +1149,27 @@ echo " "
 echo "Setting up the python3 environment"
 echo " "
 
-cd ${SETUPPATH}
 
-if [[ ! -f ${SETUPPATH}/setup-python3.sh ]]; then
+if [[ $(uname -a) != *-686-* ]]; then
+  cd ${SETUPPATH}
+
+  if [[ ! -f ${SETUPPATH}/setup-python3.sh ]]; then
+    echo ""
+    echo "ERROR: Unable to find the python setup script!"
+    exit 1
+  fi
+
+  ${SETUPPATH}/setup-python3.sh
+  if [ "$?" != "0" ]; then
+    # The error message is part of the above script
+    exit 1
+  fi
+else
   echo ""
-  echo "ERROR: Unable to find the python setup script!"
-  exit 1
-fi
-
-${SETUPPATH}/setup-python3.sh
-if [ "$?" != "0" ]; then
-  # The error message is part of the above script
-  exit 1
+  echo "WARNING: You are using a 32-bit operating system."
+  echo "         Unfortunately, several required python libraries only support 64-bit OSes"
+  echo "         Therefore, I cannot install the python environment, and the python-based parts of COSItools will not work"
+  echo ""
 fi
 
 
