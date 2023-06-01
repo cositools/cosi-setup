@@ -13,6 +13,7 @@ IsDebianClone=0
 IsRedhatClone=0
 IsOpenSuseClone=0
 IsArchClone=0
+IsAlpineClone=0
 
 if [ -f /etc/os-release ]; then
   OS=`cat /etc/os-release | grep "^ID_LIKE\=" | awk -F= '{ print $2 }'`
@@ -30,8 +31,10 @@ if [ -f /etc/os-release ]; then
     IsOpenSuseClone=1
   elif [[ ${OS} == scientific* ]] || [[ ${OS} == *fedora* ]] ; then
     IsRedhatClone=1
-  elif [[ ${OS} == arch ]] ; then
+  elif [[ ${OS} == arch ]]; then
     IsArchClone=1
+  elif [[ ${OS} == alpine ]]; then
+    IsAlpineClone=1
   else
     echo ""
     echo "ERROR: Unknown operating system: ${OS}"
@@ -339,11 +342,11 @@ fi
 
 
 ###############################################################################
-# Arch & clones
+# Arch & clones - NOT SUPPORTED
 
 if [[ ${IsArchClone} -eq 1 ]]; then
 
-  REQUIRED="git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl  fftw graphviz avahi libldap python3 tk python-virtualenv libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost "
+  REQUIRED="git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl  fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost "
 
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
 
@@ -381,5 +384,43 @@ if [[ ${IsArchClone} -eq 1 ]]; then
 fi
 
 
+
+
+###############################################################################
+# Alpine - NOT SUPPORTED!
+
+if [[ ${IsAlpineClone} -eq 1 ]]; then
+
+  REQUIRED="git git-lfs libstdc++ gcompat gawk make gcc g++ gfortran patch libtbb-dev gdb valgrind binutils libx11 libxpm libxft-dev libxext-dev openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu libxpm-dev curl doxygen blas lapack expect dos2unix ncurses boost-dev cfitsio-dev xerces-c-dev"
+
+  if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
+
+  # Check if each of the packages exists:
+  INSTALLED=$(apk list -I)
+  for PACKAGE in ${REQUIRED}; do
+    # Check if the file is installed
+    STATUS=$(echo "${INSTALLED}" | grep "^${PACKAGE}-")
+    if [[ ${STATUS} != "" ]]; then
+      echo "Installed: ${PACKAGE}"
+    else
+      echo "Not installed: ${PACKAGE}"
+      TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
+    fi
+  done
+
+
+  if [[ "${TOBEINSTALLED}" != "" ]]; then
+    echo " "
+    echo "Do the following to install all required packages:"
+    echo "sudo apk add ${TOBEINSTALLED}"
+    echo " "
+    exit 1
+  else
+    echo " "
+    echo "All required packages seem to be already installed!"
+    exit 0
+  fi
+
+fi
 
 exit 0
