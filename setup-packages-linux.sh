@@ -75,7 +75,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       echo "Anyway, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo apt update; sudo apt install ${REQUIRED}"
       echo " "
-      exit 1  
+      exit 255  
     fi
   elif [[ ${OS} == debian ]] || [[ ${OS} == raspbian ]]; then
     if [[ ${VERSIONID} == 10 ]]; then
@@ -90,7 +90,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       echo "Anyway, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo apt update; sudo apt install ${REQUIRED}"
       echo " "
-      exit 1  
+      exit 255  
     fi
   else
     REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev "
@@ -101,7 +101,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
     echo "sudo apt update; sudo apt install ${REQUIRED}"
     echo " "
-    exit 1      
+    exit 255      
   fi
   
   #echo "Required: ${REQUIRED}"
@@ -129,7 +129,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     echo "Do the following to install all required packages:"
     echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
     echo " "
-    exit 1
+    exit 255
   else 
     echo " "
     echo "All required packages seem to be already installed!"
@@ -167,7 +167,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       echo "sudo zypper install ${REQUIRED}"
       echo "sudo updatedb"
       echo " "
-      exit 1 
+      exit 255 
     fi
   elif [[ ${OS} == opensuse-tumbleweed ]]; then
     REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ mlocate cfitsio-devel libxerces-c-devel "
@@ -181,7 +181,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
     echo "sudo zypper install ${REQUIRED}"
     echo " "
-    exit 1
+    exit 255
   fi
   
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
@@ -205,7 +205,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     echo "sudo zypper install ${TOBEINSTALLED}"
     echo "sudo updatedb"
     echo " "
-    exit 1
+    exit 255
   else 
     echo " "
     echo "All required packages seem to be already installed!"
@@ -242,7 +242,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo yum install ${REQUIRED}"
       echo " "
-      exit 1
+      exit 255
     fi
   elif [[ ${OS} == fedora ]]; then
     # Check the version
@@ -262,7 +262,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo yum install ${REQUIRED}"
       echo " "
-      exit 1
+      exit 255
     fi
   elif [[ ${OS} == centos ]]; then
     # Check the version
@@ -296,7 +296,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
       echo "sudo yum install ${REQUIRED}"
       echo " "
-      exit 1
+      exit 255
     fi
   else
     REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel "
@@ -308,7 +308,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
     echo "sudo yum install ${REQUIRED}"
     echo " "
-    exit 1 
+    exit 255 
   fi
   
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
@@ -330,7 +330,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     echo "Do the following to install all required packages:"
     echo "sudo yum install ${TOBEINSTALLED}"
     echo " "
-    exit 1
+    exit 255
   else 
     echo " "
     echo "All required packages seem to be already installed!"
@@ -374,7 +374,7 @@ if [[ ${IsArchClone} -eq 1 ]]; then
     echo "Do the following to install all required packages:"
     echo "sudo pacman -S ${TOBEINSTALLED}"
     echo " "
-    exit 1
+    exit 255
   else
     echo " "
     echo "All required packages seem to be already installed!"
@@ -414,7 +414,7 @@ if [[ ${IsAlpineClone} -eq 1 ]]; then
     echo "Do the following to install all required packages:"
     echo "sudo apk add ${TOBEINSTALLED}"
     echo " "
-    exit 1
+    exit 255
   else
     echo " "
     echo "All required packages seem to be already installed!"

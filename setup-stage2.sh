@@ -434,9 +434,10 @@ else
       fi
 
       ${SETUPPATH}/setup-packages-macports.sh
-      if [ "$?" != "0" ]; then
+      EXITCODE=$?
+      if [ "${EXITCODE}" != "0" ]; then
         # The error message is part of the above script
-        exit 1
+        exit ${EXITCODE}
       fi
     else
       type brew >/dev/null 2>&1
@@ -448,9 +449,10 @@ else
         fi
 
         ${SETUPPATH}/setup-packages-brew.sh
-        if [ "$?" != "0" ]; then
+        EXITCODE=$?
+        if [ "${EXITCODE}" != "0" ]; then
           # The error message is part of the above script
-          exit 1
+          exit ${EXITCODE}
         fi
         
         # We need a specific version of python for the next steps, and brew does not set it, thus we have to do it:
@@ -477,9 +479,10 @@ else
     fi
 
     ${SETUPPATH}/setup-packages-linux.sh
-    if [ "$?" != "0" ]; then
+    EXITCODE=$?
+    if [ "${EXITCODE}" != "0" ]; then
       # The error message is part of the above script
-      exit 1
+      exit ${EXITCODE}
     fi
   else  
     echo ""
