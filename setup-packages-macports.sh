@@ -11,14 +11,14 @@
 
 
 TOOLS_GENERAL="hdf5"
-TOOLS_PYTHON="python38 py38-gnureadline py38-jupyter py38-metakernel py38-numpy"
+TOOLS_PYTHON="python311 py311-gnureadline py311-jupyter py311-metakernel py311-numpy"
 TOOLS_ROOT="cmake git git-lfs OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
 TOOLS_GEANT4="cmake pkgconfig zlib xercesc3"
 TOOLS_MEGALIB="git doxygen imagemagick cfitsio healpix"
-TOOLS_GCC="gcc11" # must be single gcc version, don't add anything
+TOOLS_GCC="gcc12" # must be single gcc version, don't add anything
 
 # Not working tools:
-TOOLS_NOTWORKING="valgrind-macos-devel"
+TOOLS_NOTWORKING="valgrind-macos-devel gcc11"
 
 TOOLS_ALL=""
 
@@ -62,7 +62,7 @@ if [[ ${TODO} != "" ]]; then
   echo ""
   echo -e "${TODO}"
   echo ""
-  exit 1
+  exit 255
 fi
   
 echo " "

@@ -51,7 +51,7 @@ if [[ ${TODO} != "" ]]; then
   echo ""
   echo -e "${TODO}"
   echo ""
-  exit 1
+  exit 255
 fi
   
 echo " "
