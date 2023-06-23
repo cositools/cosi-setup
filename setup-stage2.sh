@@ -1111,6 +1111,31 @@ for V in ${VERSIONEDBRANCHES}; do
 done
 echo ""
 
+
+echo "Retrieving Compton sphere"
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-comptonsphere -b=${BRANCH} -r=https://github.com/cositools/massmodel-comptonsphere.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+if [ "$?" != "0" ]; then
+  echo " "
+  echo "ERROR: Something went wrong while retrieving massmodel-comptonsphere from the repository"
+  issuereport
+  exit 1
+fi
+
+VERSIONEDBRANCHES=$(git -C massmodels/massmodel-comptonsphere branch -r | sed 's/origin\///g' | awk '{$1=$1;print}' | grep "^v")
+for V in ${VERSIONEDBRANCHES}; do
+  if [[ ! -d massmodels/massmodel-comptonsphere-${V} ]]; then
+    git clone -c advice.detachedHead=false --branch ${V} https://github.com/cositools/massmodel-comptonsphere massmodels/massmodel-comptonsphere-${V}
+    if [ "$?" != "0" ]; then
+      echo " "
+      echo "ERROR: Something went wrong while retrieving massmodel-comptonsphere (${V}) from the repository"
+      issuereport
+      exit 1
+    fi
+    rm -rf massmodels/massmodel-comptonsphere-${V}/.git
+  fi
+done
+echo ""
+
 cd ${COSIPATH}
 
 
