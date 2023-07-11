@@ -1228,7 +1228,7 @@ echo " " >> ${ENVFILE}
 echo "export COSITOOLSDIR=\"${COSIPATH}\"" >> ${ENVFILE}
 echo " " >> ${ENVFILE}
 if [[ ${PATHTOPYTHON} != "" ]]; then
-  echo "export PATH=${PATHTOPYTHON}:${PATH}" >> ${ENVFILE}
+  echo "export PATH=${PATHTOPYTHON}:\${PATH}" >> ${ENVFILE}
   echo " " >> ${ENVFILE}
 fi
 echo "alias cosi='cd ${COSIPATH}; source python-env/bin/activate'" >> ${ENVFILE}
