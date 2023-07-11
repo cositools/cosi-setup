@@ -389,24 +389,34 @@ else
       exit 1
     fi
     
-    # Check if the license has been accepted
-    CURRENT_VERSION=`xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'`
-    ACCEPTED_LICENSE_VERSION=`defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '"' -f 2`
-    if [[ "${CURRENT_VERSION}" != "${ACCEPTED_LICENSE_VERSION}"* ]]; then
+    # Check if just the command line tools have been installed:
+    XBOUT=$(xcodebuild -usage 2>&1)
+    if [[ ${XBOUT} == *is\ a\ command\ line\ tools\ instance* ]]; then
       echo " "
-      echo "Error: You have not accepted the XCode license!"
-      echo "       Either open XCode to accept the license, or run:"
+      echo "Info: You seem to just have installed the command line tools and not a full instance of Xcode."
+      echo "      In most cases this is OK."
+      echo "      If you encounter any strange errors please install Xcode."
       echo " "
-      echo "       sudo xcodebuild -license accept"
-      echo " "
-      echo "       Debugging: Current version ${CURRENT_VERSION} from \"xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'\""
-      echo "                  Accepted version ${ACCEPTED_LICENSE_VERSION} from \" defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '\"' -f 2"
-      echo " "
-      echo "       If this error persists, please delete the file which stores which license has been accepted, and accept again:"
-      echo "       sudo rm /Library/Preferences/com.apple.dt.Xcode.plist"
-      echo "       sudo xcodebuild -license accept"
-      echo " "
-      exit 1
+    else
+      # Check if the license has been accepted
+      CURRENT_VERSION=`xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'`
+      ACCEPTED_LICENSE_VERSION=`defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '"' -f 2`
+      if [[ "${CURRENT_VERSION}" != "${ACCEPTED_LICENSE_VERSION}"* ]]; then
+        echo " "
+        echo "Error: You have not accepted the XCode license!"
+        echo "       Either open XCode to accept the license, or run:"
+        echo " "
+        echo "       sudo xcodebuild -license accept"
+        echo " "
+        echo "       Debugging: Current version ${CURRENT_VERSION} from \"xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'\""
+        echo "                  Accepted version ${ACCEPTED_LICENSE_VERSION} from \" defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '\"' -f 2"
+        echo " "
+        echo "       If this error persists, please delete the file which stores which license has been accepted, and accept again:"
+        echo "       sudo rm /Library/Preferences/com.apple.dt.Xcode.plist"
+        echo "       sudo xcodebuild -license accept"
+        echo " "
+        exit 1
+      fi
     fi
     
     # Check if the latest version is installed:
