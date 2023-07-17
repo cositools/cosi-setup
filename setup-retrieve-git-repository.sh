@@ -63,6 +63,12 @@ confhelp() {
   echo "    Show this help."
   echo " "
   echo " "
+  echo "Return codes:"
+  echo "0:    Nothing to be done, e.g. local branch is already latest version or you requested this help"
+  echo "1:    The local installation was updated"
+  echo "Else: An error occured"
+  echo " "
+  echo " "
 }
 
 
@@ -97,6 +103,12 @@ for C in "${CMD[@]}"; do
     echo ""
     confhelp
     exit 0
+  else
+    echo ""
+    echo "Error: Unknown option: ${C}"
+    echo ""
+    confhelp
+    exit 100
   fi
 done
 
@@ -108,46 +120,46 @@ done
 if [[ ${COSIPATH} == "" ]]; then
   echo ""
   echo "ERROR: No COSItools path provided..."
-  exit 1
+  exit 100
 fi
 if [[ ! -d ${COSIPATH} ]]; then
   echo ""
   echo "ERROR: The path to the COSItools does not exist: \"${COSIPATH}\""
-  exit 1
+  exit 100
 fi
 
 if [[ ${NAME} == "" ]]; then
   echo ""
   echo "ERROR: No repository name provided..."
-  exit 1
+  exit 100
 fi
 if ! [[ "${NAME}" =~ ^[a-zA-Z0-9\-]+$ ]]; then
   echo ""
   echo "ERROR: The name is only allowed to contain characters, numbers, and dashes: \"${NAME}\""
-  exit 1
+  exit 100
 fi
 
 if [[ ${STASHNAME} == "" ]]; then
   echo ""
   echo "ERROR: No stash name provided..."
-  exit 1
+  exit 100
 fi
 if ! [[ "${STASHNAME}" =~ ^[a-zA-Z0-9\.:]+$ ]]; then
   echo ""
   echo "ERROR: The stash name is only allowed to contain characters, numbers, dots, and double colons: \"${STASHNAME}\""
-  exit 1
+  exit 100
 fi
 
 if [[ ${GITPATH} == "" ]]; then
   echo ""
   echo "ERROR: No git path provided..."
-  exit 1
+  exit 100
 fi
 
 if [[ ${GITBRANCH} == "" ]]; then
   echo ""
   echo "ERROR: No git branch provided..."
-  exit 1
+  exit 100
 fi
 
 if ( [[ ${GITPULLBEHAVIOR} == merge ]] || [[ ${GITPULLBEHAVIOR} == stash ]] || [[ ${GITPULLBEHAVIOR} == no ]] ); then
@@ -156,7 +168,7 @@ else
   echo " "
   echo "ERROR: Unknown git pull behavior: ${GITPULLBEHAVIOR}"
   confhelp
-  exit 1
+  exit 100
 fi
 
 
@@ -166,14 +178,41 @@ fi
 
 cd ${COSIPATH}
 
+# Check if the requested branch exits:
+if [ "${GITBRANCH}" == "" ]; then
+  GITBRANCH="main"
+fi
+
+FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "${GITBRANCH}")
+if [[ ${FOUNDBRANCH} != ${GITBRANCH} ]]; then
+  echo " "
+  echo "INFO: The desired branch \"${GITBRANCH}\" does not exit in the repository"
+  FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "main")
+  if [[ ${FOUNDBRANCH} == main ]]; then
+    echo "      Switching to the main branch..."
+    GITBRANCH="main"
+  else
+    FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "master")
+    if [[ ${FOUNDBRANCH} == master ]]; then
+      echo "         Switching to the master branch..."
+      GITBRANCH="master"
+    else
+      echo " "
+      echo "ERROR: Unable to find the desired or the main/master branch"
+      exit 100
+    fi
+  fi
+fi
+
+
 # The repository does not exist - clone it
 if [[ ! -d ${NAME} ]]; then
   echo "Using git to clone the repository ${GITPATH} into the local directory ${NAME}..."
   git clone ${GITPATH} ${NAME}
   if [ "$?" != "0" ]; then
     echo " "
-    echo "ERROR: Unable to checkout the latest development version from git"
-    exit 1
+    echo "ERROR: Unable to clone the requested repository from git"
+    exit 100
   fi
   cd ${NAME}
     
@@ -181,6 +220,15 @@ if [[ ! -d ${NAME} ]]; then
 else
   echo "The repository ${NAME} already exists"
   cd ${NAME}
+
+  # Check if we are already on the requested branch with the latest commit
+  REMOTEBRANCHHASH=$(git ls-remote ${GITPATH} ${GITBRANCH} | awk -F" " '{ print $1 }' | xargs)
+  LOCALBRANCHHASH=$(git rev-parse HEAD | xargs)
+  if [[ ${REMOTEBRANCHHASH} == ${LOCALBRANCHHASH} ]]; then
+    echo "We are already on the requested branch with the latest commit"
+    exit 0
+  fi
+
   # Stash potential changes
   if [[ ${GITPULLBEHAVIOR} == "stash" ]]; then
     echo "Stashing any potential modifications if there are any"
@@ -192,7 +240,7 @@ else
       if [ "$?" != "0" ]; then
         echo " "
         echo "ERROR: Unable to stash any changes in your code"
-        exit 1
+        exit 100
       fi
     fi
   elif [[ ${GITPULLBEHAVIOR} == "no" ]]; then
@@ -209,37 +257,14 @@ git fetch origin
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Unable to fetch the latest data from the repository"
-  exit 1
+  exit 100
 fi
 
 # Getting the current brnach
 CURRENTBRANCH=`git rev-parse --abbrev-ref HEAD`
 echo "Current branch: ${CURRENTBRANCH}"
 
-if [ "${GITBRANCH}" == "" ]; then
-  GITBRANCH="main"
-fi
- 
-FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "${GITBRANCH}")
-if [[ ${FOUNDBRANCH} != ${GITBRANCH} ]]; then
-  echo " "
-  echo "INFO: The desired branch \"${GITBRANCH}\" does not exit in the repository"
-  FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "main")
-  if [[ ${FOUNDBRANCH} == main ]]; then    
-    echo "      Switching to the main branch..."
-    GITBRANCH="main"
-  else
-    FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "master")
-    if [[ ${FOUNDBRANCH} == master ]]; then    
-      echo "         Switching to the master branch..."
-      GITBRANCH="master"
-    else
-      echo " "
-      echo "ERROR: Unable to find the desired or the main/master branch"
-      exit 1
-    fi
-  fi
-fi
+
  
 
 # Switch to the desired branch if we are not yet there
@@ -249,7 +274,7 @@ if [ "${CURRENTBRANCH}" != "${GITBRANCH}" ]; then
   if [ "$?" != "0" ]; then
     echo " "
     echo "ERROR: Unable to update the git repository to branch ${GITBRANCH}"
-    exit 1
+    exit 100
   fi
 fi
 
@@ -259,12 +284,12 @@ git pull
 if [ "$?" != "0" ]; then
   echo " "
   echo "ERROR: Unable to perform a final pull."
-  exit 1
+  exit 100
 fi 
 
 cd ${COSIPATH}
 
-exit 0
+exit 1
 
 
 

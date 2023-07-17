@@ -887,36 +887,46 @@ if [[ ! -f ${SETUPPATH}/setup-retrieve-git-repository.sh ]]; then
 fi
 
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=megalib -b=${BRANCH} -r=https://github.com/zoglauer/megalib.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving MEGAlib from the repository"
   issuereport
   exit 1
 fi  
 
+
 cd ${COSIPATH}/megalib
 
-echo "The MEGAlib source code has been updated"
-
-echo "Configuring MEGAlib..."
-export MEGALIB=${COSIPATH}/megalib
-bash configure --os=${OSTYPE} --debug=${CPPDEBUG} --opt=${CPPOPT} --updates=off
-if [ "$?" != "0" ]; then
-  echo " "
-  echo "ERROR: Something went wrong during MEGAlib configuration"
-  issuereport
-  exit 1
+# Check if MEGAlib has been compiled
+if [ ${REPOSTATUS} -eq 0 ]; then
+  if [[ ! -f bin/cosima ]]; then
+    REPOSTATUS=1
+  fi
 fi
 
+if [ ${REPOSTATUS} -eq 1 ]; then
+  echo "MEGAlib needs to be compiled"
 
-echo "Compiling MEGAlib..."
-make -j${MAXTHREADS}
-if [ "$?" != "0" ]; then
-  echo "ERROR: Something went wrong while compiling MEGAlib!"
-  issuereport
-  exit 1
+  echo "Configuring MEGAlib..."
+  export MEGALIB=${COSIPATH}/megalib
+  bash configure --os=${OSTYPE} --debug=${CPPDEBUG} --opt=${CPPOPT} --updates=off
+  if [ "$?" != "0" ]; then
+    echo " "
+    echo "ERROR: Something went wrong during MEGAlib configuration"
+    issuereport
+    exit 1
+  fi
+
+
+  echo "Compiling MEGAlib..."
+  make -j${MAXTHREADS}
+  if [ "$?" != "0" ]; then
+    echo "ERROR: Something went wrong while compiling MEGAlib!"
+    issuereport
+    exit 1
+  fi
 fi
-
 
 echo "MEGALIBDIR=${COSIPATH}/megalib" >> ${ENVFILE}
 
@@ -938,26 +948,36 @@ echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=nuclearizer -b=${BRANCH} -r=https://github.com/cositools/nuclearizer.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
-  echo "ERROR: Something went wrong while retrieving cosipy from the repository"
+  echo "ERROR: Something went wrong while retrieving nuclearizer from the repository"
   issuereport
   exit 1
 fi  
-echo "The Nuclearizer source code has been updated"
 
 cd ${COSIPATH}/nuclearizer
 
-echo "Compiling Nuclearizer..."
-export NUCLEARIZER=${COSIPATH}/nuclearizer
-make clean
-make -j${MAXTHREADS}
-if [ "$?" != "0" ]; then
-  echo "ERROR: Something went wrong while compiling MEGAlib!"
-  issuereport
-  exit 1
+# Check if Nuclearizer has been compiled
+if [ ${REPOSTATUS} -eq 0 ]; then
+  if [[ ! -f ${COSIPATH}/megalib/bin/nuclearizer ]]; then
+    REPOSTATUS=1
+  fi
 fi
 
+if [ ${REPOSTATUS} -eq 1 ]; then
+  echo "Nuclearizer needs to be compiled"
+
+  echo "Compiling Nuclearizer..."
+  export NUCLEARIZER=${COSIPATH}/nuclearizer
+  make clean
+  make -j${MAXTHREADS}
+  if [ "$?" != "0" ]; then
+    echo "ERROR: Something went wrong while compiling MEGAlib!"
+    issuereport
+    exit 1
+  fi
+fi
 
 echo "NUCLEARIZERDIR=${COSIPATH}/nuclearizer" >> ${ENVFILE}
 
@@ -979,7 +999,8 @@ echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy -b=${BRANCH} -r=https://github.com/cositools/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosipy from the repository"
   issuereport
@@ -1002,7 +1023,8 @@ echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy-classic -b=${BRANCH} -r=https://github.com/tsiegert/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosipy-classic from the repository"
   issuereport
@@ -1025,7 +1047,8 @@ echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-data-challenges -b=${BRANCH} -r=https://github.com/cositools/cosi-data-challenges.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosi-data-challenges from the repository"
   issuereport
@@ -1048,7 +1071,8 @@ echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-docs -b=${BRANCH} -r=https://github.com/cositools/cosi-docs.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving cosi-docs from the repository"
   issuereport
@@ -1078,7 +1102,8 @@ fi
 
 echo "Retrieving Coserl"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-coserl -b=${BRANCH} -r=https://github.com/cositools/massmodel-coserl.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving massmodel-coserl from the repository"
   issuereport
@@ -1102,7 +1127,8 @@ echo ""
 
 echo "Retrieving COSI balloon"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-cosi-balloon -b=${BRANCH} -r=https://github.com/cositools/massmodel-cosi-balloon.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving massmodel-cosi-balloon from the repository"
   issuereport
@@ -1127,7 +1153,8 @@ echo ""
 
 echo "Retrieving Compton sphere"
 ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-comptonsphere -b=${BRANCH} -r=https://github.com/cositools/massmodel-comptonsphere.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-if [ "$?" != "0" ]; then
+REPOSTATUS=$?
+if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
   echo "ERROR: Something went wrong while retrieving massmodel-comptonsphere from the repository"
   issuereport
@@ -1165,7 +1192,8 @@ if [[ ${EXTRAS} != "" ]]; then
     echo " "
     echo "Switching to file setup-retrieve-git-repository.sh"
     ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=${REPO} -b=${BRANCH} -r=https://github.com/cositools/${REPO}.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
-    if [ "$?" != "0" ]; then
+    REPOSTATUS=$?
+    if [ ${REPOSTATUS} -ge 2 ]; then
       echo " "
       echo "ERROR: Something went wrong while retrieving ${REPO} from the repository"
       issuereport

@@ -25,15 +25,34 @@ export PYTHONPATH=""
 
 PENV=../python-env
 
-# Create the python environment
+# If we have an existing environment, check if we can reuse it
 if [[ -d ${PENV} ]]; then
-  rm -r ${PENV}
+  # Currently the only requirement for re-use is the same python version
+  REUSEOK="TRUE"
+  PYVERS=$(python3 --version)
+  . ${PENV}/bin/activate
+  if [[ ${PYVERS} != $(python3 --version) ]]; then
+    echo "INFO: Existing python environment uses different python version - rebuilding it"
+    REUSEOK="FALSE"
+  fi
+  deactivate
+
+  if [[ ${REUSEOK} == "TRUE" ]]; then
+    echo "Re-using existing python environment"
+  else
+    echo "Removing existing python environment"
+    rm -r ${PENV}
+  fi
 fi
-python3 -m venv ${PENV}
-if [[ "$?" != "0" ]]; then
-  echo ""
-  echo "ERROR: Unable to create the python environment!"
-  exit 1; 
+
+# Create the python environment
+if [ ! -d ${PENV} ]; then
+  python3 -m venv ${PENV}
+  if [[ "$?" != "0" ]]; then
+    echo ""
+    echo "ERROR: Unable to create the python environment!"
+    exit 1;
+  fi
 fi
 
 # Activate the environment
