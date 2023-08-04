@@ -905,6 +905,18 @@ if [ ${REPOSTATUS} -eq 0 ]; then
   fi
 fi
 
+# Now check if we need recompile
+if [[ "$(bin/megalib-config --compiler)" != "$(gcc --version | head -n 1)" ]]; then
+  REPOSTATUS=1
+elif [[ "$(bin/megalib-config --python3)" != "$(python3 --version)" ]]; then
+  REPOSTATUS=1
+elif [[ "$(bin/megalib-config --root)" != "$(root-config --version)" ]]; then
+  REPOSTATUS=1
+elif [[ "$(bin/megalib-config --geant4)" != "$(geant4-config --version)" ]]; then
+  REPOSTATUS=1
+fi
+
+MEGALIBRECOMPILED="FALSE"
 if [ ${REPOSTATUS} -eq 1 ]; then
   echo "MEGAlib needs to be compiled"
 
@@ -926,6 +938,8 @@ if [ ${REPOSTATUS} -eq 1 ]; then
     issuereport
     exit 1
   fi
+
+  MEGALIBRECOMPILED="TRUE"
 fi
 
 echo "MEGALIBDIR=${COSIPATH}/megalib" >> ${ENVFILE}
@@ -964,6 +978,12 @@ if [ ${REPOSTATUS} -eq 0 ]; then
     REPOSTATUS=1
   fi
 fi
+
+# Check if MEGAlib has been compiled
+if [[ ${MEGALIBRECOMPILED} == "TRUE" ]]; then
+  REPOSTATUS=1
+fi
+
 
 if [ ${REPOSTATUS} -eq 1 ]; then
   echo "Nuclearizer needs to be compiled"
