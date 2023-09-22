@@ -1330,10 +1330,11 @@ if [[ ${SHELL} == *zsh* ]]; then
 else
   echo "You can add this line to your ~/.bashrc file (or ~/.bash_profile on macOS),"
 fi
-echo "or execute this line everytime you want to use COSItools."
+echo "or execute this line everytime you want to use COSItools in a new terminal."
 echo " "
 echo "Then type \"cosi\" to switch to the COSItools directory and automatically activate the COSI python environment."
 echo " "
+echo "However, since your envoronment might have changed significantly,we recommend to open a new terminal before using COSItools."
 echo " "
 echo "Signing off"
 echo " "

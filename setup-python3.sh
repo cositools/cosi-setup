@@ -29,10 +29,10 @@ PENV=../python-env
 if [[ -d ${PENV} ]]; then
   # Currently the only requirement for re-use is the same python version
   REUSEOK="TRUE"
-  PYVERS=$(python3 --version)
+  PYVERS=$(python3 -VV)
   . ${PENV}/bin/activate
-  if [[ ${PYVERS} != $(python3 --version) ]]; then
-    echo "INFO: Existing python environment uses different python version - rebuilding it"
+  if [[ ${PYVERS} != $(python3 -VV) ]]; then
+    echo "INFO: Existing python environment uses different python version or has been compiled differntly - rebuilding it"
     REUSEOK="FALSE"
   fi
   deactivate
