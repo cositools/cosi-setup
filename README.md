@@ -3,7 +3,7 @@
 This repository contains the tools to setup a fully working COSItools development and end-user environment.
 You need a 64-bit operating system to (completely) install and run the COSItools. 
 The preferred operating systems are the latest LTS versions of Ubuntu and the latest two versions of macOS.
-However, please wait a few months before you install the latest OS version after it is released to give us some time for testing and debugging.
+However, whenever a new OS is realeased, please wait a few months before you install it, to give us (and all the developers of the packages on which the COSItools are based) some time for testing and debugging.
 
 ## Quick guide
 
@@ -25,7 +25,7 @@ https://github.com/cositools/cosi-singularity
 
 ### Accessing the options
 
-The setup script has serveral advanced options accessible. Using the above one-line install script, you can add options the following way (pay attention to the underscore:
+The setup script has serveral advanced options accessible. Using the above one-line install script, you can add options the following way (pay attention to the underscore):
 
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --options --here
@@ -107,7 +107,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 
 ### Linux
 
-We recommend to stick with long(ish)-term support versions such as Ubuntu LTE. 
+We strongly recommend to stick with long(ish)-term support versions such as Ubuntu LTE. 
 
 #### Ubuntu & derivatives
 
@@ -125,7 +125,7 @@ The one-line install should work. Latest tested version is 9.
 
 ##### Scientific Linux and Centos 8 or earlier
 
-Not supported. These versions are too old to run COSItools.
+Not supported. These versions are too old to run COSItools. Please use a container.
 
 #### SUSE 
 
@@ -136,7 +136,7 @@ The one-line install should work. Latest tested version is 15.4.
 ##### Tumbleweed
 
 Tumbleweed is a cutting edge rolling release thus not recommended for COSItools, as it might break at any moment in time. 
-As of February 2023, it is not compiling.
+Sometimes it works, sometimes not.
 
 ##### SLES
 
@@ -181,7 +181,7 @@ If this occurs, the cached license can be cleared by deleting the XCode plist fi
 
 ### Windows
 
-Please use Ubuntu 20.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access. There is a known bug in WSL2 which makes the MEGAlib/ROOT menu bars show up at random places on the screen.
+Please use Ubuntu 20.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access. There is a known bug in WSL2 which makes the MEGAlib/ROOT menu bars show up at random places on the screen. That'a a WSL2 / ROOT bug.
 
 
 ### Clusters and supercomputers
