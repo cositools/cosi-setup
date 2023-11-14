@@ -235,8 +235,18 @@ fi
 git checkout ${GITBRANCH}
 if [ "$?" != "0" ]; then
   echo ""
-  echo "ERROR: Unable to checkout branch ${GITBRANCH} from cosi-setup!"
-  exit 1
+  if [[ ${GITBRANCH} != main ]]; then
+    echo "WARNING: Unable to checkout branch ${GITBRANCH} from cosi-setup. Trying main."
+    git checkout main
+    if [ "$?" != "0" ]; then
+      echo ""
+      echo "ERROR: Unable to checkout branch main from cosi-setup!"
+      exit 1
+    fi
+  else
+    echo "ERROR: Unable to checkout branch ${GITBRANCH} from cosi-setup!"
+    exit 1
+  fi
 fi
 
 
