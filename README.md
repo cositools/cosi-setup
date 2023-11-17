@@ -146,7 +146,7 @@ The SUSE Linux Enterprise Server Distribution is a hit and miss, and depends on 
 
 #### Debian
 
-The one-line install should work. Latest tested version is 11.
+The one-line install should work. Latest tested version is 12.
 
 #### Other Linux systems
 
