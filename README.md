@@ -166,7 +166,9 @@ In addition, you must open Xcode at least once after installing it.
 
 #### macports, homebrew & conda
 
-You need to have either homebrew (preferred) or macports installed. Conda is not supported at the moment. In addition, you can only have *one* of the three (homebrew, macports, conda) active. If you have more than one installed, then please comment the others out in your .zprofile file (or .bash_profile or whatever you use) for the installation. You can try to comment them in again after the installation and see if everything works (depending on the complexity of your overall setup, it might or might not work). 
+You need to have either homebrew (preferred) or macports installed. Conda is not supported at the moment. In addition, you can only have *one* of the three (homebrew, macports, conda) active. If you have more than one installed, then please comment the others out in your .zprofile file (or .bash_profile or whatever you use) for the installation. You can try to comment them in again after the installation and see if everything works (depending on the complexity of your overall setup, it might or might not work).
+
+Please keep in mind that sometimes homebrew or macports need to compile packages. This can take a long time. For example, setting up all macports package for the first time with macOS Ventura took several hours on an M1 CPU.
 
 #### Installation (Apple & Intel silicon)
 
