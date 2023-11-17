@@ -3,7 +3,9 @@
 This repository contains the tools to setup a fully working COSItools development and end-user environment.
 You need a 64-bit operating system to (completely) install and run the COSItools. 
 The preferred operating systems are the latest LTS versions of Ubuntu and the latest two versions of macOS.
-However, whenever a new OS is realeased, please wait a few months before you install it, to give us (and all the developers of the packages on which the COSItools are based) some time for testing and debugging.
+
+However, **whenever a new OS is released, please wait several months before you install it**.
+This give us, and all the developers of the packages on which the COSItools are based, some time for testing and debugging.
 
 ## Quick guide
 
@@ -117,7 +119,7 @@ Version 20.04 and 22.04 should work with the default one-line install script. We
 
 ##### Fedora
 
-The one-line install should work. Latest tested version is 35.
+The one-line install should work. Latest tested version is 38. Fedora tends to be close to the cutting edge. Thus, consider to stay one version behind the latest version.
 
 ##### Centos Stream
 
