@@ -101,7 +101,7 @@ elif [[ ${OSTYPE} == *arwin* ]]; then
 
   echo -e "${SEPARATOR}"
   echo -e "Memory:\n"
-  MEM=$(sysctl -a | grep mem | grep hw.memsize | awk -F: '{ print $2 }' | xargs)
+  MEM=$(sysctl -a | grep "mem" | grep "hw.memsize:" | awk -F: '{ print $2 }' | xargs)
   MEM=$(echo "${MEM}/1024/1024/1024" | bc)
   echo "${MEM} GB"
 
