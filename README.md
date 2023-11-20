@@ -273,10 +273,26 @@ bash setup.sh --ignore-missing-packages --keep-environment-as-is=true --max-thre
 Note: the following are listed as missing packages: glew-devel, mariadb-devel, fftw-devel, graphviz-devel, avahi-compat-libdns_sd-devel, python3-devel
 
 
+## Frequently encountered issues
 
+### During ROOT build: "read jobs pipe: Resource temporarily unavailable."
 
+The built of ROOT fails with something similar like this (instead of LZMA, it couls be FREETYPE, or TBB, or ...):
+```
+CMake Error at /Users/andreas/Documents/Science/Software/COSItools/external/root_v6.28.08/root_v6.28.08-build/LZMA-prefix/src/LZMA-stamp/LZMA-build-Release.cmake:49 (message):
+  Command failed: 2
 
+   '/Applications/Xcode.app/Contents/Developer/usr/bin/make'
 
+  See also
+
+    /Users/andreas/Documents/Science/Software/COSItools/external/root_v6.28.08/root_v6.28.08-build/LZMA-prefix/src/LZMA-stamp/LZMA-build-*.log
+```
+If you open the log file you see:
+```
+read jobs pipe: Resource temporarily unavailable
+```
+The origin of this issue is not entirely clear, but it pops up from time to time on various systems. Reducing the number of threads to compile ROOR usually helps. You do this via the "--max-threads" command line option of the setup script. In the worst case you have to go down to one single thread, which will make the compile take a long time.
 
 
 
