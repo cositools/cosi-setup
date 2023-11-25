@@ -905,7 +905,8 @@ if [ ${REPOSTATUS} -eq 0 ]; then
   fi
 fi
 
-# Now check if we need recompile
+# Now check if we need to recompile
+export MEGALIB=${COSIPATH}/megalib
 if [[ "$(bin/megalib-config --compiler)" != "$(gcc --version | head -n 1)" ]]; then
   REPOSTATUS=1
 elif [[ "$(bin/megalib-config --python3)" != "$(python3 --version)" ]]; then
@@ -921,7 +922,6 @@ if [ ${REPOSTATUS} -eq 1 ]; then
   echo "MEGAlib needs to be compiled"
 
   echo "Configuring MEGAlib..."
-  export MEGALIB=${COSIPATH}/megalib
   bash configure --os=${OSTYPE} --debug=${CPPDEBUG} --opt=${CPPOPT} --updates=off
   if [ "$?" != "0" ]; then
     echo " "
