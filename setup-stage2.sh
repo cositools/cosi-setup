@@ -137,11 +137,11 @@ done
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-b* ]]; then
+  if [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]]; then
     BRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-ro*=* ]]; then
     ROOTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-g*=* ]]; then
+  elif [[ ${C} == *-g*=* ]] && [[ ${C} != *-p*-g* ]] ; then
     GEANT4PATH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-hea*=* ]]; then
     HEASOFTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
@@ -153,11 +153,11 @@ for C in "${CMD[@]}"; do
     GITPULLBEHAVIOR=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-ma*=* ]]; then
     MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *--i*-m* ]]; then
+  elif [[ ${C} == *-i*-m* ]]; then
     IGNOREMISSINGPACKAGES=true
   elif [[ ${C} == *-k*-e* ]]; then
     KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-e* ]]; then
+  elif [[ ${C} == *-e* ]] && [[ ${C} != *-k*-e* ]]; then
     EXTRAS=`echo ${C} | awk -F"=" '{ print $2 }'`
     EXTRAS=${EXTRAS/,/ }
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then

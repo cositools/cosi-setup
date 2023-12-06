@@ -127,7 +127,7 @@ done
 for C in "${CMD[@]}"; do
   if [[ ${C} == *-co*=* ]]; then
     COSIPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-b* ]]; then
+  elif [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]]; then
     GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
