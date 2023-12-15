@@ -158,7 +158,7 @@ Only macOS Monterey and Ventura are supported.
 
 #### Xcode
 
-Xcode must be installed from the App store. Afterwards install the command line tools via:
+Xcode or at a minimim the command-line tools must be installed from the App store. Afterwards install the command line tools via:
 ```
 xcode-select --install
 ```
@@ -174,13 +174,9 @@ Please keep in mind that sometimes homebrew or macports need to compile packages
 
 The installation should work using the default one line setup.
 
-The following error may occur even if the XCode license has been accepted due to a mismatch between the installed version of XCode and the version of the cached license agreement:
-```
-Error: You have not accepted the XCode license!
-    Either open XCode to accept the license, or run:
-    sudo xcodebuild -license accept
-```
-If this occurs, the cached license can be cleared by deleting the XCode plist file located at /Library/Preferences/com.apple.dt.Xcode.plist. Once the file has been removed, accept the license again to resolve the mismatch.
+#### Sometimes things break badly on macOS...
+
+Sometimes things can break badly on macOS. In this case it usually helps to completely remove your homebrew, macports, and/or conda directory, as well as make sure your .zprofile and .zshrc files are clean, and start to install everything from the beginning.
 
 
 ### Windows
