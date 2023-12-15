@@ -288,7 +288,7 @@ If you open the log file you see:
 ```
 read jobs pipe: Resource temporarily unavailable
 ```
-The origin of this issue is not entirely clear, but it pops up from time to time on various systems. Reducing the number of threads to compile ROOR usually helps. You do this via the "--max-threads" command line option of the setup script. In the worst case you have to go down to one single thread, which will make the compile take a long time.
+The origin of this issue is not entirely clear, but it pops up from time to time on various systems. Reducing the number of threads to compile ROOT usually helps. You do this via the "--max-threads" command line option of the setup script. In the worst case you have to go down to one single thread, which will make the compile take a long time.
 
 
 
