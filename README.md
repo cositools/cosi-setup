@@ -154,7 +154,7 @@ No other systems have been been tested yet or are supported. Especially avoid an
 
 ### macOS 
 
-Only macOS Monterey and Ventura are supported. 
+Only the latest two versions of macOS are officially supported. However, since Apple tinkers even with minor revisions of the latest release, which can break things unexpectedly, we strongly recommend to stay one version behind for your production system. Usually, Apple supports the latest 3 versions of macOS with updates, thus this approach should be OK from a security point of view, and since Apple usually just tinkers with the most recent OS, you should have a stable operating system.
 
 #### Xcode
 
