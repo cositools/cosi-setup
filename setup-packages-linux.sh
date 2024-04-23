@@ -44,7 +44,7 @@ fi
 
 REQUIRED=""
 TOBEINSTALLED=""
-
+UNSUPPORTEDOS="FALSE"
 
 
 ###############################################################################
@@ -150,6 +150,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
   OS=`cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }'`
   OS=${OS//\"/}
   #echo "OS: ${OS}"
+  VERSIONID=""
   if [[ ${OS} == opensuse-leap ]]; then
     # Check the version:
     VERSIONID=$(cat /etc/os-release | grep "^VERSION_ID=" | awk -F= '{ print $2 }')
@@ -157,38 +158,26 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     VERSIONID=$(echo ${VERSIONID} | awk -F'.' '{ print $1 }')
     #echo "VERSION: ${VERSIONID}"
     if [[ ${VERSIONID} == 15 ]]; then
-      REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel libxerces-c-devel "
+      REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
     else 
-      REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel libxerces-c-devel "
-
-      echo " "
-      echo "This script has not yet been adapted for your version of opensuse: ${VERSIONID}"
-      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
-      echo " "
-      echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
-      echo "sudo zypper install ${REQUIRED}"
-      echo "sudo updatedb"
-      echo " "
-      exit 255 
+      REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
+      UNSUPPORTEDOS="TRUE"
     fi
-  elif [[ ${OS} == opensuse-tumbleweed ]]; then
-    REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ mlocate cfitsio-devel libxerces-c-devel "
-  else
-    REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel python3-devel mlocate cfitsio-devel libxerces-c-devel "
 
-    echo " "
-    echo "This script has not yet been adapted for your version of Linux: SUSE-derivative ${OS}"
-    echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
-    echo " "
-    echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
-    echo "sudo zypper install ${REQUIRED}"
-    echo " "
-    exit 255
+    # OpenSUSE is frequently behind with python. Thus add the latest version:
+    REQUIRED+="$(zypper search -s python3*[0-9]-devel | tail -1 | awk -F"|" '{ print $2 }') "
+
+  elif [[ ${OS} == opensuse-tumbleweed ]]; then
+    REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
+  else
+    REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel python3-devel mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
+    UNSUPPORTEDOS="TRUE"
   fi
-  
+
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
 
   # Check if each of the packages exists:
+  TOBEINSTALLED=""
   for PACKAGE in ${REQUIRED}; do 
     # Check if the file is installed
     STATUS=$(rpm -q --queryformat "%{NAME}\n" ${PACKAGE})
@@ -196,18 +185,34 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     if [[ "${STATUS}" != "${PACKAGE}" ]]; then
       # Check if it exists at all:
       echo "Not installed: ${PACKAGE}"
-      TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
+      TOBEINSTALLED+="${PACKAGE} "
     fi
   done
-  
+    
   
   if [[ "${TOBEINSTALLED}" != "" ]]; then
-    echo " "
-    echo "Do the following to install all required packages:"
-    echo "sudo zypper install ${TOBEINSTALLED}"
-    echo "sudo updatedb"
-    echo " "
-    exit 255
+    if [[ ${UNSUPPORTEDOS} == FALSE ]]; then
+      echo " "
+      echo "Do the following to install all required packages:"
+      echo ""
+      echo "sudo zypper install ${TOBEINSTALLED}"
+      echo " "
+      exit 255
+    else 
+      echo " "
+      echo "This script has not yet been adapted for your version of Linux:"
+      echo "    SUSE-derivative: ${OS}"
+      if [[ ${VERSIONID} != "" ]]; then
+        echo "    Version:         ${VERSIONID}"
+      fi
+      echo "Feel free to open a GitHub issue and attach the content of the file: /etc/os-release"
+      echo " "
+      echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
+      echo ""
+      echo "sudo zypper install ${TOBEINSTALLED}"
+      echo " "
+      exit 255
+    fi
   else 
     echo " "
     echo "All required packages seem to be already installed!"

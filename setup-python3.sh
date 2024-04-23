@@ -13,11 +13,27 @@
 ############################################################################################################
 # Step 1: Define default parameters
 
-# The operating system
+# The operating system identifiers
 OSTYPE=$(uname -s)
+OSNAME=$(cat /etc/os-release | grep "^ID\=" | awk -F= '{ print $2 }' | tr -d '"')
+OSVERSION=$(cat /etc/os-release | grep "^VERSION_ID\=" | awk -F= '{ print $2 }')
+OSVERSION=${OSVERSION//\"/}
+OSVERSION=${OSVERSION/./}
 
 # We do not want any site packages, thus clear PYTHONENV
 export PYTHONPATH=""
+
+# Choose the python version
+PY="python3"
+
+# In case of OpenSUSE, choose the latest installed python version
+if [[ ${OSNAME} == opensuse-leap ]]; then
+  PYVERNEW=$(zypper search -i python3*-base | tail -1 | awk -F"|" '{ print $2 }' | xargs | sed 's/-base$//')
+  PYVERNEW=${PYVERNEW:0:7}.${PYVERNEW:7}
+  if [[ ${PYVERNEW} != "" ]]; then
+    PY=${PYVERNEW}
+  fi
+fi
 
 
 ############################################################################################################
@@ -29,10 +45,10 @@ PENV=../python-env
 if [[ -d ${PENV} ]]; then
   # Currently the only requirement for re-use is the same python version
   REUSEOK="TRUE"
-  PYVERS=$(python3 -VV)
+  PYVERS=$(${PY} -VV)
   . ${PENV}/bin/activate
-  if [[ ${PYVERS} != $(python3 -VV) ]]; then
-    echo "INFO: Existing python environment uses different python version or has been compiled differntly - rebuilding it"
+  if [[ "${PYVERS}" != "$(python3 -VV)" ]]; then
+    echo "INFO: Existing python environment uses different python version (${PYVERS} != $(python3 -VV)) or has been compiled differently - rebuilding it"
     REUSEOK="FALSE"
   fi
   deactivate
@@ -47,7 +63,7 @@ fi
 
 # Create the python environment
 if [ ! -d ${PENV} ]; then
-  python3 -m venv ${PENV}
+  ${PY} -m venv ${PENV}
   if [[ "$?" != "0" ]]; then
     echo ""
     echo "ERROR: Unable to create the python environment!"
@@ -109,16 +125,16 @@ if [[ $(uname -s) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
       
 else
   pip3 install tensorflow
-  if [[ "$?" != "0" ]]; then
+  if [[ "$?" != "0" ]]; then    
     echo ""
     echo "ERROR: Unable to install tensorflow!"
-    exit 1; 
+    exit 1;
   fi
   pip3 install torch 
   if [[ "$?" != "0" ]]; then
     echo ""
     echo "ERROR: Unable to install torch!"
-    exit 1; 
+    exit 1;
   fi
 fi
 
@@ -136,12 +152,8 @@ for REQFILE in ${ALLREQUIREMENTSFILES}; do
   cat ${REQFILE} > ${REQTEMP}
   if [[ ${OSTYPE} == *inux ]]; then
     # On Ubuntu 22.04 or higher, filter pystan
-    OS=$(cat /etc/os-release | grep "^ID\=" | awk -F= '{ print $2 }')
-    VERSIONID=$(cat /etc/os-release | grep "^VERSION_ID\=" | awk -F= '{ print $2 }')
-    VERSIONID=${VERSIONID//\"/}
-    VERSIONID=${VERSIONID/./}
-    if [[ ${OS} == ubuntu ]]; then
-      if [ ${VERSIONID} -ge 2204 ]; then
+    if [[ ${OSNAME} == ubuntu ]]; then
+      if [ ${OSVERSION} -ge 2204 ]; then
         echo "Filtering pystan since we are on Ubuntu (=${OS}) and release is >= 22.04 (=${VERSIONID})"
         REQTEMP2=$(mktemp /tmp/cositoolsrequirementsfile.XXXXXXXXX)
         cat ${REQTEMP} | grep -v "pystan" > ${REQTEMP2}
@@ -155,11 +167,11 @@ for REQFILE in ${ALLREQUIREMENTSFILES}; do
   fi
 
 
-  pip3 install -r ${REQTEMP}
+  pip3 install --quiet -r ${REQTEMP}
   if [[ "$?" != "0" ]]; then
     echo ""
     echo "ERROR: Unable to install requirements file ${REQFILE}"
-    exit 1; 
+    exit 1;
   fi
 done
 
