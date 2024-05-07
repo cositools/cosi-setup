@@ -30,7 +30,7 @@ echo "$@"
 CMD=( "$@" )
 
 # The path to where the COSItools will be installed
-COSIPATH="$( cd -- "$(dirname ../"$0")" >/dev/null 2>&1 ; pwd -P )"
+COSIPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; cd ..; pwd -P )"
 
 # The path where the setup scripts are
 SETUPPATH="${COSIPATH}/cosi-setup"
@@ -1302,6 +1302,18 @@ if [ -f ${COSIPATH}/megalib/bin/source-megalib.sh ]; then
 fi
 ln -s ${COSIPATH}/source.sh ${COSIPATH}/megalib/bin/source-megalib.sh  
 
+echo " "
+echo " "
+
+if [[ ! -f ${SETUPPATH}/setup-terminal.sh ]]; then
+  echo ""
+  echo "ERROR: Unable to find the terminal setup script!"
+  exit 1
+fi
+
+${SETUPPATH}/setup-terminal.sh
+
+
 ############################################################################################################
 # Final remarks
 
@@ -1313,30 +1325,6 @@ echo "*****************************"
 echo " "
 echo " "
 echo "Finished! Execution duration: ${TIMEDIFF} seconds"
-
-echo " "
-echo " "
-echo "SUCCESS: The COSItools should be installed now"
-echo " "
-echo " "
-echo "ATTENTION:"
-echo " "
-echo "In order to run the COSItools programs, a source script was created, which needs to be run beforehand:"
-echo " "
-echo "source ${COSIPATH}/source.sh"
-echo " "
-if [[ ${SHELL} == *zsh* ]]; then
-  echo "You can add this line to your ~/.zprofile file,"
-else
-  echo "You can add this line to your ~/.bashrc file (or ~/.bash_profile on macOS),"
-fi
-echo "or execute this line everytime you want to use COSItools in a new terminal."
-echo " "
-echo "Then type \"cosi\" to switch to the COSItools directory and automatically activate the COSI python environment."
-echo " "
-echo "However, since your envoronment might have changed significantly,we recommend to open a new terminal before using COSItools."
-echo " "
-echo "Signing off"
 echo " "
 
 exit 0
