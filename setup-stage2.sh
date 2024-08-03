@@ -886,7 +886,8 @@ if [[ ! -f ${SETUPPATH}/setup-retrieve-git-repository.sh ]]; then
   exit 1
 fi
 
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=megalib -b=${BRANCH} -r=https://github.com/zoglauer/megalib.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+MEGALIBBRANCH=develop-cosi
+${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=megalib -b=${MEGALIBBRANCH} -r=https://github.com/zoglauer/megalib.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "

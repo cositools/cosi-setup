@@ -25,7 +25,7 @@ if [[ $(uname -a) != *arwin* ]]; then
     CONFIGUREOPTIONS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++"
   fi
 fi
-CONFIGUREOPTIONS="${CONFIGUREOPTIONS} -DCMAKE_INSTALL_PREFIX=.. -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=OFF -DGEANT4_INSTALL_DATA_TIMEOUT=14400 -DGEANT4_USE_SYSTEM_EXPAT=OFF -DGEANT4_BUILD_CXXSTD=c++14"
+CONFIGUREOPTIONS="${CONFIGUREOPTIONS} -DCMAKE_INSTALL_PREFIX=.. -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=OFF -DGEANT4_INSTALL_DATA_TIMEOUT=14400 -DGEANT4_USE_SYSTEM_EXPAT=OFF -DCMAKE_CXX_STANDARD=17"
 # Reduce the warning messages:
 WARNINGS="-Wno-shadow -Wno-implicit-fallthrough -Wno-overloaded-virtual -Wno-deprecated-copy -Wno-unused-result -Wno-format-overflow="
 
@@ -277,8 +277,8 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given Geant4 tarball is ${TARBALL}"
   
   # Check if it has the correct version:
-  VER=`echo ${TARBALL} | awk -Fgeant4. '{ print $2 }' | awk -F.t '{ print $1 }'`;
-  SHORTVER=`echo ${TARBALL} | awk -Fgeant4. '{ print $2 }' | awk -F.t '{ print $1 }' | awk -F.p '{ print $1 }'`;
+  VER=`echo ${TARBALL} | awk -Fgeant4- '{ print $2 }' | awk -F.t '{ print $1 }'`;
+  SHORTVER=`echo ${TARBALL} | awk -Fgeant4- '{ print $2 }' | awk -F.t '{ print $1 }' | awk -F.p '{ print $1 }'`;
   echo "Version of Geant4 is: ${VER}"
   
   if [[ ${WANTEDVERSION} != "" ]]; then
@@ -307,16 +307,9 @@ else
   echo "Looking for Geant4 version ${WANTEDVERSION} with latest patch on the Geant4 website --- sometimes this takes a few minutes..."
   
   # Now check Geant4 repository for the given version:
-  TESTTARBALL="geant4.${WANTEDVERSION}.tar.gz"
-  echo "Trying to find ${TESTTARBALL}..."
-  EXISTS=`curl -s --head ${WEBSITE}/${TESTTARBALL} | grep gzip`
-  if [ "${EXISTS}" == "" ]; then
-    echo "ERROR: Unable to find suitable Geant4 tar ball at the Geant4 website"
-    exit 1
-  fi
-  TARBALL=${TESTTARBALL}
-  for s in `seq -w 01 10`; do
-    TESTTARBALL="geant4.${WANTEDVERSION}.p${s}.tar.gz"
+  TARBALL=""
+  for s in `seq 0 10`; do
+    TESTTARBALL="geant4-v${WANTEDVERSION}.${s}.tar.gz"
     echo "Trying to find ${TESTTARBALL}..."
     EXISTS=`curl -s --head ${WEBSITE}/${TESTTARBALL} | grep gzip`
     if [ "${EXISTS}" == "" ]; then
@@ -324,6 +317,10 @@ else
     fi
     TARBALL=${TESTTARBALL}
   done
+  if [ "${TARBALL}" == "" ]; then
+    echo "ERROR: Unable to find suitable Geant4 tar ball at the Geant4 website"
+    exit 1
+  fi
   echo "Using Geant4 tar ball ${TARBALL}"
   
   # Check if it already exists locally
@@ -366,10 +363,10 @@ fi
 
 
 
-GEANT4CORE=geant4_v${VER}
-GEANT4DIR=geant4_v${VER}${DEBUGSTRING}
-GEANT4SOURCEDIR=geant4_v${VER}-source   # Attention: the cleanup checks this name pattern before removing it
-GEANT4BUILDDIR=geant4_v${VER}-build     # Attention: the cleanup checks this name pattern before removing it
+GEANT4CORE=geant4_${VER}
+GEANT4DIR=geant4_${VER}${DEBUGSTRING}
+GEANT4SOURCEDIR=geant4_${VER}-source   # Attention: the cleanup checks this name pattern before removing it
+GEANT4BUILDDIR=geant4_${VER}-build     # Attention: the cleanup checks this name pattern before removing it
 
 
 # Hardcoding default patch conditions
@@ -448,21 +445,21 @@ fi
 
 
 echo "Unpacking..."
+mkdir ${GEANT4DIR}
+cd ${GEANT4DIR}
 if ( [[ ${TARBALL} == *.tgz ]] || [[ ${TARBALL} == *.tar.gz ]] ); then
-    tar xfz ${TARBALL} > /dev/null
+  tar xfz ../${TARBALL} > /dev/null
 elif [[ $1 == *.tar ]] ; then
-    tar xf ${TARBALL} > /dev/null
+  tar xf ../${TARBALL} > /dev/null
 else
-    echo "ERROR: File has unknown suffix: $1 (known: tgz, tar.gz, tar)"
-    exit 1
+  echo "ERROR: File has unknown suffix: $1 (known: tgz, tar.gz, tar)"
+  exit 1
 fi
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the Geant4 tarball!"
   exit 1
 fi
-mkdir ${GEANT4DIR}
-cd ${GEANT4DIR}
-mv ../geant4.${VER} ${GEANT4SOURCEDIR}
+mv geant4-${VER} ${GEANT4SOURCEDIR}
 mkdir ${GEANT4BUILDDIR}
 
 

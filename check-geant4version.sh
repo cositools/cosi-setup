@@ -102,17 +102,9 @@ Geant4VersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Min" | a
 Geant4VersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Max" | awk -F":" '{ print $2 }')
 
 Sep=$((${#Geant4VersionMin}-1))
-if [ ${Geant4VersionMin:0:${Sep}} -ge 10 ]; then 
-  Geant4VersionMinString="${Geant4VersionMin:0:${Sep}}.0${Geant4VersionMin:${Sep}:1}"
-else 
-  Geant4VersionMinString="${Geant4VersionMin:0:${Sep}}.${Geant4VersionMin:${Sep}:1}"
-fi
+Geant4VersionMinString="${Geant4VersionMin:0:${Sep}}.${Geant4VersionMin:${Sep}:1}"
 Sep=$((${#Geant4VersionMax}-1))
-if [ ${Geant4VersionMax:0:${Sep}} -ge 10 ]; then 
-  Geant4VersionMaxString="${Geant4VersionMax:0:${Sep}}.0${Geant4VersionMax:${Sep}:1}"
-else
-  Geant4VersionMaxString="${Geant4VersionMax:0:${Sep}}.${Geant4VersionMax:${Sep}:1}"
-fi
+Geant4VersionMaxString="${Geant4VersionMax:0:${Sep}}.${Geant4VersionMax:${Sep}:1}"
 
 if [ "${GET}" == "true" ]; then
   if [ "${MAX}" == "true" ]; then
