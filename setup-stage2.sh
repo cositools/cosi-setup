@@ -426,7 +426,7 @@ else
       echo "ERROR: There are missing updates for the command line tools."
       echo "       Please install them either via the normal macOS software update interface (preferred) or via the command line (does not always work):"
       echo " "
-      echo "       softwareupdate --install -a"
+      echo "       softwareupdate --install \"$(softwareupdate --list | grep "Label: Command Line Tools" | awk -F: '{ print $2 }' | head -n 1 | xargs)\""
       echo " "
       echo "       Debugging: Failed test: \"(softwareupdate --list 2>&1 | grep \"Command Line Tools\"\" contained the string \"Command Line Tools\""
       echo " "
@@ -586,7 +586,7 @@ else
   
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-root.sh -root=${ROOTPATH} -source=${ENVFILE} -patch=no --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
+  bash ${SETUPPATH}/build-root.sh -root=${ROOTPATH} -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
@@ -683,7 +683,7 @@ else
   echo "Switching to build-geant4.sh script..."
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-geant4.sh -source=${ENVFILE} -patch=no --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
+  bash ${SETUPPATH}/build-geant4.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Geant4 dir, copy the build log there
