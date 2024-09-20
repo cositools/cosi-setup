@@ -212,7 +212,7 @@ echo " * Switched to the COSItools path"
 echo ""
 echo "Updating/cloning the cosi-setup repository"
 
-# If the cosi-setup diretcory exists update it if not clone it
+# If the cosi-setup directory exists, update it if not clone it
 if [[ -d cosi-setup ]]; then
   cd cosi-setup
   git pull
@@ -232,6 +232,8 @@ else
 fi
 # At this stage we need to be in the cosi-setup directory
 
+# We never switch the cosi-setup branch
+: '
 git checkout ${GITBRANCH}
 if [ "$?" != "0" ]; then
   echo ""
@@ -248,7 +250,7 @@ if [ "$?" != "0" ]; then
     exit 1
   fi
 fi
-
+'
 
 
 ############################################################################################################
