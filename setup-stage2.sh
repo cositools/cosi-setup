@@ -870,6 +870,78 @@ fi
 
 
 
+
+
+############################################################################################################
+# Install HEALPix
+
+echo ""
+echo "*****************************"
+echo " "
+echo "Installing HEALPix"
+echo " "
+
+# First check if no operating-system version is already present
+if pkg-config --exists healpix_cxx; then
+  echo " "
+  echo "Found operating system HEALPix"
+
+  cd ${COSIPATH}
+
+  echo " "
+  echo "SUCCESS: We have a usable HEALPix version!"
+else
+
+  # Download and build a new HEALPix version
+  if [[ ! -f ${SETUPPATH}/build-healpix.sh ]]; then
+    echo ""
+    echo "ERROR: Unable to find the script to build HEALPix!"
+    exit 1
+  fi
+
+  echo "Switching to build-healpix.sh script..."
+  cd ${EXTERNALPATH}
+
+  ${SETUPPATH}/build-healpix.sh --t=${SETUPPATH}/codes/healpix_cxx-3.82.1.tar.gz -source=${ENVFILE} 2>&1 | tee BuildLogHEALPix.txt
+  RESULT=${PIPESTATUS[0]}
+
+
+  # If we have a new HEALPix dir, copy the build log there
+  NEWHEALPIXDIR=`grep HEALPIXDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  if [[ -d ${NEWHEALPIXDIR} ]]; then
+    if [[ -f ${NEWHEALPIXDIR}/BuildLogHEALPix.txt ]]; then
+      mv ${NEWHEALPIXDIR}/BuildLogHEALPix.txt $${NEWHEALPIXDIR}/BuildLogHEALPix_before$(date +'%y%m%d%H%M%S').txt
+    fi
+    mv BuildLogHEALPix.txt ${NEWHEALPIXDIR}
+  fi
+
+  # Now handle build errors
+  if [ "${RESULT}" != "0" ]; then
+    echo " "
+    echo "ERROR: Something went wrong during the HEALPix setup."
+    issuereport
+    exit 1
+  fi
+
+  # Source HEALPix to be available for later installs
+  . ${SETUPPATH}/source-healpix.sh -p=${NEWHEALPIXDIR}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source HEALPix"
+    exit 1
+  fi
+
+  # The build-script will have added HEALPix to the environment file
+
+  cd ${COSIPATH}
+
+  echo " "
+  echo "SUCCESS: We have a usable HEALPix version!"
+
+fi
+
+
+
 ############################################################################################################
 # Install MEGAlib
 
