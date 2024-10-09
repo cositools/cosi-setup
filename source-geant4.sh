@@ -62,12 +62,17 @@ fi
 # Source the Geant4 environment depending on which version we have
 
 if [[ -f ${__TMP_PATH}/bin/geant4.sh ]]; then
-  source ${__TMP_PATH}/bin/geant4.sh > /dev/null
-  __TMP_PATHTOGEANT4MAKE=${__TMP_PATH}/share/Geant4-`${__TMP_PATH}/bin/geant4-config --version`/geant4make
-
-  cd ${__TMP_PATHTOGEANT4MAKE}
-  source geant4make.sh
-  cd ${__TMP_HERE}
+  
+  if [[ -n $ZSH_VERSION ]]; then
+    BASH_SOURCE=()
+    BASH_SOURCE[0]="${__TMP_PATH}/bin/geant4.sh" emulate ksh -c '. "${BASH_SOURCE[0]}"'
+    PATHTOGEANT4MAKE="${__TMP_PATH}/share/Geant4/geant4make"
+    BASH_SOURCE[0]="${PATHTOGEANT4MAKE}/geant4make.sh" emulate ksh -c 'source "${BASH_SOURCE[0]}"'
+  else
+    source "${__TMP_PATH}/bin/geant4.sh"
+    PATHTOGEANT4MAKE="${__TMP_PATH}/share/Geant4/geant4make"
+    source "${PATHTOGEANT4MAKE}/geant4make.sh"
+  fi
 
   if [[ `uname -a` == *Darwin* ]]; then
     export LD_LIBRARY_PATH=${G4LIB}/..:${LD_LIBRARY_PATH}
