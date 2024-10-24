@@ -10,7 +10,7 @@
 
 
 
-TOOLS_GENERAL="hdf5"
+TOOLS_GENERAL="hdf5 curl"
 TOOLS_PYTHON="python311 py311-gnureadline py311-jupyter py311-metakernel py311-numpy"
 TOOLS_ROOT="cmake git git-lfs OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
 TOOLS_GEANT4="cmake pkgconfig zlib xercesc3"

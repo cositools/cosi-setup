@@ -15,7 +15,7 @@ if [[ $1 == "--python-path" ]]; then
   exit 0
 fi
 
-TOOLS_GENERAL="hdf5"
+TOOLS_GENERAL="hdf5 curl"
 TOOLS_PYTHON="${MAIN_PYTHON_VERSION} jupyterlab numpy"
 TOOLS_ROOT="cmake openblas davix expat giflib git git-lfs gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 openssl@3 pcre tbb libtiff xrootd xxhash xz"
 TOOLS_GEANT4="cmake pkg-config zlib xerces-c"
