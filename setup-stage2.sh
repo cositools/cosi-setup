@@ -747,46 +747,51 @@ if [[ "${HEASOFTPATH}" == "off" ]]; then
 # Compile cfitsio instead of full HEASoft
 elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
 
-  # Download and build a new cfitsio version
-  if [[ ! -f ${SETUPPATH}/build-cfitsio.sh ]]; then
-    echo ""  
-    echo "ERROR: Unable to find the script to build cfitsio!"
-    exit 1
-  fi
-  
-  echo "Switching to build-cfitsio.sh script..."
-  cd ${EXTERNALPATH}
-
-  ${SETUPPATH}/build-cfitsio.sh -source=${ENVFILE} 2>&1 | tee BuildLogCFitsIO.txt
-  RESULT=${PIPESTATUS[0]}
-  
-  
-  # If we have a new cfitsio dir, copy the build log there
-  NEWCFITSIODIR=`grep CFITSIODIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
-  if [[ -d ${NEWCFITSIODIR} ]]; then
-    if [[ -f ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ]]; then
-      mv ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ${NEWCFITSIODIR}/BuildLogCFitsIO_before$(date +'%y%m%d%H%M%S').txt
+  # Check if it is not already installed by default
+  if pkg-config --exists cfitsio; then
+    echo "cfitsio already installed"
+  else
+    # Download and build a new cfitsio version
+    if [[ ! -f ${SETUPPATH}/build-cfitsio.sh ]]; then
+      echo ""
+      echo "ERROR: Unable to find the script to build cfitsio!"
+      exit 1
     fi
-    mv BuildLogCFitsIO.txt ${NEWCFITSIODIR}
-  fi
   
-  # Now handle build errors
-  if [ "${RESULT}" != "0" ]; then
-    echo " "
-    echo "ERROR: Something went wrong during the cfitsio setup."
-    issuereport
-    exit 1
-  fi
+    echo "Switching to build-cfitsio.sh script..."
+    cd ${EXTERNALPATH}
+
+    ${SETUPPATH}/build-cfitsio.sh -source=${ENVFILE} 2>&1 | tee BuildLogCFitsIO.txt
+    RESULT=${PIPESTATUS[0]}
   
-  # Source cfitsio to be available for later installs
-  . ${SETUPPATH}/source-cfitsio.sh -p=${NEWCFITSIODIR}
-  if [[ "$?" != "0" ]]; then
-    echo " "
-    echo "ERROR: Unable to source cfitsio"
-    exit 1
-  fi
+  
+    # If we have a new cfitsio dir, copy the build log there
+    NEWCFITSIODIR=`grep CFITSIODIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+    if [[ -d ${NEWCFITSIODIR} ]]; then
+      if [[ -f ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ]]; then
+        mv ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ${NEWCFITSIODIR}/BuildLogCFitsIO_before$(date +'%y%m%d%H%M%S').txt
+      fi
+      mv BuildLogCFitsIO.txt ${NEWCFITSIODIR}
+    fi
+  
+    # Now handle build errors
+    if [ "${RESULT}" != "0" ]; then
+      echo " "
+      echo "ERROR: Something went wrong during the cfitsio setup."
+      issuereport
+      exit 1
+    fi
+  
+    # Source cfitsio to be available for later installs
+    . ${SETUPPATH}/source-cfitsio.sh -p=${NEWCFITSIODIR}
+    if [[ "$?" != "0" ]]; then
+      echo " "
+      echo "ERROR: Unable to source cfitsio"
+      exit 1
+    fi
     
-  # The build-script will have added cfitsio to the environment file
+    # The build-script will have added cfitsio to the environment file
+  fi
 
   cd ${COSIPATH}
 
