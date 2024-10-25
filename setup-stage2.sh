@@ -474,6 +474,15 @@ else
           echo "ERROR: Unable to retrieve python path"
           exit 1
         fi
+
+        # Since brew can be installed in x86 mode in ARM chips, chech that this is not the case
+        if [[ $(uname -m) == *arm64* ]] && [[ $(file $(find $(pkg-config --libs healpix_cxx | sed -n 's/.*-L\([^ ]*\).*/\1/p') -name "*dylib*" | head -n 1)) != *arm64* ]]; then
+          echo ""
+          echo "ERROR: You are on an arm64 system but brew seems to have installed libraries in x86_64 mode."
+          echo "       Please install brew and everything it installs in arm64 mode or switch to macports."
+          exit 1
+        fi
+
       else
         echo ""
         echo "ERROR: Please install homebrew (preferred) or macports to install the required COSItools packages"
