@@ -15,10 +15,15 @@
 
 # The operating system identifiers
 OSTYPE=$(uname -s)
-OSNAME=$(cat /etc/os-release | grep "^ID\=" | awk -F= '{ print $2 }' | tr -d '"')
-OSVERSION=$(cat /etc/os-release | grep "^VERSION_ID\=" | awk -F= '{ print $2 }')
-OSVERSION=${OSVERSION//\"/}
-OSVERSION=${OSVERSION/./}
+if [[ ${OSTYPE} == *arwin* ]]; then
+  OSNAME="MACOS"
+  OSVERSION=$(sw_vers | grep "ProductVersion" | awk -F" " '{ print $2 }')
+else 
+  OSNAME=$(cat /etc/os-release | grep "^ID\=" | awk -F= '{ print $2 }' | tr -d '"')
+  OSVERSION=$(cat /etc/os-release | grep "^VERSION_ID\=" | awk -F= '{ print $2 }')
+  OSVERSION=${OSVERSION//\"/}
+  OSVERSION=${OSVERSION/./}
+fi
 
 # We do not want any site packages, thus clear PYTHONENV
 export PYTHONPATH=""
