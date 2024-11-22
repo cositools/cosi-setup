@@ -8,10 +8,10 @@
 # Description:
 # This script checks if all required macports packages are installed 
 
-
+PVER="312"
 
 TOOLS_GENERAL="hdf5 curl"
-TOOLS_PYTHON="python311 py311-gnureadline py311-jupyter py311-metakernel py311-numpy"
+TOOLS_PYTHON="python${PVER} py${PVER}-gnureadline py${PVER}-jupyter py${PVER}-metakernel py${PVER}-numpy"
 TOOLS_ROOT="cmake git git-lfs OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
 TOOLS_GEANT4="cmake pkgconfig zlib xercesc3"
 TOOLS_MEGALIB="git doxygen imagemagick cfitsio healpix"
@@ -37,25 +37,26 @@ done
 TODO=""
 
 if [[ ${TOBEINSTALLED} != "" ]]; then
-  TODO="sudo port -N install ${TOBEINSTALLED}\n"
+  TODO+="port -N install ${TOBEINSTALLED}; "
 fi
 
-if [[ $(port select --show python 2> /dev/null) != *python38* ]]; then
-  TODO+="sudo port select --set python python38\n"
+if [[ $(port select --show python 2> /dev/null) != *python${PVER}* ]]; then
+  TODO+="port select --set python python${PVER}; "
 fi
 
-if [[ $(port select --show python3 2> /dev/null) != *python38* ]]; then
-  TODO+="sudo port select --set python3 python38\n"
+if [[ $(port select --show python3 2> /dev/null) != *python${PVER}* ]]; then
+  TODO+="port select --set python3 python${PVER}; "
 fi
 
 if [[ $(port select --show gcc 2> /dev/null) != *${TOOLS_GCC}* ]]; then
   GCC=$(port select --list gcc | grep -v version | grep -v none | grep ${TOOLS_GCC} | sort | head -n 1 | xargs)
   if [[ ${GCC} != "" ]]; then
-    TODO+="sudo port select --set gcc ${GCC}\n"
+    TODO+="port select --set gcc ${GCC}; "
   fi
 fi  
 
 if [[ ${TODO} != "" ]]; then
+  TODO="sudo -- sh -c '${TODO}'"
   echo ""
   echo "Not all required packages are present or correctly selected."
   echo "Please do the following:"
