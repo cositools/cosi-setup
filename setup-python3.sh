@@ -144,6 +144,10 @@ else
 fi
 
 
+# Install some generally helpful packages
+pip3 install jupyter
+
+
 # All the default installations
 ALLREQUIREMENTSFILES=$(find .. -maxdepth 2 -iname "Requirements.txt")
 
