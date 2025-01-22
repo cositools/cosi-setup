@@ -18,7 +18,7 @@ fi
 TOOLS_GENERAL="hdf5 curl"
 TOOLS_PYTHON="${MAIN_PYTHON_VERSION} jupyterlab numpy"
 TOOLS_ROOT="cmake openblas davix expat giflib git git-lfs gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 openssl@3 pcre tbb libtiff xrootd xxhash xz"
-TOOLS_GEANT4="cmake pkgconfig zlib xerces-c"
+TOOLS_GEANT4="cmake zlib xerces-c"
 TOOLS_MEGALIB="doxygen imagemagick cfitsio healpix open-mpi"
 
 # Not working tools:
@@ -38,10 +38,16 @@ for TOOL in ${TOOLS_GENERAL} ${TOOLS_ROOT} ${TOOLS_GEANT4} ${TOOLS_MEGALIB} ${TO
   fi
 done
 
-TODO=""
+# There is an idiocracy regarding pkg-conf / pkgconf
+if [[ "${INSTALLED}" != *pkg-conf* ]] && [[ "${INSTALLED}" != *pkgconf* ]]; then
+  TOBEINSTALLED+="pkgconf "
+fi 
 
 if [[ ${TOBEINSTALLED} != "" ]]; then
-  TODO+="brew install ${TOBEINSTALLED}; brew link --force ${MAIN_PYTHON_VERSION}\n"
+  TODO="brew install ${TOBEINSTALLED}"
+  if [[ ${TOBEINSTALLED} == *python3* ]]; then
+    TODO+="; brew link --force ${MAIN_PYTHON_VERSION}\n"
+  fi
 fi
 
 if [[ ${TODO} != "" ]]; then
