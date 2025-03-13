@@ -133,13 +133,15 @@ else
   if [[ "$?" != "0" ]]; then    
     echo ""
     echo "ERROR: Unable to install tensorflow!"
-    exit 1;
+    echo "       But not bailing out since not everybody uses it."
+    echo "" 
   fi
   pip3 install torch 
   if [[ "$?" != "0" ]]; then
     echo ""
     echo "ERROR: Unable to install torch!"
-    exit 1;
+    echo "       But not bailing out since not everybody uses it."
+    echo ""
   fi
 fi
 
