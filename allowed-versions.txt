@@ -6,9 +6,9 @@
 # Description:
 # This script contains a list of allowed versions of ROOT, Geant4, and HEAsoft
 
-# ROOT: 6.32 till 6.32
+# ROOT: 6.32 till 6.34
 ROOT-Min:632
-ROOT-Max:632
+ROOT-Max:634
 ROOT-Blacklist:
 
 # Geant4: Only 11.2
