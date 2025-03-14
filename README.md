@@ -113,13 +113,13 @@ We strongly recommend to stick with long(ish)-term support versions such as Ubun
 
 #### Ubuntu & derivatives
 
-Version 20.04 and 22.04 should work with the default one-line install script. We have no indications sofar that any distributions derived from Ubuntu are not working. We only test long-term support (LTE) versions.
+Version 24.04 and 22.04 should work with the default one-line install script. We have no indications sofar that any distributions derived from Ubuntu are not working. We only test long-term support (LTE) versions.
 
 #### Redhat derivatives
 
 ##### Fedora
 
-The one-line install should work. Latest tested version is 38. Fedora tends to be close to the cutting edge. Thus, consider to stay one version behind the latest version.
+The one-line install should work. Latest tested version is 41. Fedora tends to be close to the cutting edge. Thus, consider to stay one version behind the latest version.
 
 ##### Centos Stream
 
@@ -133,7 +133,8 @@ Not supported. These versions are too old to run COSItools. Please use a contain
 
 ##### Leap
 
-The one-line install should work. Latest tested version is 15.4.
+The one-line install should work. Latest tested version is 15.6. 
+Attention, for Leap 15.6 you need to install a recent compiler with full support of C++-17!
 
 ##### Tumbleweed
 
@@ -181,7 +182,7 @@ Sometimes things can break badly on macOS. In this case it usually helps to comp
 
 ### Windows
 
-Please use Ubuntu 20.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access. There is a known bug in WSL2 which makes the MEGAlib/ROOT menu bars show up at random places on the screen. That'a a WSL2 / ROOT bug.
+Please use Ubuntu 24.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access. There is a known bug in WSL2 which makes the MEGAlib/ROOT menu bars show up at random places on the screen. That'a a WSL2 / ROOT bug.
 
 
 ### Clusters and supercomputers
