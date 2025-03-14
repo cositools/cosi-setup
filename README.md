@@ -133,8 +133,7 @@ Not supported. These versions are too old to run COSItools. Please use a contain
 
 ##### Leap
 
-The one-line install should work. Latest tested version is 15.6. 
-Attention, for Leap 15.6 you need to install a recent compiler with full support of C++-17!
+Leap is currently not working since it doesn't have a builtin version of healpix --- contributions of a healpix build-script are welcome.
 
 ##### Tumbleweed
 
