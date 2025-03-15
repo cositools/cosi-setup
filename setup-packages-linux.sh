@@ -160,9 +160,9 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     VERSIONID=$(echo ${VERSIONID} | awk -F'.' '{ print $1 }')
     #echo "VERSION: ${VERSIONID}"
     if [[ ${VERSIONID} == 15 ]]; then
-      REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
+      REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel python xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel "
     else 
-      REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
+      REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel python xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel "
       UNSUPPORTEDOS="TRUE"
     fi
 
@@ -170,9 +170,9 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     REQUIRED+="$(zypper search -s python3*[0-9]-devel | tail -1 | awk -F"|" '{ print $2 }') "
 
   elif [[ ${OS} == opensuse-tumbleweed ]]; then
-    REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc gcc-fortran binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
+    REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ cfitsio-devel libxerces-c-devel hdf5-devel "
   else
-    REQUIRED="git-core git-lfs bash cmake gcc-c++ gcc binutils libX11-devel libXpm-devel xorg-x11-devel libXext-devel fftw3-devel python-devel gsl-devel graphviz-devel Mesa glew-devel python3-devel mlocate cfitsio-devel libxerces-c-devel hdf5-devel "
+    REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ cfitsio-devel libxerces-c-devel hdf5-devel "
     UNSUPPORTEDOS="TRUE"
   fi
 
