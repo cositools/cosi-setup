@@ -59,7 +59,11 @@ if [[ -d ${PENV} ]]; then
   deactivate
 
   if [[ ${REUSEOK} == "TRUE" ]]; then
+    echo ""
     echo "Re-using existing python environment"
+    echo "If something goes wrong with the python setup, try first to remove the existing local python environment, and start the setup stript again:"
+    echo "rm -r ${PENV}"
+    echo ""
   else
     echo "Removing existing python environment"
     rm -r ${PENV}
@@ -85,6 +89,7 @@ if [[ "$?" != "0" ]]; then
 fi
 
 # Upgrade pip
+python3 -m ensurepip
 python3 -m pip install --upgrade pip
 if [[ "$?" != "0" ]]; then
   echo ""
