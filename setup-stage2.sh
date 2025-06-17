@@ -118,9 +118,15 @@ issuereport() {
 }
 
 absolutefilename() {
-  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+  local TARGET="$1"
+  if [ -d "${TARGET}" ]; then
+    (cd "${TARGET}" && pwd)
+  elif [ -e "${TARGET}" ]; then
+    (cd "$(dirname "${TARGET}")" && echo "$(pwd)/$(basename "${TARGET}")")
+  else
+    (cd "$(dirname "${TARGET}")" 2>/dev/null && echo "$(pwd)/$(basename "${TARGET}")") || return 1
+  fi
 }
-
 
 
 ############################################################################################################
@@ -533,7 +539,6 @@ echo "Installing ROOT"
 echo " "
 
 ISPATH="TRUE"
-echo "${ROOTPATH}"
 if [[ ${ROOTPATH} == "" ]]; then
   ISPATH="FALSE"
 elif [[ ${ROOTPATH} == ?.?? ]]; then
@@ -550,10 +555,22 @@ fi
 # If we are given an existing ROOT installation, check is it is compatible
 if [[ ${ISPATH} == TRUE ]]; then
   # Make an absolute path and check for spaces
-  ROOTPATH=`absolutefilename ${ROOTPATH}`
+  ROOTPATH=$(absolutefilename "${ROOTPATH}")
+  if [ -z "${ROOTPATH}" ]; then
+    echo "ERROR: Unable to resolve ROOT path. It either does not exist, or is not relative to this localtion, or is not an absolute path, or is not accessible." >&2
+    exit 1
+  fi  
   if [[ "${ROOTPATH}" != "${ROOTPATH% *}" ]]; then
     echo "ERROR: ROOT needs to be installed in a path without spaces,"
     echo "       but you chose: \"${ROOTPATH}\""
+    exit 1
+  fi
+  if [ ! -d "${ROOTPATH}" ]; then
+    echo "ERROR: The given ROOT path is no directory: \"${ROOTPATH}\""
+    exit 1
+  fi
+  if [ ! -f "${ROOTPATH}/bin/root-config" ]; then
+    echo "ERROR: The given ROOT path does not contain (all?) ROOT files. For example, we are missing \"${ROOTPATH}/bin/root-config\""
     exit 1
   fi
 
