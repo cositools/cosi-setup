@@ -26,6 +26,9 @@ if [[ $(uname -a) != *arwin* ]]; then
   fi
 fi
 CONFIGUREOPTIONS="${CONFIGUREOPTIONS} -DCMAKE_INSTALL_PREFIX=.. -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=OFF -DGEANT4_INSTALL_DATA_TIMEOUT=14400 -DGEANT4_USE_SYSTEM_EXPAT=OFF -DCMAKE_CXX_STANDARD=17"
+CONFIGUREOPTIONS+=" -DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+CONFIGUREOPTIONS+=" -DGEANT4_USE_SYSTEM_ZLIB=ON"
+
 # Reduce the warning messages:
 WARNINGS="-Wno-shadow -Wno-implicit-fallthrough -Wno-overloaded-virtual -Wno-deprecated-copy -Wno-unused-result -Wno-format-overflow="
 
@@ -375,7 +378,10 @@ if [[ ${GEANT4CORE} == "geant4_v10.02.p03" ]]; then
   PATCH="on"
   echo "This version of Geant4 version requires a mandatory patch"
 fi
-
+if [[ ${GEANT4CORE} == "geant4_v11.02.p02" ]]; then
+  PATCH="on"
+  echo "This version of Geant4 requires a mandatory patch"
+fi
 
 echo "Checking for old installation..."
 if [ -d ${GEANT4DIR} ]; then
