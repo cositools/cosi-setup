@@ -355,14 +355,13 @@ fi
 
 if [[ ${IsArchClone} -eq 1 ]]; then
 
-  REQUIRED="git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl  fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost "
+  REQUIRED_PAC="yay git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl  fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost xerces-c"
 
-  if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
+  if [[ "${REQUIRED_PAC}" == "" ]]; then exit 0; fi
 
   # Check if each of the packages exists:
-  for PACKAGE in ${REQUIRED}; do
-    # Check if the file is installed
-    #echo "Testing: ${PACKAGE}"
+  for PACKAGE in ${REQUIRED_PAC}; do
+    # Check if the package is installed
     STATUS=$(pacman -Ss ${PACKAGE} >& /dev/null)
     if [[ $? == 1 ]]; then
       # Check if it exists at all:
@@ -372,16 +371,41 @@ if [[ ${IsArchClone} -eq 1 ]]; then
       if [[ $? == 1 ]]; then
         # Check if it exists at all:
         echo "Not installed: ${PACKAGE}"
-        TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
+        TOBEINSTALLED_PAC="${TOBEINSTALLED} ${PACKAGE}"
       fi
     fi
   done
+  
+  REQUIRED_AUR="healpix"
 
+  # Check if each of the packages exists:
+  for PACKAGE in ${REQUIRED_AUR}; do
+    # Check if the package is exists
+    EXISTS=$(curl -s "https://aur.archlinux.org/rpc/?v=5&type=info&arg[]=${PACKAGE}" | grep -o '"resultcount":1')
+    if [[ -z "${EXISTS}" ]]; then
+      echo "Does not exist (AUR): ${PACKAGE}"
+      continue
+    fi
+    
+    # Check if it is already installed
+    pacman -Qi "${PACKAGE}" >/dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+      echo "Not installed (AUR): ${PACKAGE}"
+      TOBEINSTALLED_AUR="${TOBEINSTALLED_AUR} ${PACKAGE}"
+    fi
 
-  if [[ "${TOBEINSTALLED}" != "" ]]; then
+  done
+
+  
+  if [[ "${TOBEINSTALLED_PAC}" != "" ]] || [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
     echo " "
     echo "Do the following to install all required packages:"
-    echo "sudo pacman -S ${TOBEINSTALLED}"
+    if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
+      echo "sudo pacman -S ${TOBEINSTALLED_PAC}"
+    fi
+    if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
+      echo "yay -S ${TOBEINSTALLED_AUR}"
+    fi    
     echo " "
     exit 255
   else
