@@ -44,6 +44,7 @@ CONFIGUREOPTIONS+=" -Dexplicitlink=ON -Drpath=ON -Dsoversion=ON"
 # Use builtin glew
 CONFIGUREOPTIONS+=" -Dbuiltin_glew=ON"
 
+
 # In case you have trouble with anything related to freetype, try to comment in this option
 # CONFIGUREOPTIONS+=" -Dbuiltin-freetype=ON"
 
@@ -95,6 +96,11 @@ CONFIGUREOPTIONS+=" -Dalien=OFF -Dbonjour=OFF -Dcastor=OFF -Ddavix=OFF -Dfortran
 # Explictly add gcc -- cmake seems to sometimes digg up other compilers on the system, not the default one...
 if [[ ${OSTYPE} != *arwin* ]]; then
   CONFIGUREOPTIONS+=" -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_CXX_COMPILER=$(which g++)"
+fi
+
+# Turn off runtime modules on macOS
+if [[ ${OSTYPE} == *arwin* ]]; then
+  CONFIGUREOPTIONS+=" -Druntime_cxxmodules=OFF"
 fi
 
 # The compiler
