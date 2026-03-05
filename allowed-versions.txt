@@ -20,3 +20,11 @@ Geant4-Blacklist:notimplemented
 HEASoft-Min:631
 HEASoft-Max:699
 HEASoft-Blacklist:notimplemented
+
+# Healpix
+Healpix-Min:383
+Healpix-Max:399
+Healpix-Blacklist:notimplemented
+
+
+

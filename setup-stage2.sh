@@ -59,12 +59,13 @@ CPPDEBUG="off"
 # The python path
 PATHTOPYTHON=""
 
-# Path to potentially existing ROOT, Geant4, and HEASoft installs
+# Path to potentially existing ROOT, Geant4, HEASoft, and Healpix installs
 ROOTPATH=""
 GEANT4PATH=""
 HEASOFTPATH=""
+HEALPIXPATH=""
 
-# The directory where to install ROOT, Geant4, and HEASoft
+# The directory where to install ROOT, Geant4, HEASoft, and Healpix
 EXTERNALPATH=${COSIPATH}/external
 if [ ! -d ${EXTERNALPATH} ]; then
   mkdir ${EXTERNALPATH}
@@ -149,8 +150,10 @@ for C in "${CMD[@]}"; do
     ROOTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-g*=* ]] && [[ ${C} != *-p*-g* ]] ; then
     GEANT4PATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-hea*=* ]]; then
+  elif [[ ${C} == *-heas*=* ]]; then
     HEASOFTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+  elif [[ ${C} == *-heal*=* ]]; then
+    HEALPIXPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-o*=* ]]; then
     CPPOPT=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-d*=* ]]; then
@@ -270,6 +273,20 @@ else
   else
     echo " * Use this installation of HEASoft: ${HEASOFTPATH}"
   fi
+fi
+
+if [ "${HEALPIXPATH}" != "" ]; then
+  HEALPIXPATH=`absolutefilename ${HEALPIXPATH}`
+fi
+if [[ "${HEALPIXPATH}" != "${HEALPIXPATH% *}" ]]; then
+  echo "ERROR: Healpix needs to be installed in a path without spaces,"
+  echo "       but you chose: \"${HEALPIXPATH}\""
+  exit 1
+fi
+if [ "${HEALPIXPATH}" == "" ]; then
+  echo " * Download latest compatible version of Healpix"
+else
+  echo " * Use this installation of Healpix: ${HEALPIXPATH}"
 fi
 
 
@@ -902,6 +919,97 @@ fi
 
 
 ############################################################################################################
+# Install Healpix
+
+echo ""
+echo "*****************************"
+echo " "
+echo "Installing Healpix"
+echo " "
+
+# If we are given an existing Healpix installation, check is it is compatible
+if [[ "${HEALPIXPATH}" == "off" ]]; then
+
+  echo " "
+  echo "Command line option --healpix=off: Do not install Healpix"
+
+
+# Use the installed Healpix version
+elif [ "${HEALPIXPATH}" != "" ]; then
+  # Check if we can use the given Healpix version
+  if [[ ! -f ${SETUPPATH}/check-healpixversion.sh ]]; then
+    echo ""
+    echo "ERROR: Unable to find the script to check the Healpix version!"
+    exit 1
+  fi
+  
+  ${SETUPPATH}/check-healpixversion.sh --check=${HEALPIXPATH}
+  if [ "$?" != "0" ]; then
+    echo " "
+    echo "ERROR: The directory ${HEALPIXPATH} cannot be used as your Healpix install for COSItools."
+    exit 1
+  fi
+  
+  # Add Healpix to the environment file
+  echo "HEALPIXDIR=$(cd $(dirname ${HEALPIXPATH}); pwd)/$(basename ${HEALPIXPATH})" >> ${ENVFILE}
+  
+  # Source Healpix to be available for later installs
+  . ${SETUPPATH}/source-healpix.sh -p=$(cd $(dirname ${HEALPIXPATH}); pwd)/$(basename ${HEALPIXPATH})
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source Healpix"
+    exit 1
+  fi
+  
+# Install a new version of Healpix
+else
+  # Download and build a new Healpix version
+  if [[ ! -f ${SETUPPATH}/build-healpix.sh ]]; then
+    echo ""
+    echo "ERROR: Unable to find the script to check the Healpix version!"
+    exit 1
+  fi
+  
+  echo "Switching to build-healpix.sh script..."
+  cd ${EXTERNALPATH}
+  
+  bash ${SETUPPATH}/build-healpix.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogHealpix.txt
+  RESULT=${PIPESTATUS[0]}
+
+  # If we have a new Healpix dir, copy the build log there
+  NEWHEALPIXDIR=`grep HEALPIXDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  if [[ -d ${NEWHEALPIXDIR} ]]; then
+    if [[ -f ${NEWHEALPIXDIR}/BuildLogHealpix.txt ]]; then
+      mv ${NEWHEALPIXDIR}/BuildLogHealpix.txt ${NEWHEALPIXDIR}/BuildLogHealpix_before$(date +'%y%m%d%H%M%S').txt
+    fi
+    mv BuildLogHealpix.txt ${NEWHEALPIXDIR}
+  fi
+
+  # Now handle build errors
+  if [ "${RESULT}" != "0" ]; then
+    echo " "
+    echo "ERROR: Something went wrong during the Healpix setup."
+    issuereport
+    exit 1
+  fi
+  
+  # Source Healpix to be available for later installs
+  . ${SETUPPATH}/source-healpix.sh -p=${NEWHEALPIXDIR}
+  if [[ "$?" != "0" ]]; then
+    echo " "
+    echo "ERROR: Unable to source Healpix"
+    exit 1
+  fi
+    
+  # The build-script will have added Healpix to the environment file
+fi
+
+echo " "
+echo "SUCCESS: We have a usable Healpix version!"
+
+
+
+############################################################################################################
 # Install MEGAlib
 
 echo ""
@@ -1312,6 +1420,9 @@ if grep -q "CFITSIODIR" ${ENVFILE}; then
 fi
 if grep -q "HEASOFTDIR" ${ENVFILE}; then
   echo ". ${SETUPPATH}/source-heasoft.sh -p=\${HEASOFTDIR}" >> ${ENVFILE}
+fi
+if grep -q "HEALPIXDIR" ${ENVFILE}; then
+  echo ". ${SETUPPATH}/source-healpix.sh -p=\${HEALPIXDIR}" >> ${ENVFILE}
 fi
 echo ". ${SETUPPATH}/source-root.sh -p=\${ROOTDIR}" >> ${ENVFILE}
 echo " " >> ${ENVFILE}

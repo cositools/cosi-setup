@@ -70,7 +70,7 @@ confhelp() {
   echo "    If you use this flag make sure the COSItools source script has not been called in the terminal you are using."
   echo " "
   echo "--root=[options: empty (default), path to existing ROOT installation]"
-  echo "    --root=              Download and install the latest compatible version"
+  echo "    --root=              Download and install the latest compatible version (default)."
   echo "    --root=[version]     Download the given ROOT version. Format must be \"x.yy\""
   echo "    --root=[GitHub tag]  Download the ROOT version with the given tag. Format must be \"vx-yy-zz\", \"vx-yy-zz-patches\", or \"master\""
   echo "    --root=[path]        Use the version of ROOT found in the path. The path cannot be of the format \"x.yy\", \"vx-yy-zz\", \"vx-yy-zz-patches\", or \"master\""
@@ -78,17 +78,22 @@ confhelp() {
   echo "    If you need/want to test/use a different ROOT version, please change this file."
   echo " "
   echo "--geant=[options: empty (default), path to existing GEANT4 installation]"
-  echo "    --geant=           Download and install the latest compatible version."
+  echo "    --geant=           Download and install the latest compatible version (default)."
   echo "    --geant=[path]     Use the version of Geant4 found in the path. If it is not compatible, the script will stop with an error."
   echo "    The (currently) supported GEANT4 versions are stored in the file \"allowed-versions.txt\". The format is xy, e.g. 102 for GEANT4 version 10.2."
   echo "    If you need/want to test/use a different GEANT4 version, please change this file."
   echo " "
-  echo "--heasoft=[options: empty or heasoft, off, cfitsio (default), path to existing HEASoft installation]"
+  echo "--heasoft=[options: empty, heasoft, off, cfitsio (default), or path to existing HEASoft installation]"
   echo "    --heasoft=         Download and install the latest compatible version."
   echo "    --heasoft=heasoft  Download and install the latest compatible version."
   echo "    --heasoft=cfitsio  Download and install the latest cfitsio version."
-  echo "    --heasoft=off      Do not install HEASoft."
+  echo "    --heasoft=off      Do not install HEASoft - use a built-in version."
   echo "    --heasoft=[path]   Use the version of HEASoft found in the path. If it is not compatible, the script will stop with an error."
+  echo " "
+  echo "--healpix=[options: empty, off (default), or path to existing Healpix installation]"
+  echo "    --healpix=         Download and install the latest compatible version."
+  echo "    --healpix=off      Do not install Healpix - use a built-in version."
+  echo "    --healpix=[path]   Use the version of Healpix found in the path. If it is not compatible, the script will stop with an error."
   echo " "
   echo "--maxthreads=[integer >=1]"
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
@@ -289,8 +294,11 @@ ADDITIONALOPTIONS=""
 # Check if we should set a new git branch
 ADDITIONALOPTIONS+=" --br=${GITBRANCH}"
 # If the heasoft flag is not given we just install cfitsio
-if [[ $@ != *-hea* ]]; then
+if [[ $@ != *-heas* ]]; then
   ADDITIONALOPTIONS+=" --heasoft=cfitsio"
+fi
+if [[ $@ != *-heal* ]]; then
+  ADDITIONALOPTIONS+=" --healpix=off"
 fi
 
 set -o pipefail # This ensures the $? catches any error in the pipeline
@@ -324,10 +332,6 @@ fi
 echo ""
 
 exit 0
-
-
-
-
 
 
  
