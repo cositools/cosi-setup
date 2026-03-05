@@ -275,20 +275,23 @@ else
   fi
 fi
 
-if [ "${HEALPIXPATH}" != "" ]; then
-  HEALPIXPATH=`absolutefilename ${HEALPIXPATH}`
-fi
-if [[ "${HEALPIXPATH}" != "${HEALPIXPATH% *}" ]]; then
-  echo "ERROR: Healpix needs to be installed in a path without spaces,"
-  echo "       but you chose: \"${HEALPIXPATH}\""
-  exit 1
-fi
-if [ "${HEALPIXPATH}" == "" ]; then
-  echo " * Download latest compatible version of Healpix"
+if [[ "${HEALPIXPATH}" == "off" ]]; then
+  echo " * Do not install Healpix"
+elif [[ "${HEALPIXPATH}" == "" ]] ; then
+  echo " * Download the latest version of Healpix"
 else
-  echo " * Use this installation of Healpix: ${HEALPIXPATH}"
+  HEALPIXPATH=`absolutefilename ${HEALPIXPATH}`
+  if [[ "${HEALPIXPATH}" != "${HEALPIXPATH% *}" ]]; then
+    echo "ERROR: Healpix needs to be installed in a path without spaces,"
+    echo "       but you chose: \"${HEALPIXPATH}\""
+    exit 1
+  fi
+  if [ "${HEALPIXPATH}" == "" ]; then
+    echo " * Download latest compatible version of Healpix"
+  else
+    echo " * Use this installation of Healpix: ${HEALPIXPATH}"
+  fi
 fi
-
 
 if [[ ${OSTYPE} == *inux* ]]; then
   OSTYPE="linux"
@@ -928,6 +931,7 @@ echo "Installing Healpix"
 echo " "
 
 # If we are given an existing Healpix installation, check is it is compatible
+echo "HEALPIXPATH::${HEALPIXPATH}::"
 if [[ "${HEALPIXPATH}" == "off" ]]; then
 
   echo " "
