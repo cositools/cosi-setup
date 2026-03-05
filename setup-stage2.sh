@@ -973,7 +973,7 @@ else
   echo "Switching to build-healpix.sh script..."
   cd ${EXTERNALPATH}
   
-  bash ${SETUPPATH}/build-healpix.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogHealpix.txt
+  bash ${SETUPPATH}/build-healpix.sh -source=${ENVFILE} 2>&1 | tee BuildLogHealpix.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Healpix dir, copy the build log there
