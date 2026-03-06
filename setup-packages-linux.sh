@@ -43,6 +43,7 @@ if [ -f /etc/os-release ]; then
 fi
 
 REQUIRED=""
+EXTRATEXT=""
 TOBEINSTALLED=""
 UNSUPPORTEDOS="FALSE"
 
@@ -233,7 +234,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
   OS=`cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }'`
   OS=${OS//\"/}
   #echo "OS: ${OS}"
-  if [[ ${OS} == rhel ]] || [[ ${OS} == almalinux ]]; then
+  if [[ ${OS} == rhel ]] || [[ ${OS} == almalinux ]] || [[ ${OS} == rocky ]]; then
     # Check the version
     VERSIONID=$(cat /etc/os-release | grep "^VERSION_ID=" | awk -F= '{ print $2 }')
     VERSIONID=${VERSIONID//\"/}
@@ -243,12 +244,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
     elif (( ${VERSIONID} >= 9 )) && (( ${VERSIONID} <= 12 )) ; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool "
-      echo " "
-      echo "Please enable CRB first:"
-      echo "sudo dnf config-manager --set-enabled crb"
-      echo "sudo dnf install epel-release"
-      echo "sudo dnf makecache"
-      echo ""
+      MESSAGE+="\nPlease enable these extra package repositories are active:\nsudo dnf config-manager --set-enabled crb\nsudo dnf install epel-release\nsudo dnf makecache"
     else 
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel autoconf automake libtool "
 
@@ -343,6 +339,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
   
   
   if [[ "${TOBEINSTALLED}" != "" ]]; then
+    echo -e "${MESSAGE}"
     echo " "
     echo "Do the following to install all required packages:"
     echo "sudo yum install ${TOBEINSTALLED}"

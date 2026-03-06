@@ -246,8 +246,9 @@ cd ${MAINDIR}/healpix_v${VER}-source/src/cxx
 
 make distclean 2>/dev/null || true
 
-export SHARP_INCDIR=${MAINDIR}/include
-export SHARP_LIBDIR=${MAINDIR}/lib
+#export SHARP_INCDIR=${MAINDIR}/include
+#export SHARP_LIBDIR=${MAINDIR}/lib
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${MAINDIR}/lib/pkgconfig
 
 if [[ "${ENVFILE}" != "" ]]; then
   HEASOFTDIR=$(cat ${ENVFILE} | grep HEASOFTDIR)
