@@ -9,7 +9,7 @@ This give us, and all the developers of the packages on which the COSItools are 
 
 ## Quick guide
 
-You can setup the environment by simply executing this command:
+For most system, you can setup the environment by simply executing this command:
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)"
 ```
@@ -48,58 +48,68 @@ bash setup.sh --options --here
 The following options are a copy-and-paste from ```bash setup.sh --help```:
 
 ```
+ 
 --cositoolspath=[path to COSItools - default: "COSItools"]
     This is the path to where the COSItools will be installed. If the path exists, we will try to update them.
-
+ 
 --branch=[name of a git branch - default: main]
     Choose a specific branch of the COSItools git repositories.
     If the option is not given the latest release will be used.
     If the branch does not exist for all repositories use the main/master branch.
-
+ 
 --pull-behavior-git=[stash (default), merge]
      Choose how to handle changes in git repositories:
      "stash": stash the changes and pull the latest version
      "merge": merge the changes -- the script will stop on error
      "no": Do not change existing repositories in any way (no pull, no branch switch, etc.)
-
+ 
 --extras=[list of extra packages not installed by default]
      Add a few extra packages not installed by default since, e.g., they are too large
      Example: --extras=cosi-data-challenge-1,cosi-data-challenge-2
-
+ 
 --ignore-missing-packages
     Do not check for missing packages.
-
+ 
 --keep-environment=[off/no, on/yes - default: off]
     By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty
     to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not.
     If you use this flag make sure the COSItools source script has not been called in the terminal you are using.
-
+ 
 --root=[options: empty (default), path to existing ROOT installation]
-    --root=              Download and install the latest compatible version
+    --root=              Download and install the latest compatible version (default).
     --root=[version]     Download the given ROOT version. Format must be "x.yy"
     --root=[GitHub tag]  Download the ROOT version with the given tag. Format must be "vx-yy-zz", "vx-yy-zz-patches", or "master"
     --root=[path]        Use the version of ROOT found in the path. The path cannot be of the format "x.yy", "vx-yy-zz", "vx-yy-zz-patches", or "master"
-
+    The (currently) supported ROOT versions are stored in the file "allowed-versions.txt". The format is xyy, e.g. 628 for ROOT version 6.28.
+    If you need/want to test/use a different ROOT version, please change this file.
+ 
 --geant=[options: empty (default), path to existing GEANT4 installation]
-    --geant=           Download and install the latest compatible version.
+    --geant=           Download and install the latest compatible version (default).
     --geant=[path]     Use the version of Geant4 found in the path. If it is not compatible, the script will stop with an error.
-
---heasoft=[options: empty or heasoft, off, cfitsio (default), path to existing HEASoft installation]
+    The (currently) supported GEANT4 versions are stored in the file "allowed-versions.txt". The format is xy, e.g. 102 for GEANT4 version 10.2.
+    If you need/want to test/use a different GEANT4 version, please change this file.
+ 
+--heasoft=[options: empty, heasoft, off, cfitsio (default), or path to existing HEASoft installation]
     --heasoft=         Download and install the latest compatible version.
     --heasoft=heasoft  Download and install the latest compatible version.
     --heasoft=cfitsio  Download and install the latest cfitsio version.
-    --heasoft=off      Do not install HEASoft.
+    --heasoft=off      Do not install HEASoft - use a built-in version.
     --heasoft=[path]   Use the version of HEASoft found in the path. If it is not compatible, the script will stop with an error.
-
+ 
+--healpix=[options: empty, off (default), or path to existing Healpix installation]
+    --healpix=         Download and install the latest compatible version.
+    --healpix=off      Do not install Healpix - use a built-in version.
+    --healpix=[path]   Use the version of Healpix found in the path. If it is not compatible, the script will stop with an error.
+ 
 --maxthreads=[integer >=1]
     The maximum number of threads to be used for compilation. Default is the number of cores in your system.
-
+ 
 --debug=[off/no (default), on/yes]
     Debugging compiler flags for C++ programs ROOT, Geant4 & MEGAlib.
-
+ 
 --optimization=[off/no, normal/on/yes (default), strong/hard]
     Compilation optimization compiler flags for MEGAlib only.
-
+ 
 --help or -h
     Show this help.
 ```
@@ -116,6 +126,13 @@ We strongly recommend to stick with long(ish)-term support versions such as Ubun
 Version 24.04 and 22.04 should work with the default one-line install script. We have no indications sofar that any distributions derived from Ubuntu are not working. We only test long-term support (LTE) versions.
 
 #### Redhat derivatives
+
+##### Redhat, Rocky & Alma
+
+These operating systems do not come with a Healpix package by default, thus Healpix has to be compiled during installation. Please use these options:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --healpix=
+```
 
 ##### Fedora
 
