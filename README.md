@@ -133,6 +133,7 @@ These operating systems do not come with a Healpix package by default, thus Heal
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --healpix=
 ```
+Version 8, 9 & 10 should work.
 
 ##### Fedora
 
