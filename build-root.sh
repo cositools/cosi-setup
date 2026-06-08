@@ -41,8 +41,9 @@ CONFIGUREOPTIONS+=" -Dxft=ON"
 CONFIGUREOPTIONS+=" -Dasimage=ON"
 # Stuff for linking, paths in so files, versioning etc
 CONFIGUREOPTIONS+=" -Dexplicitlink=ON -Drpath=ON -Dsoversion=ON"
-# Use builtin glew
-CONFIGUREOPTIONS+=" -Dbuiltin_glew=ON"
+# Use builtin openGL components glew and gl2ps
+CONFIGUREOPTIONS+=" -Dbuiltin_glew=ON -Dbuiltin_gl2ps=ON"
+
 
 
 # In case you have trouble with anything related to freetype, try to comment in this option
