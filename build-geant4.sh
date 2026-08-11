@@ -475,6 +475,10 @@ if [[ ${PATCH} == on ]]; then
   echo "Patching... "
   if [[ -f "${SETUPPATH}/patches/${GEANT4CORE}.patch" ]]; then
     patch -p1 < ${SETUPPATH}/patches/${GEANT4CORE}.patch
+    if [ "$?" != "0" ]; then
+      echo "ERROR: Something went wrong applying the Geant4 patch!"
+      exit 1
+    fi
     PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
     echo "Applied patch: ${SETUPPATH}/patches/${GEANT4CORE}.patch"

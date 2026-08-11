@@ -13,7 +13,7 @@ PVER="312"
 TOOLS_GENERAL="hdf5 curl"
 TOOLS_PYTHON="python${PVER} py${PVER}-gnureadline py${PVER}-jupyter py${PVER}-metakernel py${PVER}-numpy"
 TOOLS_ROOT="cmake git git-lfs OpenBLAS davix expat giflib git gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 lzma openssl pcre tbb tiff vdt xrootd xxhashlib xz"
-TOOLS_GEANT4="cmake pkgconfig zlib xercesc3"
+TOOLS_GEANT4="cmake pkgconfig zlib xercesc3 qt5"
 TOOLS_MEGALIB="git doxygen imagemagick cfitsio healpix"
 TOOLS_GCC="gcc14" # must be single gcc version, don't add anything
 

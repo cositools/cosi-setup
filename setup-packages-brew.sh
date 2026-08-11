@@ -18,8 +18,8 @@ fi
 TOOLS_GENERAL="hdf5 curl"
 TOOLS_PYTHON="${MAIN_PYTHON_VERSION} jupyterlab numpy"
 TOOLS_ROOT="cmake openblas davix expat giflib git git-lfs gl2ps gmp graphviz gsl jpeg libpng libxml2 lz4 openssl@3 pcre tbb libtiff xrootd xxhash xz"
-TOOLS_GEANT4="cmake zlib xerces-c"
-TOOLS_MEGALIB="doxygen imagemagick cfitsio healpix open-mpi"
+TOOLS_GEANT4="cmake zlib xerces-c qt@5"
+TOOLS_MEGALIB="doxygen imagemagick cfitsio ccfits healpix open-mpi"
 
 # Not working tools:
 TOOLS_NOTWORKING="valgrind-macos-devel gcc11"

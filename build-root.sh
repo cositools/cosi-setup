@@ -17,6 +17,10 @@ OSTYPE=$(uname -s | awk '{print tolower($0)}')
 
 # The configuration options
 CONFIGUREOPTIONS=" "
+
+# No deprecated  and developer arnings - we are not the maintainers of the cmake files
+CONFIGUREOPTIONS+=" -Wno-dev -DCMAKE_WARN_DEPRECATED=OFF"
+
 # Install path relative to the build path --- simply one up in this script
 CONFIGUREOPTIONS+=" -DCMAKE_INSTALL_PREFIX=.."
 # Make sure we ignore some default paths of macport.
@@ -42,8 +46,9 @@ CONFIGUREOPTIONS+=" -Dasimage=ON"
 # Stuff for linking, paths in so files, versioning etc
 CONFIGUREOPTIONS+=" -Dexplicitlink=ON -Drpath=ON -Dsoversion=ON"
 # Use builtin openGL components glew and gl2ps
-CONFIGUREOPTIONS+=" -Dbuiltin_glew=ON -Dbuiltin_gl2ps=ON"
-
+if [[ ${OSTYPE} != *arwin* ]]; then
+  CONFIGUREOPTIONS+=" -Dbuiltin_glew=ON -Dbuiltin_gl2ps=ON"
+fi
 
 
 # In case you have trouble with anything related to freetype, try to comment in this option
@@ -295,13 +300,13 @@ fi
 PATCH=`echo ${PATCH} | tr '[:upper:]' '[:lower:]'`
 if ( [[ ${PATCH} == of* ]] || [[ ${PATCH} == n* ]] ); then
   PATCH="off"
-  echo " * Don't apply internal ROOT and Geant4 patches"
+  echo " * Don't apply internal ROOT patches"
 elif ( [[ ${PATCH} == on ]] || [[ ${PATCH} == y* ]] ); then
   PATCH="on"
-  echo " * Apply internal ROOT and Geant4 patches"
+  echo " * Apply internal ROOT patches"
 else
   echo " "
-  echo "ERROR: Unknown option for updates: ${PATCH}"
+  echo "ERROR: Unknown option for patch: ${PATCH}"
   confhelp
   exit 1
 fi
@@ -508,13 +513,6 @@ ROOTDIR=root_v${VER}${DEBUGSTRING}
 ROOTSOURCEDIR=root_v${VER}-source   # Attention: the cleanup checks this name pattern before removing it
 ROOTBUILDDIR=root_v${VER}-build     # Attention: the cleanup checks this name pattern before removing it
 
-# Hardcoding default patch conditions
-# Needs to be done after the ROOT version is known and before we check the exiting installation
-if [[ ${ROOTCORE} == "root_v6.24.08" ]] || [[ ${ROOTCORE} == "root_v6.24.10" ]]; then
-  echo "This version of ROOT requires a mandatory patch"
-  PATCH="on"
-fi
-
 
 echo "Checking for old installation..."
 if [ -d ${ROOTDIR} ]; then
@@ -602,9 +600,15 @@ if [[ ${PATCH} == on ]]; then
   echo "Patching..."
   if [ -f "${SETUPPATH}/patches/${ROOTCORE}.patch" ]; then
     patch -p1 < ${SETUPPATH}/patches/${ROOTCORE}.patch
+    if [ "$?" != "0" ]; then
+      echo "ERROR: Something went wrong applying the ROOT patch!"
+      exit 1
+    fi
     PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
     echo "Applied patch: ${SETUPPATH}/patches/${ROOTCORE}.patch"
+  else
+    echo "No required patch found for this version of ROOT"
   fi
 fi
 
