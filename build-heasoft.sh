@@ -8,6 +8,10 @@
 # Description:
 # This script downloads, compiles, and installs HEASoft
 
+
+# Path to this script
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 # Operating system type
 OSTYPE=$(uname -s | awk '{print tolower($0)}')
 
@@ -63,6 +67,9 @@ confhelp() {
   echo "--sourcescript=[file name of new environment script]"
   echo "    The source script which sets all environment variables for HEASoft."
   echo " "
+  echo "--patch=[yes or no - default: no]"
+  echo "    Apply internal HEASoft patches, if there are any for this version."
+  echo " "
   echo "--help or -h"
   echo "    Show this help."
   echo " "
@@ -116,6 +123,7 @@ done
 
 TARBALL=""
 ENVFILE=""
+PATCH="off"
 
 # Overwrite default options with user options:
 for C in ${CMD}; do
@@ -125,6 +133,8 @@ for C in ${CMD}; do
   elif [[ ${C} == *-s* ]]; then
     ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
     echo "Using this environment file: ${ENVFILE}"
+  elif [[ ${C} == *-p*=* ]]; then
+    PATCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h* ]]; then
     echo ""
     confhelp
@@ -136,6 +146,18 @@ for C in ${CMD}; do
     exit 1
   fi
 done
+
+PATCH=`echo ${PATCH} | tr '[:upper:]' '[:lower:]'`
+if ( [[ ${PATCH} == of* ]] || [[ ${PATCH} == n* ]] ); then
+  PATCH="off"
+  echo " * Don't apply internal HEASoft patches"
+elif ( [[ ${PATCH} == on ]] || [[ ${PATCH} == y* ]] ); then
+  PATCH="on"
+  echo " * Apply internal HEASoft patches"
+else
+  echo "ERROR: Unknown option for patch: ${PATCH}"
+  exit 1
+fi
 
 
 echo "Getting HEASoft..."
@@ -203,6 +225,9 @@ fi
 
 
 
+HEASOFTCORE=heasoft_v${VER}
+
+
 echo "Checking for old installation..."
 if [ -d heasoft_v${VER} ]; then
   cd heasoft_v${VER}
@@ -219,7 +244,37 @@ if [ -d heasoft_v${VER} ]; then
     if [ "${SAMECOMPONENTS}" == "" ]; then
       echo "The old installation used different components..."
     fi
-    if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] && [ "${SAMECOMPONENTS}" != "" ] ); then
+
+    SAMEPATCH=""
+    PATCHPRESENT="no"
+    if [ -f "${SETUPPATH}/patches/${HEASOFTCORE}.patch" ]; then
+      PATCHPRESENT="yes"
+      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/patches/${HEASOFTCORE}.patch" | awk -F" " '{ print $2 }'`
+    fi
+    PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
+    if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
+      PATCHMD5=`echo ${PATCHSTATUS} | awk -F" " '{ print $3 }'`
+    fi
+
+    if [[ ${PATCH} == on ]]; then
+      if [[ ${PATCHPRESENT} == yes ]] && [[ ${PATCHSTATUS} == Patch\ applied* ]] && [[ ${PATCHPRESENTMD5} == ${PATCHMD5} ]]; then
+        SAMEPATCH="YES";
+      elif [[ ${PATCHPRESENT} == no ]] && [[ ${PATCHSTATUS} == Patch\ not\ applied* ]]; then
+        SAMEPATCH="YES";
+      else
+        echo "The old installation didn't use the same patch..."
+        SAMEPATCH=""
+      fi
+    elif [[ ${PATCH} == off ]]; then
+      if [[ ${PATCHSTATUS} == Patch\ not\ applied* ]] || [[ -z ${PATCHSTATUS}  ]]; then    # last one means empty
+        SAMEPATCH="YES";
+      else
+        echo "The old installation used a patch, but now we don't want any..."
+        SAMEPATCH=""
+      fi
+    fi
+
+    if ( [ "${SAMEOPTIONS}" != "" ] && [ "${SAMECOMPILER}" != "" ] && [ "${SAMECOMPONENTS}" != "" ] && [ "${SAMEPATCH}" != "" ] ); then
       echo "Your already have a usable HEASoft version installed!"
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the HEASoft directory in the source script..."
@@ -256,6 +311,26 @@ if [ "$?" != "0" ]; then
 fi
 mv heasoft-${VER} heasoft_v${VER}
 
+
+
+PATCHAPPLIED="Patch not applied"
+if [[ ${PATCH} == on ]]; then
+  echo "Patching..."
+  if [ -f "${SETUPPATH}/patches/${HEASOFTCORE}.patch" ]; then
+    cd heasoft_v${VER}
+    patch -p1 < ${SETUPPATH}/patches/${HEASOFTCORE}.patch
+    if [ "$?" != "0" ]; then
+      echo "ERROR: Something went wrong applying the HEASoft patch!"
+      exit 1
+    fi
+    cd ..
+    PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${HEASOFTCORE}.patch" | awk -F" " '{ print $2 }'`
+    PATCHAPPLIED="Patch applied ${PATCHMD5}"
+    echo "Applied patch: ${SETUPPATH}/patches/${HEASOFTCORE}.patch"
+  else
+    echo "No required patch found for this version of HEASoft"
+  fi
+fi
 
 
 
@@ -319,6 +394,7 @@ rm -f COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
 echo "${COMPONENTS}" >> COMPILE_SUCCESSFUL
+echo "${PATCHAPPLIED}" >> COMPILE_SUCCESSFUL
 
 
 echo "Setting permissions..."

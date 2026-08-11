@@ -849,7 +849,7 @@ elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]]; then
   echo "Switching to build-heasoft.sh script..."
   cd ${EXTERNALPATH}
 
-  ${SETUPPATH}/build-heasoft.sh -source=${ENVFILE} 2>&1 | tee BuildLogHEASoft.txt
+  ${SETUPPATH}/build-heasoft.sh -source=${ENVFILE} -patch=yes 2>&1 | tee BuildLogHEASoft.txt
   RESULT=${PIPESTATUS[0]}
 
 

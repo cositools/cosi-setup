@@ -1,0 +1,27 @@
+diff -rupN heasoft_v6.36/tcltk/tk/unix/tkUnixFont.c heasoft_v6.36_patched/tcltk/tk/unix/tkUnixFont.c
+--- heasoft_v6.36/tcltk/tk/unix/tkUnixFont.c	2026-08-11 12:29:38.258268363 -0700
++++ heasoft_v6.36_patched/tcltk/tk/unix/tkUnixFont.c	2026-08-11 12:39:23.581669228 -0700
+@@ -2109,8 +2109,21 @@ FindSubFontForChar(
+ 
+     nameList = ListFonts(fontPtr->display, "*", &numNames);
+     for (i = 0; i < numNames; i++) {
+-	fallback = strchr(nameList[i] + 1, '-') + 1;
+-	strchr(fallback, '-')[0] = '\0';
++	/*
++	 * Truncate through a plain (non-const) char* into nameBuf, then
++	 * only assign the result to "fallback" (declared "const char *"
++	 * above). Newer GCC versions (14+) propagate the const-ness of
++	 * "fallback" into their built-in strchr() modeling and reject an
++	 * in-place write through it as "assignment of read-only location",
++	 * even though the pointee here is a plain stack buffer.
++	 */
++	char nameBuf[256];
++	char *dash;
++	strncpy(nameBuf, strchr(nameList[i] + 1, '-') + 1, sizeof(nameBuf) - 1);
++	nameBuf[sizeof(nameBuf) - 1] = '\0';
++	dash = strchr(nameBuf, '-');
++	dash[0] = '\0';
++	fallback = nameBuf;
+ 	if (SeenName(fallback, &ds) == 0) {
+ 	    subFontPtr = CanUseFallback(fontPtr, fallback, ch,
+ 		    fixSubFontPtrPtr);
