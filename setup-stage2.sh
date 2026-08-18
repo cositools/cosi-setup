@@ -85,6 +85,9 @@ if [ "$?" != "0" ]; then
   MAXTHREADS=1
 fi
 
+# Automatically install additional packages
+AUTOPACKAGEINSTALL=false
+
 # Prepare the environment script
 ENVFILE="${COSIPATH}/new-source-script.sh"
 rm -f ${ENVFILE}
@@ -166,6 +169,8 @@ for C in "${CMD[@]}"; do
     IGNOREMISSINGPACKAGES=true
   elif [[ ${C} == *-k*-e* ]]; then
     KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
+  elif [[ ${C} == *-auto* ]]; then
+    AUTOPACKAGEINSTALL=true
   elif [[ ${C} == *-e* ]] && [[ ${C} != *-k*-e* ]]; then
     EXTRAS=`echo ${C} | awk -F"=" '{ print $2 }'`
     EXTRAS=${EXTRAS/,/ }
@@ -523,7 +528,7 @@ else
       exit 1
     fi
 
-    ${SETUPPATH}/setup-packages-linux.sh
+    ${SETUPPATH}/setup-packages-linux.sh --autopackageinstall=${AUTOPACKAGEINSTALL}
     EXITCODE=$?
     if [ "${EXITCODE}" != "0" ]; then
       # The error message is part of the above script

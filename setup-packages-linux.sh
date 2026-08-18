@@ -45,7 +45,19 @@ fi
 REQUIRED=""
 EXTRATEXT=""
 TOBEINSTALLED=""
+SUPPORTEDVERSION="TRUE"
 UNSUPPORTEDOS="FALSE"
+AUTOPACKAGEINSTALL="FALSE"
+
+# The command line
+CMD=( "$@" )
+
+for C in "${CMD[@]}"; do
+  if [[ ${C} == *-auto* ]]; then
+    AUTOPACKAGEINSTALL="TRUE"
+  fi
+done
+
 
 
 ###############################################################################
@@ -77,12 +89,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     else
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre2-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses-dev libboost-all-dev libcfitsio-dev libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libcrypt-dev libgif-dev liblz4-dev liblzma-dev libftgl-dev"
       
-      echo "This script has not yet been adapted for your version of Ubuntu: ${VERSIONID}"
-      echo " "
-      echo "Anyway, try to install the following packages -- remove the ones which do not work form the list:"
-      echo "sudo apt update; sudo apt install ${REQUIRED}"
-      echo " "
-      exit 255  
+      SUPPORTEDVERSION="FALSE"
     fi
   elif [[ ${OS} == debian ]] || [[ ${OS} == raspbian ]]; then
     if [[ ${VERSIONID} == 10 ]]; then
@@ -91,56 +98,73 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev "
     else
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev "
-      
-      echo "This script has not yet been adapted for your version of ${OS}: ${VERSIONID}"
-      echo " "
-      echo "Anyway, try to install the following packages -- remove the ones which do not work form the list:"
-      echo "sudo apt update; sudo apt install ${REQUIRED}"
-      echo " "
-      exit 255  
+            
+      SUPPORTEDVERSION="FALSE"
     fi
   else
     REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev "
  
+    SUPPORTEDVERSION="FALSE"
+fi
+  
+  #echo "Required: ${REQUIRED}"
+  if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
+  
+  if [[ ${SUPPORTEDVERSION} == TRUE ]]; then
+    # Check if each of the packages exists:
+    for PACKAGE in ${REQUIRED}; do 
+      # Check if the file is installed
+      STATUS=`dpkg-query -Wf'${db:Status-abbrev}' ${PACKAGE} 2>/dev/null | grep '^i'`
+      #echo "${PACKAGE}: >${STATUS}<"
+      if [[ "${STATUS}" == "" ]]; then
+        # Check if it exists at all:
+        echo "Not installed: ${PACKAGE}"
+        TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
+
+        #STATUS=`apt-cache pkgnames ${PACKAGE} 2>/dev/null`
+        #if [[ "${STATUS}" != "" ]]; then
+        #  TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
+        #fi
+      fi
+    done
+  
+    if [[ "${TOBEINSTALLED}" != "" ]]; then
+      if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+        echo " "
+        echo "Performing automatic install of packages. I will do the following:"
+        echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
+        echo " "
+        sudo apt update
+        sudo apt install ${TOBEINSTALLED}
+        if [[ "$?" != "0" ]]; then
+          echo " "
+          echo "ERROR: Something went wrong with the autoamtic package installation."
+          exit 255
+        else
+          echo " "
+          echo "All required packages seem to be installed now!"
+          exit 0
+        fi
+      else 
+        echo " "
+        echo "Do the following to install all required packages:"
+        echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
+        echo " "
+      exit 255
+      fi
+    else 
+      echo " "
+      echo "All required packages seem to be already installed!"
+      exit 0
+    fi
+  else
     echo "This script has not yet been adapted for your version of Linux: Debian-derivative ${OS}"
     echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
     echo " "
     echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
     echo "sudo apt update; sudo apt install ${REQUIRED}"
     echo " "
-    exit 255      
-  fi
-  
-  #echo "Required: ${REQUIRED}"
-  if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
-    
-  # Check if each of the packages exists:
-  for PACKAGE in ${REQUIRED}; do 
-    # Check if the file is installed
-    STATUS=`dpkg-query -Wf'${db:Status-abbrev}' ${PACKAGE} 2>/dev/null | grep '^i'`
-    #echo "${PACKAGE}: >${STATUS}<"
-    if [[ "${STATUS}" == "" ]]; then
-      # Check if it exists at all:
-      echo "Not installed: ${PACKAGE}"
-      TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
-
-      #STATUS=`apt-cache pkgnames ${PACKAGE} 2>/dev/null`
-      #if [[ "${STATUS}" != "" ]]; then
-      #  TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
-      #fi
-    fi
-  done
-  
-  if [[ "${TOBEINSTALLED}" != "" ]]; then
-    echo " "
-    echo "Do the following to install all required packages:"
-    echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
-    echo " "
     exit 255
-  else 
-    echo " "
-    echo "All required packages seem to be already installed!"
-    exit 0
   fi
 fi
 
