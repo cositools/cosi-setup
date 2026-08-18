@@ -47,7 +47,7 @@ CONFIGUREOPTIONS+=" -Dasimage=ON"
 CONFIGUREOPTIONS+=" -Dexplicitlink=ON -Drpath=ON -Dsoversion=ON"
 # Use builtin openGL components glew and gl2ps
 if [[ ${OSTYPE} != *arwin* ]]; then
-  CONFIGUREOPTIONS+=" -Dbuiltin_glew=ON -Dbuiltin_gl2ps=ON"
+  CONFIGUREOPTIONS+=" -Dbuiltin_ftgl=ON -Dbuiltin_glew=ON -Dbuiltin_gl2ps=ON"
 fi
 
 
