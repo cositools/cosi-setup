@@ -238,7 +238,6 @@ fi
 # At this stage we need to be in the cosi-setup directory
 
 # We never switch the cosi-setup branch
-: '
 git checkout ${GITBRANCH}
 if [ "$?" != "0" ]; then
   echo ""
@@ -255,7 +254,6 @@ if [ "$?" != "0" ]; then
     exit 1
   fi
 fi
-'
 
 
 ############################################################################################################
