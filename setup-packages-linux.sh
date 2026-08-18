@@ -134,8 +134,8 @@ fi
         echo "Performing automatic install of packages. I will do the following:"
         echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
         echo " "
-        sudo apt update
-        sudo apt install ${TOBEINSTALLED}
+        DEBIAN_FRONTEND=noninteractive sudo apt update
+        DEBIAN_FRONTEND=noninteractive sudo apt install -y ${TOBEINSTALLED}
         if [[ "$?" != "0" ]]; then
           echo " "
           echo "ERROR: Something went wrong with the autoamtic package installation."
