@@ -25,6 +25,7 @@ CMD=( "$@" )
 # The path to the COSItools install
 COSIPATH=""
 GITBASEDIR="https://github.com/cositools"
+GITSETUPBRANCH="main"
 GITBRANCH="main"
 
 
@@ -45,6 +46,10 @@ confhelp() {
   echo " "
   echo "--cositoolspath=[path to COSItools - default: \"COSItools\"]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
+  echo " "
+  echo "--setup-branch=[name of a git branch - default: main]"
+  echo "    Choose a specific branch to be used for the cosi-setup setup scripts."
+  echo "    If the option is not given the main branch will be used"
   echo " "
   echo "--branch=[name of a git branch - default: main]"
   echo "    Choose a specific branch of the COSItools git repositories."
@@ -115,7 +120,6 @@ absolutefilename() {
 }
 
 
-
 ############################################################################################################
 # Step 3: extract the main parameters for the stage 1 script
 
@@ -132,8 +136,10 @@ done
 for C in "${CMD[@]}"; do
   if [[ ${C} == *-co*=* ]]; then
     COSIPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]]; then
+  elif [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]] && [[ ${C} != *-s*-b* ]]; then
     GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
+  elif [[ ${C} == *-s* ]]; then
+    GITSETUPBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -215,7 +221,7 @@ echo " * Switched to the COSItools path"
 # Step 6: Update/clone the cosi-setup repository
 
 echo ""
-echo "Updating/cloning the cosi-setup repository using branch ${GITBRANCH}"
+echo "Updating/cloning the cosi-setup repository to branch ${GITSETUPBRANCH}"
 
 # If the cosi-setup directory exists, update it if not clone it
 if [[ -d cosi-setup ]]; then
@@ -237,20 +243,21 @@ else
 fi
 # At this stage we need to be in the cosi-setup directory
 
-# We never switch the cosi-setup branch
-git checkout ${GITBRANCH}
+
+# Switch the cosi-setup branch
+git switch ${GITSETUPBRANCH}
 if [ "$?" != "0" ]; then
   echo ""
-  if [[ ${GITBRANCH} != main ]]; then
-    echo "WARNING: Unable to checkout branch ${GITBRANCH} from cosi-setup. Trying main."
-    git checkout main
+  if [[ ${GITSETUPBRANCH} != main ]]; then
+    echo "WARNING: Unable to checkout branch ${GITSETUPBRANCH} from cosi-setup. Trying main."
+    git switch main
     if [ "$?" != "0" ]; then
       echo ""
       echo "ERROR: Unable to checkout branch main from cosi-setup!"
       exit 1
     fi
   else
-    echo "ERROR: Unable to checkout branch ${GITBRANCH} from cosi-setup!"
+    echo "ERROR: Unable to checkout branch ${GITSETUPBRANCH} from cosi-setup!"
     exit 1
   fi
 fi
