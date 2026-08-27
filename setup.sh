@@ -308,7 +308,7 @@ if [[ $@ != *-heal* ]]; then
 fi
 
 # Filter "--setup-branch"
-CMD=( $(printf "%s\n" "${CMD[@]}" | grep -Ev -- '^-s(=|$)') )
+CMD=(); for a in "$@"; do [[ $a == -s=* ]] || CMD+=("$a"); done
 
 set -o pipefail # This ensures the $? catches any error in the pipeline
 ./setup-stage2.sh "${CMD[@]}" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  
