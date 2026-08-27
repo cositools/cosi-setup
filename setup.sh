@@ -221,7 +221,7 @@ echo " * Switched to the COSItools path"
 # Step 6: Update/clone the cosi-setup repository
 
 echo ""
-echo "Updating/cloning the cosi-setup repository"
+echo "Updating/cloning the cosi-setup repository to branch ${GITSETUPBRANCH}"
 
 # If the cosi-setup directory exists, update it if not clone it
 if [[ -d cosi-setup ]]; then
@@ -261,7 +261,7 @@ if [ "$?" != "0" ]; then
     exit 1
   fi
 fi
-
+git status
 
 
 ############################################################################################################
