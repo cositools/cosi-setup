@@ -300,8 +300,11 @@ if [[ $@ != *-heal* ]]; then
   ADDITIONALOPTIONS+=" --healpix=off"
 fi
 
+# Filter "--setup-branch"
+CMD=( $(printf "%s\n" "${CMD[@]}" | grep -v -- "-s") )
+
 set -o pipefail # This ensures the $? catches any error in the pipeline
-./setup-stage2.sh "$@" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  
+./setup-stage2.sh "${CMD[@]}" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  
 EXITCODE=$?
 if [ "${EXITCODE}" != "0" ]; then
   if [ "${EXITCODE}" == "255" ]; then
