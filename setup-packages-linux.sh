@@ -25,7 +25,7 @@ if [ -f /etc/os-release ]; then
     OS=${OS//\"/}
   fi
 
-  if [[ ${OS} == debian ]]; then
+  if [[ ${OS} == *debian* ]] || [[ ${OS} == *ubuntu* ]]; then
     IsDebianClone=1
   elif [[ ${OS} == *suse* ]]; then
     IsOpenSuseClone=1
@@ -46,8 +46,8 @@ REQUIRED=""
 EXTRATEXT=""
 TOBEINSTALLED=""
 SUPPORTEDVERSION="TRUE"
-UNSUPPORTEDOS="FALSE"
 AUTOPACKAGEINSTALL="FALSE"
+REPOSETUP=true
 
 # The command line
 CMD=( "$@" )
@@ -74,8 +74,13 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
   VERSIONID=${VERSIONID//\"/}
   #echo "VERSION: ${VERSIONID}"
 
+  # Debian testing & unstable have no VERSION_ID -- use a value which is not a released version
+  if [[ ${VERSIONID} == "" ]]; then
+    VERSIONID=99
+  fi
+
   if [[ ${OS} == ubuntu ]]; then
-    # Check th Ubuntu version
+    # Check the Ubuntu version
     if [[ ${VERSIONID} == 18.04 ]] || [[ ${VERSIONID} == 18.10 ]] || [[ ${VERSIONID} == 19.04 ]] || [[ ${VERSIONID} == 19.10 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev libboost-all-dev mlocate libcfitsio-dev libxerces-c-dev libhealpix-cxx-dev bc "
     elif [[ ${VERSIONID} == 20.04 ]] || [[ ${VERSIONID} == 20.10 ]] || [[ ${VERSIONID} == 21.04 ]] || [[ ${VERSIONID} == 21.10 ]]; then
@@ -108,14 +113,12 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
     else
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
-            
       SUPPORTEDVERSION="FALSE"
     fi
   else
     REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
- 
     SUPPORTEDVERSION="FALSE"
-fi
+  fi
   
   #echo "Required: ${REQUIRED}"
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
@@ -141,14 +144,14 @@ fi
     if [[ "${TOBEINSTALLED}" != "" ]]; then
       if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
         echo " "
-        echo "Performing automatic install of packages. I will do the following:"
+        echo "Performing an automatic installation of the packages. I will do the following:"
         echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
         echo " "
         sudo DEBIAN_FRONTEND=noninteractive apt update
         sudo DEBIAN_FRONTEND=noninteractive apt install -y ${TOBEINSTALLED}
         if [[ "$?" != "0" ]]; then
           echo " "
-          echo "ERROR: Something went wrong with the autoamtic package installation."
+          echo "ERROR: Something went wrong with the automatic package installation."
           exit 255
         else
           echo " "
@@ -160,7 +163,7 @@ fi
         echo "Do the following to install all required packages:"
         echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
         echo " "
-      exit 255
+        exit 255
       fi
     else 
       echo " "
@@ -171,7 +174,7 @@ fi
     echo "This script has not yet been adapted for your version of Linux: Debian-derivative ${OS}"
     echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
     echo " "
-    echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
+    echo "In the mean time, try to install the following packages -- remove the ones which do not work from the list:"
     echo "sudo apt update; sudo apt install ${REQUIRED}"
     echo " "
     exit 255
@@ -200,7 +203,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel python xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel "
     else 
       REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel python xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel "
-      UNSUPPORTEDOS="TRUE"
+      SUPPORTEDVERSION="FALSE"
     fi
 
     # OpenSUSE is frequently behind with python. Thus add the latest version:
@@ -210,52 +213,69 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ cfitsio-devel libxerces-c-devel hdf5-devel healpix_cxx-devel libcurl-devel "
   else
     REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ cfitsio-devel libxerces-c-devel hdf5-devel healpix_cxx-devel libcurl-devel "
-    UNSUPPORTEDOS="TRUE"
+    SUPPORTEDVERSION="FALSE"
   fi
 
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
 
-  # Check if each of the packages exists:
-  TOBEINSTALLED=""
-  for PACKAGE in ${REQUIRED}; do 
-    # Check if the file is installed
-    STATUS=$(rpm -q --queryformat "%{NAME}\n" ${PACKAGE})
-    #echo "${PACKAGE}: >${STATUS}<"
-    if [[ "${STATUS}" != "${PACKAGE}" ]]; then
-      # Check if it exists at all:
-      echo "Not installed: ${PACKAGE}"
-      TOBEINSTALLED+="${PACKAGE} "
-    fi
-  done
+  if [[ ${SUPPORTEDVERSION} == TRUE ]]; then
+    # Check if each of the packages exists:
+    for PACKAGE in ${REQUIRED}; do
+      # Check if the file is installed
+      STATUS=$(rpm -q --queryformat "%{NAME}\n" ${PACKAGE})
+      #echo "${PACKAGE}: >${STATUS}<"
+      if [[ "${STATUS}" != "${PACKAGE}" ]]; then
+        # Check if it exists at all:
+        echo "Not installed: ${PACKAGE}"
+        TOBEINSTALLED+="${PACKAGE} "
+      fi
+    done
     
   
-  if [[ "${TOBEINSTALLED}" != "" ]]; then
-    if [[ ${UNSUPPORTEDOS} == FALSE ]]; then
-      echo " "
-      echo "Do the following to install all required packages:"
-      echo ""
-      echo "sudo zypper install ${TOBEINSTALLED}"
-      echo " "
-      exit 255
+    if [[ "${TOBEINSTALLED}" != "" ]]; then
+      if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+        echo " "
+        echo "Performing an automatic installation of the packages. I will do the following:"
+        echo "sudo zypper refresh"
+        echo "sudo zypper install -y ${TOBEINSTALLED}"
+        echo " "
+        sudo zypper refresh && sudo zypper install -y ${TOBEINSTALLED}
+        if [[ "$?" != "0" ]]; then
+          echo " "
+          echo "ERROR: Something went wrong with the automatic package installation."
+          exit 255
+        else
+          echo " "
+          echo "All required packages seem to be installed now!"
+          exit 0
+        fi
+      else
+        echo " "
+        echo "Do the following to install all required packages:"
+        echo ""
+        echo "sudo zypper install ${TOBEINSTALLED}"
+        echo " "
+        exit 255
+      fi
     else 
       echo " "
-      echo "This script has not yet been adapted for your version of Linux:"
-      echo "    SUSE-derivative: ${OS}"
-      if [[ ${VERSIONID} != "" ]]; then
-        echo "    Version:         ${VERSIONID}"
-      fi
-      echo "Feel free to open a GitHub issue and attach the content of the file: /etc/os-release"
-      echo " "
-      echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
-      echo ""
-      echo "sudo zypper install ${TOBEINSTALLED}"
-      echo " "
-      exit 255
+      echo "All required packages seem to be already installed!"
+      exit 0
     fi
-  else 
+  else
     echo " "
-    echo "All required packages seem to be already installed!"
-    exit 0
+    echo "This script has not yet been adapted for your version of Linux:"
+    echo "    SUSE-derivative: ${OS}"
+    if [[ ${VERSIONID} != "" ]]; then
+      echo "    Version:         ${VERSIONID}"
+    fi
+    echo "Feel free to open a GitHub issue and attach the content of the file: /etc/os-release"
+    echo " "
+    echo "In the mean time, try to install the following packages -- remove the ones which do not work from the list:"
+    echo ""
+    echo "sudo zypper install ${REQUIRED}"
+    echo " "
+    exit 255
   fi
 fi
 
@@ -278,26 +298,22 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     #echo "VERSION: ${VERSIONID}"
     if (( ${VERSIONID} == 7 )) ; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
+      echo " "
+      echo "ERROR: Redhat 7 or earlier is no longer supported."
+      exit 255
     elif (( ${VERSIONID} == 8 )) ; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python36-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool "
-      MESSAGE+="\nPlease make sure these extra package repositories are active:\nsudo dnf config-manager --set-enabled powertools\nsudo dnf install epel-release\nsudo dnf makecache"
+      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled powertools && sudo dnf install -y epel-release"
     elif (( ${VERSIONID} == 9 )) ; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool "
-      MESSAGE+="\nPlease make sure these extra package repositories are active:\nsudo dnf config-manager --set-enabled crb\nsudo dnf install epel-release\nsudo dnf makecache"
+      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
     elif (( ${VERSIONID} >= 10 )) && (( ${VERSIONID} <= 100 )) ; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool "
-      MESSAGE+="\nPlease make sure these extra package repositories are active:\nsudo dnf config-manager --set-enabled crb\nsudo dnf install epel-release\nsudo dnf makecache"
+      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
     else 
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel autoconf automake libtool "
-
-      echo " "
-      echo "This script has not yet been adapted for your version of SL ${VERSIONID}"
-      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
-      echo " "
-      echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
-      echo "sudo yum install ${REQUIRED}"
-      echo " "
-      exit 255
+      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
+      SUPPORTEDVERSION="FALSE"
     fi
   elif [[ ${OS} == fedora ]]; then
     # Check the version
@@ -307,17 +323,11 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     #echo "VERSION: ${VERSIONID}"
     if (( ${VERSIONID} >= 42 )) && (( ${VERSIONID} <= 99 )) ; then
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
+      REPOSETUP="sudo dnf install -y dnf-plugins-core"
     else 
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
-
-      echo " "
-      echo "This script has not yet been adapted for your version of SL ${VERSIONID}"
-      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
-      echo " "
-      echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
-      echo "sudo yum install ${REQUIRED}"
-      echo " "
-      exit 255
+      REPOSETUP="sudo dnf install -y dnf-plugins-core"
+      SUPPORTEDVERSION="FALSE"
     fi
   elif [[ ${OS} == centos ]]; then
     # Check the version
@@ -329,76 +339,85 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel lib-curl-devel "
     elif [[ ${VERSIONID} == 8 ]]; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-      
-      echo ""
-      echo "Centos 8 - please make sure to enable the powertools repository:"
-      echo "sudo dnf -y install dnf-plugins-core"
-      echo "sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
-      echo "sudo dnf config-manager --set-enabled powertools"
-      echo ""
-
+      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled powertools && sudo dnf install -y epel-release"
     elif [[ ${VERSIONID} == 9 ]]; then
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel fftw-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-
-
+      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
     else 
       REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-
-      echo " "
-      echo "This script has not yet been adapted for your version of Centos ${VERSIONID}"
-      echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
-      echo " "
-      echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
-      echo "sudo yum install ${REQUIRED}"
-      echo " "
-      exit 255
+      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
+      SUPPORTEDVERSION="FALSE"
     fi
   else
     REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-
-    echo " "
-    echo "This script has not yet been adapted for your version of Linux: Redhat-derivative ${OS}"
-    echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
-    echo " "
-    echo "In the mean time, try to install the following packages -- remove the ones which do not work form the list:"
-    echo "sudo yum install ${REQUIRED}"
-    echo " "
-    exit 255 
+    SUPPORTEDVERSION="FALSE"
   fi
   
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
 
-  # Check if each of the packages exists:
-  for PACKAGE in ${REQUIRED}; do 
-    # Check if the file is installed
-    STATUS=$(rpm -q ${PACKAGE} >& /dev/null)
-    if [[ $? == 1 ]]; then
-      # Check if it exists at all:
-      echo "Not installed: ${PACKAGE}"
-      TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
+  if [[ ${SUPPORTEDVERSION} == TRUE ]]; then
+    # Check if each of the packages exists:
+    for PACKAGE in ${REQUIRED}; do
+      # Check if the file is installed
+      if ! rpm -q ${PACKAGE} >& /dev/null; then
+        # Check if it exists at all:
+        echo "Not installed: ${PACKAGE}"
+        TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
+      fi
+    done
+  
+  
+    if [[ "${TOBEINSTALLED}" != "" ]]; then
+      if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+        echo " "
+        echo "Performing an automatic installation of the packages. I will do the following:"
+        if [[ ${REPOSETUP} != true ]]; then
+          echo "${REPOSETUP}"
+        fi
+        echo "sudo dnf makecache"
+        echo "sudo dnf install -y ${TOBEINSTALLED}"
+        echo " "
+        eval "${REPOSETUP}" && sudo dnf makecache && sudo dnf install -y ${TOBEINSTALLED}
+        if [[ "$?" != "0" ]]; then
+          echo " "
+          echo "ERROR: Something went wrong with the automatic package installation."
+          exit 255
+        else
+          echo " "
+          echo "All required packages seem to be installed now!"
+          exit 0
+        fi
+      else
+        echo " "
+        echo "Do the following to install all required packages:"
+        if [[ ${REPOSETUP} != true ]]; then
+          echo "${REPOSETUP}"
+        fi
+        echo "sudo yum install ${TOBEINSTALLED}"
+        echo " "
+        exit 255
+      fi
+    else
+      echo " "
+      echo "All required packages seem to be already installed!"
+      exit 0
     fi
-  done
-  
-  
-  if [[ "${TOBEINSTALLED}" != "" ]]; then
-    echo -e "${MESSAGE}"
+  else
     echo " "
-    echo "Do the following to install all required packages:"
-    echo "sudo yum install ${TOBEINSTALLED}"
+    echo "This script has not yet been adapted for your version of Linux: ${OS} version ${VERSIONID}"
+    echo "Feel free to write the maintainers an email to update this script and send them the content of the file: /etc/os-release"
+    echo " "
+    echo "In the mean time, try to install the following packages -- remove the ones which do not work from the list:"
+    echo "sudo yum install ${REQUIRED}"
     echo " "
     exit 255
-  else 
-    echo " "
-    echo "All required packages seem to be already installed!"
-    exit 0
   fi
-
 fi
 
 
 
 ###############################################################################
-# Arch & clones - NOT SUPPORTED
+# Arch & clones
 
 if [[ ${IsArchClone} -eq 1 ]]; then
 
@@ -409,16 +428,14 @@ if [[ ${IsArchClone} -eq 1 ]]; then
   # Check if each of the packages exists:
   for PACKAGE in ${REQUIRED_PAC}; do
     # Check if the package is installed
-    STATUS=$(pacman -Ss ${PACKAGE} >& /dev/null)
-    if [[ $? == 1 ]]; then
+    if ! pacman -Si ${PACKAGE} >& /dev/null; then
       # Check if it exists at all:
       echo "Does not exist: ${PACKAGE}"
     else
-      STATUS=$(pacman -Qi ${PACKAGE} >& /dev/null)
-      if [[ $? == 1 ]]; then
+      if ! pacman -Qi ${PACKAGE} >& /dev/null; then
         # Check if it exists at all:
         echo "Not installed: ${PACKAGE}"
-        TOBEINSTALLED_PAC="${TOBEINSTALLED} ${PACKAGE}"
+        TOBEINSTALLED_PAC="${TOBEINSTALLED_PAC} ${PACKAGE}"
       fi
     fi
   done
@@ -445,16 +462,58 @@ if [[ ${IsArchClone} -eq 1 ]]; then
 
   
   if [[ "${TOBEINSTALLED_PAC}" != "" ]] || [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
-    echo " "
-    echo "Do the following to install all required packages:"
-    if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
-      echo "sudo pacman -S ${TOBEINSTALLED_PAC}"
+    if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+      echo " "
+      echo "Performing an automatic installation of the packages. I will do the following:"
+      if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
+        echo "sudo pacman -Syu --noconfirm ${TOBEINSTALLED_PAC}"
+      fi
+      if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
+        echo "yay -S --noconfirm ${TOBEINSTALLED_AUR}"
+      fi
+      echo " "
+
+      if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
+        # Arch does not support partial upgrades, thus we have to do a full one
+        sudo pacman -Syu --noconfirm ${TOBEINSTALLED_PAC}
+        if [[ "$?" != "0" ]]; then
+          echo " "
+          echo "ERROR: Something went wrong with the automatic package installation."
+          exit 255
+        fi
+      fi
+
+      if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
+        # yay must not be called via sudo
+        if ! command -v yay >& /dev/null; then
+          echo " "
+          echo "ERROR: yay is required to install these AUR packages: ${TOBEINSTALLED_AUR}"
+          echo "       Please install yay first, and then run this script again."
+          exit 255
+        fi
+        yay -S --noconfirm ${TOBEINSTALLED_AUR}
+        if [[ "$?" != "0" ]]; then
+          echo " "
+          echo "ERROR: Something went wrong with the automatic package installation."
+          exit 255
+        fi
+      fi
+
+      echo " "
+      echo "All required packages seem to be installed now!"
+      exit 0
+    else
+      echo " "
+      echo "Do the following to install all required packages:"
+      if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
+        echo "sudo pacman -S ${TOBEINSTALLED_PAC}"
+      fi
+      if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
+        echo "yay -S ${TOBEINSTALLED_AUR}"
+      fi
+      echo " "
+      exit 255
     fi
-    if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
-      echo "yay -S ${TOBEINSTALLED_AUR}"
-    fi    
-    echo " "
-    exit 255
   else
     echo " "
     echo "All required packages seem to be already installed!"

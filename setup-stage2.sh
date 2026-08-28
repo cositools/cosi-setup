@@ -528,7 +528,11 @@ else
       exit 1
     fi
 
-    ${SETUPPATH}/setup-packages-linux.sh --autopackageinstall=${AUTOPACKAGEINSTALL}
+    if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
+      ${SETUPPATH}/setup-packages-linux.sh --autoinstall
+    else
+      ${SETUPPATH}/setup-packages-linux.sh
+    fi
     EXITCODE=$?
     if [ "${EXITCODE}" != "0" ]; then
       # The error message is part of the above script
