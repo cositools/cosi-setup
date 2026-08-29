@@ -69,7 +69,7 @@ if [[ $? -eq 0 ]]; then
       echo "ERROR: You cannot use a python version installed via (ana)conda with ROOT."
       exit 1
     else
-      CONFIGUREOPTIONS+=" -DPYTHON_EXECUTABLE:FILEPATH=${PPATH} -Dpython3=ON"
+      CONFIGUREOPTIONS+=" -DPYTHON_EXECUTABLE:FILEPATH=${PPATH} -DPython3_EXECUTABLE:FILEPATH=${PPATH} -Dpython3=ON"
     fi
   fi
 fi
