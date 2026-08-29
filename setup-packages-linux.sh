@@ -380,9 +380,9 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
           echo "${REPOSETUP}"
         fi
         echo "sudo dnf makecache"
-        echo "sudo dnf install -y ${TOBEINSTALLED}"
+        echo "sudo dnf install -y --allowerasing ${TOBEINSTALLED}"
         echo " "
-        eval "${REPOSETUP}" && sudo dnf makecache && sudo dnf install -y ${TOBEINSTALLED}
+        eval "${REPOSETUP}" && sudo dnf makecache && sudo dnf install -y --allowerasing ${TOBEINSTALLED}
         if [[ "$?" != "0" ]]; then
           echo " "
           echo "ERROR: Something went wrong with the automatic package installation."
@@ -426,7 +426,7 @@ fi
 
 if [[ ${IsArchClone} -eq 1 ]]; then
 
-  REQUIRED_PAC="yay git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost xerces-c gl2ps autoconf automake libtool pkgconf patch"
+  REQUIRED_PAC="yay git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost xerces-c gl2ps autoconf automake libtool pkgconf patch fakeroot debugedit"
 
   if [[ "${REQUIRED_PAC}" == "" ]]; then exit 0; fi
 
