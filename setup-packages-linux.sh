@@ -326,7 +326,11 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     VERSIONID=${VERSIONID//\"/}
     VERSIONID=$(echo ${VERSIONID} | awk -F'.' '{ print $1 }')
     #echo "VERSION: ${VERSIONID}"
-    if (( ${VERSIONID} >= 42 )) && (( ${VERSIONID} <= 99 )) ; then
+    if (( ${VERSIONID} <= 42 )) ; then
+      echo " "
+      echo "ERROR: Fedora 42 or earlier is no longer supported."
+      exit 255
+    elif (( ${VERSIONID} >= 43 )) && (( ${VERSIONID} <= 99 )) ; then
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre2-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core"
     else 
@@ -546,6 +550,10 @@ fi
 # Alpine - NOT SUPPORTED!
 
 if [[ ${IsAlpineClone} -eq 1 ]]; then
+
+  echo " "
+  echo "ERROR: Alpine Linux is not supported due to an incompatibility between ROOT and Alpine."
+  exit 255
 
   REQUIRED="git git-lfs libstdc++ gcompat gawk make gcc g++ gfortran patch libtbb-dev gdb valgrind binutils libx11 libxpm libxft-dev libxext-dev openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu libxpm-dev curl doxygen blas lapack expect dos2unix ncurses boost-dev cfitsio-dev xerces-c-dev"
 
