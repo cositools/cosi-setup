@@ -125,7 +125,7 @@ GetBootstrap() {
       echo "export DEBIAN_FRONTEND=noninteractive; apt-get update && apt-get install -y curl git sudo"
       ;;
     fedora*|rockylinux*|almalinux*|*centos*)
-      echo "dnf install -y curl git sudo"
+      echo "dnf install -y --allowerasing curl git sudo"
       ;;
     *suse*)
       echo "zypper --non-interactive install curl git sudo"
