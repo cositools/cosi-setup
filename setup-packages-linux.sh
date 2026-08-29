@@ -492,9 +492,21 @@ if [[ ${IsArchClone} -eq 1 ]]; then
         # yay must not be called via sudo
         if ! command -v yay >& /dev/null; then
           echo " "
-          echo "ERROR: yay is required to install these AUR packages: ${TOBEINSTALLED_AUR}"
-          echo "       Please install yay first, and then run this script again."
-          exit 255
+          echo "yay not found - building and installing it from the AUR..."
+          YAYBUILDDIR=$(mktemp -d)
+          git clone https://aur.archlinux.org/yay.git "${YAYBUILDDIR}/yay"
+          if [[ "$?" != "0" ]]; then
+            echo " "
+            echo "ERROR: Unable to clone yay from the AUR."
+            exit 255
+          fi
+          (cd "${YAYBUILDDIR}/yay" && makepkg -si --noconfirm)
+          if [[ "$?" != "0" ]]; then
+            echo " "
+            echo "ERROR: Something went wrong building/installing yay."
+            exit 255
+          fi
+          rm -rf "${YAYBUILDDIR}"
         fi
         yay -S --noconfirm ${TOBEINSTALLED_AUR}
         if [[ "$?" != "0" ]]; then
