@@ -172,10 +172,18 @@ TestSingleOS() {
     return
   fi
 
-  if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; ${BOOTSTRAP}; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && sudo -H -u tester bash -lc 'cd; ${CMD}'" > "$LOG" 2>&1; then
+  # Exit code 90 flags a failure to bootstrap the container itself (broken distro
+  # mirror, missing repository metadata, ...) so that "this OS image is broken
+  # today" can be told apart from "COSItools failed to install".
+  if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; { ${BOOTSTRAP}; } || exit 90; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && sudo -H -u tester bash -lc 'cd; ${CMD}'" > "$LOG" 2>&1; then
     echo "PASS: ${IMAGE}" | tee -a "${LOGDIR}/summary.txt"
   else
-    echo "FAIL: ${IMAGE} (see ${LOG})" | tee -a "${LOGDIR}/summary.txt"
+    STATUS=$?
+    if [[ ${STATUS} -eq 90 ]]; then
+      echo "INFRA-FAIL: ${IMAGE} (could not bootstrap the container -- broken distro repository/mirror, not a COSItools problem; see ${LOG})" | tee -a "${LOGDIR}/summary.txt"
+    else
+      echo "FAIL: ${IMAGE} (see ${LOG})" | tee -a "${LOGDIR}/summary.txt"
+    fi
   fi
 }
 
