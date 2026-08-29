@@ -205,7 +205,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       echo "ERROR: opensuse Leap 15 or earlier is no longer supported."
       exit 255
     elif (( ${VERSIONID} == 16 )); then
-      REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel "
+      REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel patch "
     else 
       REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel python xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel "
       SUPPORTEDVERSION="FALSE"
@@ -426,7 +426,7 @@ fi
 
 if [[ ${IsArchClone} -eq 1 ]]; then
 
-  REQUIRED_PAC="yay git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost xerces-c gl2ps autoconf automake libtool pkgconf"
+  REQUIRED_PAC="yay git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost xerces-c gl2ps autoconf automake libtool pkgconf patch"
 
   if [[ "${REQUIRED_PAC}" == "" ]]; then exit 0; fi
 
