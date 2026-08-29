@@ -179,7 +179,9 @@ echo ""
 echo "Starting stage 1 setup"
 
 # Check 
-
+echo ""
+echo "Command line:"
+echo "$@"
 
 echo ""
 echo "Setting up the COSItools directory"
