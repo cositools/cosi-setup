@@ -172,7 +172,7 @@ TestSingleOS() {
     return
   fi
 
-  if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; ${BOOTSTRAP}; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && sudo -H -u tester bash -lc '${CMD}'" > "$LOG" 2>&1; then
+  if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; ${BOOTSTRAP}; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && sudo -H -u tester bash -lc 'cd; ${CMD}'" > "$LOG" 2>&1; then
     echo "PASS: ${IMAGE}" | tee -a "${LOGDIR}/summary.txt"
   else
     echo "FAIL: ${IMAGE} (see ${LOG})" | tee -a "${LOGDIR}/summary.txt"
