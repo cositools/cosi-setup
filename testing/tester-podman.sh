@@ -146,7 +146,7 @@ ExpandSetup() {
   local IMAGE="$1"
   case "$IMAGE" in
     rockylinux*|almalinux*)
-      SETUPCMD+="--healpix= "
+      echo "--healpix= "
       ;;
     *)
       echo ""  # unknown family - caller will skip
@@ -162,6 +162,7 @@ TestSingleOS() {
   local BOOTSTRAP="$(GetBootstrap "$IMAGE")"
   local TAG="${IMAGE//[:\/]/_}"
   local LOG="$LOGDIR/$TAG.log"
+  local CMD="${SETUPCMD}$(ExpandSetup "$IMAGE")"
 
   echo " "
   echo "Testing ${IMAGE}..."
@@ -171,7 +172,7 @@ TestSingleOS() {
     return
   fi
 
-  if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; ${BOOTSTRAP}; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && su - tester -c '${SETUPCMD};'" > "$LOG" 2>&1; then
+  if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; ${BOOTSTRAP}; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && su - tester -c '${CMD};'" > "$LOG" 2>&1; then
     echo "PASS: ${IMAGE}" | tee -a "${LOGDIR}/summary.txt"
   else
     echo "FAIL: ${IMAGE} (see ${LOG})" | tee -a "${LOGDIR}/summary.txt"
