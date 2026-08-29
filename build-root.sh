@@ -26,7 +26,7 @@ CONFIGUREOPTIONS+=" -DCMAKE_INSTALL_PREFIX=.."
 # Make sure we ignore some default paths of macport.
 type port >/dev/null 2>&1
 if [[ $? -eq 0 ]]; then
-  PORTPATH=$(which port)
+  PORTPATH=$(command -v port)
   PORTPATH=${PORTPATH%/bin/port}
   CONFIGUREOPTIONS+=" -DCMAKE_IGNORE_PATH=${PORTPATH};${PORTPATH}/bin;${PORTPATH}/include;${PORTPATH}/include/libxml2;${PORTPATH}/include/unicode"
 fi
@@ -63,7 +63,7 @@ fi
 # By default we build with python 3:
 type python3 >/dev/null 2>&1
 if [[ $? -eq 0 ]]; then
-  PPATH=$(which python3)
+  PPATH=$(command -v python3)
   if [[ -f ${PPATH} ]]; then
     if [[ ${PPATH} == *conda* ]]; then
       echo "ERROR: You cannot use a python version installed via (ana)conda with ROOT."
@@ -101,7 +101,7 @@ CONFIGUREOPTIONS+=" -Dalien=OFF -Dbonjour=OFF -Dcastor=OFF -Ddavix=OFF -Dfortran
 
 # Explictly add gcc -- cmake seems to sometimes digg up other compilers on the system, not the default one...
 if [[ ${OSTYPE} != *arwin* ]]; then
-  CONFIGUREOPTIONS+=" -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_CXX_COMPILER=$(which g++)"
+  CONFIGUREOPTIONS+=" -DCMAKE_C_COMPILER=$(command -v gcc) -DCMAKE_CXX_COMPILER=$(command -v g++)"
 fi
 
 # Turn off runtime modules on macOS
