@@ -20,7 +20,7 @@ IMAGES=(
   "almalinux:8+"
   "quay.io/centos/centos:stream9+"
   "opensuse/leap:16"
-  "manjarolinux/base:latest"
+  "docker.io/manjarolinux/base:latest"
 )
 
 SETUPCMD='/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --auto --setup-branch=feature/auto-install '
@@ -131,7 +131,7 @@ GetBootstrap() {
       echo "zypper --non-interactive install curl git sudo"
       ;;
     archlinux:*|*manjaro*)
-      echo "pacman -Sy --noconfirm curl git sudo"
+      echo "pacman -Syu --noconfirm curl git sudo"
       ;;
     *)
       echo ""  # unknown family - caller will skip
