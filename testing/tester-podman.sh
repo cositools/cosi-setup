@@ -196,8 +196,7 @@ echo "Podman based OS compatibility tester"
 echo ""
 
 # Check if podman is installed
-type podman >/dev/null 2>&1
-if [ $? -ne 0 ]; then
+if ! type podman >/dev/null 2>&1; then
   echo "ERROR: podman must be installed"
   exit 1
 fi
