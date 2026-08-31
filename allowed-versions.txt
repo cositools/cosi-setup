@@ -6,8 +6,8 @@
 # Description:
 # This script contains a list of allowed versions of ROOT, Geant4, and HEAsoft
 
-# ROOT: 6.32 till 6.34
-ROOT-Min:640
+# ROOT:
+ROOT-Min:636
 ROOT-Max:640
 ROOT-Blacklist:
 
@@ -26,9 +26,9 @@ Healpix-Min:383
 Healpix-Max:399
 Healpix-Blacklist:notimplemented
 
-# Python: 3.12 till 3.14
+# Python:
 Python-Min:312
-Python-Max:314
+Python-Max:315
 Python-Blacklist:notimplemented
 
 
