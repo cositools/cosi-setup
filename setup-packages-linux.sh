@@ -295,7 +295,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
   OS=`cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }'`
   OS=${OS//\"/}
   #echo "OS: ${OS}"
-  if [[ ${OS} == rhel ]] || [[ ${OS} == almalinux ]] || [[ ${OS} == rocky ]]; then
+  if [[ ${OS} == rhel ]] || [[ ${OS} == almalinux ]] || [[ ${OS} == rocky ]] || [[ ${OS} == centos ]]; then
     # Check the version
     VERSIONID=$(cat /etc/os-release | grep "^VERSION_ID=" | awk -F= '{ print $2 }')
     VERSIONID=${VERSIONID//\"/}
@@ -336,25 +336,6 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     else 
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core"
-      SUPPORTEDVERSION="FALSE"
-    fi
-  elif [[ ${OS} == centos ]]; then
-    # Check the version
-    VERSIONID=$(cat /etc/os-release | grep "^VERSION_ID=" | awk -F= '{ print $2 }')
-    VERSIONID=${VERSIONID//\"/}
-    VERSIONID=$(echo ${VERSIONID} | awk -F'.' '{ print $1 }')
-    #echo "VERSION: ${VERSIONID}"
-    if [[ ${VERSIONID} == 7 ]]; then
-      REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel lib-curl-devel "
-    elif [[ ${VERSIONID} == 8 ]]; then
-      REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled powertools && sudo dnf install -y epel-release"
-    elif [[ ${VERSIONID} == 9 ]]; then
-      REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel fftw-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
-    else 
-      REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-      REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
       SUPPORTEDVERSION="FALSE"
     fi
   else

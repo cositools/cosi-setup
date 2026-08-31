@@ -145,7 +145,7 @@ GetBootstrap() {
 ExpandSetup() {
   local IMAGE="$1"
   case "$IMAGE" in
-    rockylinux*|almalinux*|opensuse/leap*)
+    rockylinux*|almalinux*|*centos*|opensuse/leap*)
       echo "--healpix= "
       ;;
     *)
