@@ -568,7 +568,6 @@ fi
 PYTHONEXE=$(${SETUPPATH}/check-pythonversion.sh --get-interpreter)
 if [ "$?" != "0" ]; then
   # The error message is part of the above script
-  issuereport
   exit 1
 fi
 echo "Using python version: ${PYTHONEXE}"
