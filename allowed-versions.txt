@@ -26,5 +26,10 @@ Healpix-Min:383
 Healpix-Max:399
 Healpix-Blacklist:notimplemented
 
+# Python: 3.12 till 3.14
+Python-Min:312
+Python-Max:314
+Python-Blacklist:notimplemented
+
 
 

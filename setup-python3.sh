@@ -29,15 +29,10 @@ fi
 export PYTHONPATH=""
 
 # Choose the python version
-PY="python3"
-
-# In case of OpenSUSE, choose the latest installed python version
-if [[ ${OSNAME} == opensuse-leap ]]; then
-  PYVERNEW=$(zypper search -i python3*-base | tail -1 | awk -F"|" '{ print $2 }' | xargs | sed 's/-base$//')
-  PYVERNEW=${PYVERNEW:0:7}.${PYVERNEW:7}
-  if [[ ${PYVERNEW} != "" ]]; then
-    PY=${PYVERNEW}
-  fi
+PY=$($(dirname $0)/check-pythonversion.sh --get-interpreter)
+if [[ "$?" != "0" ]]; then
+  # The error message is part of the above script
+  exit 1
 fi
 
 
@@ -153,6 +148,27 @@ fi
 
 # Install some generally helpful packages
 pip3 install jupyter
+
+
+# Install cosipy from its git checkout.
+# It is installed in editable mode since the repository is updated by the setup script
+# on each run, and a regular install would go stale after the next update.
+COSIPY=../cosipy
+if [[ ! -d ${COSIPY} ]]; then
+  echo ""
+  echo "ERROR: Unable to find the cosipy directory at ${COSIPY}!"
+  exit 1
+fi
+
+echo ""
+echo ""
+echo "Installing cosipy"
+pip3 install -e ${COSIPY}
+if [[ "$?" != "0" ]]; then
+  echo ""
+  echo "ERROR: Unable to install cosipy!"
+  exit 1;
+fi
 
 
 # All the default installations

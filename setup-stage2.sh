@@ -555,6 +555,24 @@ if [ "$?" != "0" ]; then
   exit 1
 fi
 
+# Check that we have an allowed python version, before we compile everything
+echo ""
+echo "Checking the python version"
+
+if [[ ! -f ${SETUPPATH}/check-pythonversion.sh ]]; then
+  echo ""
+  echo "ERROR: Unable to find the script to check the python version!"
+  exit 1
+fi
+
+PYTHONEXE=$(${SETUPPATH}/check-pythonversion.sh --get-interpreter)
+if [ "$?" != "0" ]; then
+  # The error message is part of the above script
+  issuereport
+  exit 1
+fi
+echo "Using python version: ${PYTHONEXE}"
+
 
 
 
