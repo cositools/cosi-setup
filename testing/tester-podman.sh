@@ -13,14 +13,16 @@ set -euo pipefail
 # List of operating system images to test
 # See confhelp() how it works
 IMAGES=(
-  "ubuntu:22.04+2"
-  "debian:12+"
+  "ubuntu:24.04+2"
+  "debian:13+"
   "fedora:43+"
-  "rockylinux:8+"
-  "almalinux:8+"
-  "quay.io/centos/centos:stream9+"
+  "rockylinux:10+"
+  "almalinux:10+"
+  "quay.io/centos/centos:stream10+"
   "opensuse/leap:16"
+  "opensuse/tumbleweed:latest"
   "docker.io/manjarolinux/base:latest"
+  "archlinux:latest"
 )
 
 SETUPCMD='/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --auto --setup-branch=feature/auto-install '

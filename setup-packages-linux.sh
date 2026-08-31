@@ -83,10 +83,19 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     # Check the Ubuntu version
     if [[ ${VERSIONID} == 18.04 ]] || [[ ${VERSIONID} == 18.10 ]] || [[ ${VERSIONID} == 19.04 ]] || [[ ${VERSIONID} == 19.10 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev libboost-all-dev mlocate libcfitsio-dev libxerces-c-dev libhealpix-cxx-dev bc "
+      echo " "
+      echo "ERROR: Ubuntu ${VERSIONID} is no longer supported."
+      exit 255
     elif [[ ${VERSIONID} == 20.04 ]] || [[ ${VERSIONID} == 20.10 ]] || [[ ${VERSIONID} == 21.04 ]] || [[ ${VERSIONID} == 21.10 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev libboost-all-dev mlocate libcfitsio-dev libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev "
+      echo " "
+      echo "ERROR: Ubuntu ${VERSIONID} is no longer supported."
+      exit 255
     elif [[ ${VERSIONID} == 22.04 ]] || [[ ${VERSIONID} == 22.10 ]] || [[ ${VERSIONID} == 23.04 ]] || [[ ${VERSIONID} == 23.10 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev libboost-all-dev libcfitsio-dev libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libftgl-dev"
+      echo " "
+      echo "ERROR: Ubuntu ${VERSIONID} is no longer supported."
+      exit 255
     elif [[ ${VERSIONID} == 24.04 ]] || [[ ${VERSIONID} == 24.10 ]] || [[ ${VERSIONID} == 25.04 ]] || [[ ${VERSIONID} == 25.10 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses-dev libboost-all-dev libcfitsio-dev libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libftgl-dev"
     elif [[ ${VERSIONID} == 26.04 ]] || [[ ${VERSIONID} == 26.10 ]] || [[ ${VERSIONID} == 27.04 ]] || [[ ${VERSIONID} == 27.10 ]]; then
@@ -102,13 +111,11 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       echo " "
       echo "ERROR: Debian 10 or earlier is no longer supported."
       exit 255
-    elif (( ${VERSIONID} == 11 )); then
+    elif (( ${VERSIONID} >= 11 )) && (( ${VERSIONID} <= 12 )); then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
       echo " "
-      echo "ERROR: Debian 11 is no longer supported."
+      echo "ERROR: Debian ${VERSIONID} is no longer supported."
       exit 255
-   elif (( ${VERSIONID} == 12 )); then
-      REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
    elif (( ${VERSIONID} >= 13 )); then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
     else
