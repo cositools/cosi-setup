@@ -1403,6 +1403,28 @@ if [[ $(uname -a) != *-686-* ]]; then
     # The error message is part of the above script
     exit 1
   fi
+
+  echo ""
+  echo "*****************************"
+  echo " "
+  echo "Checking that cosipy is usable"
+  echo " "
+
+  if [[ ! -f ${SETUPPATH}/setup-check-cosipy.sh ]]; then
+    echo ""
+    echo "ERROR: Unable to find the cosipy check script!"
+    exit 1
+  fi
+
+  ${SETUPPATH}/setup-check-cosipy.sh
+  if [ "$?" != "0" ]; then
+    # The error message is part of the above script
+    issuereport
+    exit 1
+  fi
+
+  echo " "
+  echo "SUCCESS: cosipy is usable"
 else
   echo ""
   echo "WARNING: You are using a 32-bit operating system."
