@@ -249,18 +249,32 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
         echo " "
         echo "Performing an automatic installation of the packages. I will do the following:"
         echo "sudo zypper refresh"
-        echo "sudo zypper install -y ${TOBEINSTALLED}"
+        echo "sudo zypper install -y --force-resolution ${TOBEINSTALLED}"
         echo " "
-        sudo zypper refresh && sudo zypper install -y ${TOBEINSTALLED}
+        # --force-resolution since zypper cannot ask us which of its solutions to pick when it hits a conflict
+        sudo zypper refresh && sudo zypper install -y --force-resolution ${TOBEINSTALLED}
         if [[ "$?" != "0" ]]; then
           echo " "
           echo "ERROR: Something went wrong with the automatic package installation."
           exit 255
-        else
-          echo " "
-          echo "All required packages seem to be installed now!"
-          exit 0
         fi
+
+        # --force-resolution allows zypper to solve a conflict by not installing a package, thus verify that we really got everything
+        MISSING=""
+        for PACKAGE in ${TOBEINSTALLED}; do
+          if [[ "$(rpm -q --queryformat "%{NAME}\n" ${PACKAGE})" != "${PACKAGE}" ]]; then
+            MISSING+="${PACKAGE} "
+          fi
+        done
+        if [[ ${MISSING} != "" ]]; then
+          echo " "
+          echo "ERROR: The following packages could not be installed: ${MISSING}"
+          exit 255
+        fi
+
+        echo " "
+        echo "All required packages seem to be installed now!"
+        exit 0
       else
         echo " "
         echo "Do the following to install all required packages:"
