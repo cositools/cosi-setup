@@ -127,6 +127,14 @@ if [ "${GET}" == "true" ]; then
 fi
 
 if [ "${GOOD}" == "true" ]; then
+  # Reject development versions, e.g., 3.15.0rc1
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+    echo ""
+    echo "ERROR: python version (${TESTVERSION}) is not acceptable"
+    echo "       It is a development version."
+    exit 1
+  fi
+
   version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
   release=`echo ${TESTVERSION} | awk -F. '{ print $2 }' | sed 's/0*//'`;
   patch=`echo ${TESTVERSION} | awk -F. '{ print $3 }'`;
@@ -185,6 +193,15 @@ if [ "${CHECK}" == "true" ]; then
   fi
 
   pv=`${PYTHONEXE} --version 2>&1 | awk '{ print $2 }'`
+
+  # Reject development versions, e.g., 3.15.0rc1
+  if [[ ! ${pv} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+    echo ""
+    echo "ERROR: python version (${pv}) is not acceptable"
+    echo "       It is a development version."
+    exit 1
+  fi
+
   version=`echo ${pv} | awk -F. '{ print $1 }'`;
   release=`echo ${pv} | awk -F. '{ print $2 }' | sed 's/0*//'`;
   patch=`echo ${pv} | awk -F. '{ print $3 }'`;
