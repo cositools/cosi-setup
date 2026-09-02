@@ -16,13 +16,13 @@ IMAGES=(
   "ubuntu:24.04+2"
   "debian:13+"
   "fedora:43+"
-  "rockylinux:10+"
-  "almalinux:10+"
-  "quay.io/centos/centos:stream10+"
-  "opensuse/leap:16"
-  "opensuse/tumbleweed:latest"
-  "docker.io/manjarolinux/base:latest"
-  "archlinux:latest"
+  "rocky:10+"
+  "alma:10+"
+  "centos:stream10+"
+  "leap:16+"
+  "tumbleweed:latest"
+  "manjaro:latest"
+  "arch:latest"
 )
 
 SETUPCMD='/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --auto --setup-branch=feature/auto-install '
@@ -56,13 +56,39 @@ confhelp() {
   echo "    N is the version name, as in debian:13, fedora:44"
   echo "    + means the all newer releases are tested to, e.g., debian:12 expands to debian:12, debian:13, etc, until we don't find a newer release"
   echo "    +STEP let's you skip releases, e.g., Ubuntu:24.04+2 --> Ubunut:24.04, Ubunut:26.04, etc. "
-  echo "    If the option is not given, the built-in list of images is used."
+  echo "    If the option is not given, the following built-in list of images is used:"
+  for I in "${IMAGES[@]}"; do
+    echo "      ${I}"
+  done
+  echo "    These short names are resolved to their full image name:"
+  echo "    rocky, alma, centos, leap, tumbleweed, manjaro, arch"
+  echo "    Example: --os=rocky:10+,arch"
   echo " "
   echo "--help or -h"
   echo "    Show this help."
   echo " "
   echo " "
 }
+
+
+# Resolve a short OS name to its full container image name
+# See confhelp() for the list of names
+ResolveImage() {
+  local ENTRY="$1"                 # e.g. "rocky:10+", "centos:stream10+"
+  local REPO="${ENTRY%%:*}"        # e.g. "rocky", "centos"
+  local REST="${ENTRY#"${REPO}"}"  # e.g. ":10+", ":stream10+"
+  case "${REPO}" in
+    rocky)      REPO="rockylinux" ;;
+    alma)       REPO="almalinux" ;;
+    centos)     REPO="quay.io/centos/centos" ;;
+    leap)       REPO="opensuse/leap" ;;
+    tumbleweed) REPO="opensuse/tumbleweed" ;;
+    manjaro)    REPO="docker.io/manjarolinux/base" ;;
+    arch)       REPO="archlinux" ;;
+  esac
+  echo "${REPO}${REST}"
+}
+
 
 
 # Expand a "repo:N+" or "repo:N+STEP" range entry into concrete tags by probing
@@ -233,6 +259,7 @@ fi
 echo "Checking for OS images to test"
 RESOLVEDIMAGES=()
 for ENTRY in "${IMAGES[@]}"; do
+  ENTRY="$(ResolveImage "${ENTRY}")"
   if [[ ${ENTRY} == *:*+* ]]; then
     EXPANDED="$(ExpandOSRange "${ENTRY}")"
     if [[ $? -ne 0 ]]; then

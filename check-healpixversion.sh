@@ -43,7 +43,7 @@ done
 
 # Check for help
 for C in ${CMD}; do
-  if [[ ${C} == *-h* ]]; then
+  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -85,7 +85,7 @@ for C in ${CMD}; do
     MAX="false"
     GOOD="true"
     TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -101,14 +101,11 @@ done
 HealpixVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Min" | awk -F":" '{ print $2 }')
 HealpixVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Max" | awk -F":" '{ print $2 }')
 
+HealpixVersionMinString=${HealpixVersionMin}
+HealpixVersionMaxString=${HealpixVersionMax}
 
-
-VERSIONS=`cat ${MEGALIB}/config/AllowedHealpixVersions.txt` 
-HealpixVersionMin=`echo ${VERSIONS} | awk -F" " '{ print $1 }'`
-HealpixVersionMax=`echo ${VERSIONS} | awk -F" " '{ print $NF }'`
-
-HealpixVersionMinString="${HealpixVersionMin:(-3):1}.${HealpixVersionMin:(-2):2}"
-HealpixVersionMaxString="${HealpixVersionMax:(-3):1}.${HealpixVersionMax:(-2):2}"
+HealpixVersionMin=$(echo ${HealpixVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
+HealpixVersionMax=$(echo ${HealpixVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 
 if [ "${GET}" == "true" ]; then
   if [ "${MAX}" == "true" ]; then

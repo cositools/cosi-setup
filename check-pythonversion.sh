@@ -49,7 +49,7 @@ done
 
 # Check for help
 for C in ${CMD}; do
-  if [[ ${C} == *-h* ]]; then
+  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -98,7 +98,7 @@ for C in ${CMD}; do
     MAX="false"
     GOOD="true"
     TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -114,8 +114,11 @@ PythonVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Min" | a
 PythonVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Max" | awk -F":" '{ print $2 }')
 PythonBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Blacklist")
 
-PythonVersionMinString="${PythonVersionMin:(-3):1}.${PythonVersionMin:(-2):2}"
-PythonVersionMaxString="${PythonVersionMax:(-3):1}.${PythonVersionMax:(-2):2}"
+PythonVersionMinString=${PythonVersionMin}
+PythonVersionMaxString=${PythonVersionMax}
+
+PythonVersionMin=$(echo ${PythonVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
+PythonVersionMax=$(echo ${PythonVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 
 if [ "${GET}" == "true" ]; then
   if [ "${MAX}" == "true" ]; then
@@ -165,7 +168,7 @@ if [ "${INTERPRETER}" == "true" ]; then
 
   # In case of OpenSUSE, choose the latest installed python version
   if [[ $(uname -s) != *arwin* ]]; then
-    OSNAME=$(cat /etc/os-release | grep "^ID\=" | awk -F= '{ print $2 }' | tr -d '"')
+    OSNAME=$(cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }' | tr -d '"')
     if [[ ${OSNAME} == opensuse-leap ]]; then
       PYVERNEW=$(zypper search -i python3*-base | tail -1 | awk -F"|" '{ print $2 }' | xargs | sed 's/-base$//')
       PYVERNEW=${PYVERNEW:0:7}.${PYVERNEW:7}

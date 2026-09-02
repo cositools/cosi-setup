@@ -60,7 +60,7 @@ done
 
 # Check for help
 for C in ${CMD}; do
-  if [[ ${C} == *-h* ]]; then
+  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -78,7 +78,7 @@ for C in ${CMD}; do
   elif [[ ${C} == *-s* ]]; then
     ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
     echo "Using this environment file: ${ENVFILE}"
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0

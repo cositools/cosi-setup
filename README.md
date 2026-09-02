@@ -80,13 +80,13 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
     --root=[version]     Download the given ROOT version. Format must be "x.yy"
     --root=[GitHub tag]  Download the ROOT version with the given tag. Format must be "vx-yy-zz", "vx-yy-zz-patches", or "master"
     --root=[path]        Use the version of ROOT found in the path. The path cannot be of the format "x.yy", "vx-yy-zz", "vx-yy-zz-patches", or "master"
-    The (currently) supported ROOT versions are stored in the file "allowed-versions.txt". The format is xyy, e.g. 628 for ROOT version 6.28.
+    The (currently) supported ROOT versions are stored in the file "allowed-versions.txt". The format is major.minor, e.g. 6.28.
     If you need/want to test/use a different ROOT version, please change this file.
  
 --geant=[options: empty (default), path to existing GEANT4 installation]
     --geant=           Download and install the latest compatible version (default).
     --geant=[path]     Use the version of Geant4 found in the path. If it is not compatible, the script will stop with an error.
-    The (currently) supported GEANT4 versions are stored in the file "allowed-versions.txt". The format is xy, e.g. 102 for GEANT4 version 10.2.
+    The (currently) supported GEANT4 versions are stored in the file "allowed-versions.txt". The format is major.minor, e.g. 11.2.
     If you need/want to test/use a different GEANT4 version, please change this file.
  
 --heasoft=[options: empty, heasoft, off, cfitsio (default), or path to existing HEASoft installation]

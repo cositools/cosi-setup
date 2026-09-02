@@ -43,7 +43,7 @@ done
 
 # Check for help
 for C in ${CMD}; do
-  if [[ ${C} == *-h* ]]; then
+  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -85,7 +85,7 @@ for C in ${CMD}; do
     MAX="false"
     GOOD="true"
     TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -101,14 +101,11 @@ done
 HEASoftVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Min" | awk -F":" '{ print $2 }')
 HEASoftVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Max" | awk -F":" '{ print $2 }')
 
+HEASoftVersionMinString=${HEASoftVersionMin}
+HEASoftVersionMaxString=${HEASoftVersionMax}
 
-
-VERSIONS=`cat ${MEGALIB}/config/AllowedHEASoftVersions.txt` 
-HEASoftVersionMin=`echo ${VERSIONS} | awk -F" " '{ print $1 }'`
-HEASoftVersionMax=`echo ${VERSIONS} | awk -F" " '{ print $NF }'`
-
-HEASoftVersionMinString="${HEASoftVersionMin:(-3):1}.${HEASoftVersionMin:(-2):2}"
-HEASoftVersionMaxString="${HEASoftVersionMax:(-3):1}.${HEASoftVersionMax:(-2):2}"
+HEASoftVersionMin=$(echo ${HEASoftVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
+HEASoftVersionMax=$(echo ${HEASoftVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 
 if [ "${GET}" == "true" ]; then
   if [ "${MAX}" == "true" ]; then

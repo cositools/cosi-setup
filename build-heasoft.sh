@@ -114,7 +114,7 @@ done
 
 # Check for help
 for C in ${CMD}; do
-  if [[ ${C} == *-h* ]]; then
+  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -135,7 +135,7 @@ for C in ${CMD}; do
     echo "Using this environment file: ${ENVFILE}"
   elif [[ ${C} == *-p*=* ]]; then
     PATCH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0

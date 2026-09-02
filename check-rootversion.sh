@@ -45,7 +45,7 @@ done
 
 # Check for help
 for C in ${CMD}; do
-  if [[ ${C} == *-h* ]]; then
+  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -87,7 +87,7 @@ for C in ${CMD}; do
     MAX="false"
     GOOD="true"
     TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -103,8 +103,11 @@ RootVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Min" | awk -
 RootVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Max" | awk -F":" '{ print $2 }')
 RootBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Blacklist")
 
-RootVersionMinString="${RootVersionMin:(-3):1}.${RootVersionMin:(-2):2}"
-RootVersionMaxString="${RootVersionMax:(-3):1}.${RootVersionMax:(-2):2}"
+RootVersionMinString=${RootVersionMin}
+RootVersionMaxString=${RootVersionMax}
+
+RootVersionMin=$(echo ${RootVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
+RootVersionMax=$(echo ${RootVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 
 if [ "${GET}" == "true" ]; then
   if [ "${MAX}" == "true" ]; then

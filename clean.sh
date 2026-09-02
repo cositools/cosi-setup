@@ -68,7 +68,7 @@ for C in "${CMD[@]}"; do
     CLEANEXTERNAL=TRUE
   elif [[ ${C} == *-p* ]]; then
     CLEANPYTHON=TRUE
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0

@@ -43,7 +43,7 @@ done
 
 # Check for help
 for C in ${CMD}; do
-  if [[ ${C} == *-h* ]]; then
+  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -85,7 +85,7 @@ for C in ${CMD}; do
     MAX="false"
     GOOD="true"
     TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h* ]]; then
+  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
     exit 0
@@ -101,10 +101,11 @@ done
 Geant4VersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Min" | awk -F":" '{ print $2 }')
 Geant4VersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Max" | awk -F":" '{ print $2 }')
 
-Sep=$((${#Geant4VersionMin}-1))
-Geant4VersionMinString="${Geant4VersionMin:0:${Sep}}.${Geant4VersionMin:${Sep}:1}"
-Sep=$((${#Geant4VersionMax}-1))
-Geant4VersionMaxString="${Geant4VersionMax:0:${Sep}}.${Geant4VersionMax:${Sep}:1}"
+Geant4VersionMinString=${Geant4VersionMin}
+Geant4VersionMaxString=${Geant4VersionMax}
+
+Geant4VersionMin=$(echo ${Geant4VersionMinString} | awk -F. '{ print 100*$1 + $2 }')
+Geant4VersionMax=$(echo ${Geant4VersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 
 if [ "${GET}" == "true" ]; then
   if [ "${MAX}" == "true" ]; then
@@ -119,7 +120,7 @@ fi
 if [ "${GOOD}" == "true" ]; then
   version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
   release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  Geant4Version=$((10*${version} + ${release}))
+  Geant4Version=$((100*${version} + ${release}))
   
   if ([ ${Geant4Version} -ge ${Geant4VersionMin} ] && [ ${Geant4Version} -le ${Geant4VersionMax} ]); then
     echo "Found a good Geant4 version: ${TESTVERSION}"
@@ -135,12 +136,11 @@ fi
 
 if [ "${CHECK}" == "true" ]; then
   if (`test -f ${GEANT4PATH}/source/global/management/include/G4Version.hh`); then
-    rv=`grep -r "\#define G4VERSION_NUMBER" ${GEANT4PATH}/source/global/management/include/G4Version.hh`; 
+    rv=`grep "#define G4VERSION_NUMBER" ${GEANT4PATH}/source/global/management/include/G4Version.hh`; 
     version=`echo $rv | awk -F" " '{ print $3 }'`;
-    Geant4Version=`echo $((${version} / 10)) | awk -F"." '{ print $1 }'`
+    Geant4Version=$((100*(${version} / 100) + (${version} / 10) % 10))
   elif [ -f ${GEANT4PATH}/bin/geant4-config ]; then
-    version=`${GEANT4PATH}/bin/geant4-config --version | sed 's|\.||g'`
-    Geant4Version=`echo $((${version} / 10)) | awk -F"." '{ print $1 }'`
+    Geant4Version=`${GEANT4PATH}/bin/geant4-config --version | awk -F. '{ print 100*$1 + $2 }'`
   else
     echo " "
     echo "ERROR: The given directory ${GEANT4PATH} does no contain a correct Geant4 installation"
@@ -152,7 +152,7 @@ if [ "${CHECK}" == "true" ]; then
     exit 0;
   else
     echo ""
-    echo "ERROR: No acceptable Geant4 version found: ${Geant4Version}"
+    echo "ERROR: No acceptable Geant4 version found: ${Geant4Version} (min: ${Geant4VersionMinString}, max: ${Geant4VersionMaxString})"
     exit 1
   fi
 fi
