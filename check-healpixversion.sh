@@ -35,14 +35,10 @@ confhelp() {
 }
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -60,9 +56,9 @@ HEALPIXPATH=""
 TESTVERSION=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-c*=* ]]; then
-    HEALPIXPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    HEALPIXPATH=`echo "${C}" | awk -F"=" '{ print $2 }'`
     CHECK="true"
     GET="false"
     GOOD="false"
@@ -84,7 +80,7 @@ for C in ${CMD}; do
     GET="false"
     MAX="false"
     GOOD="true"
-    TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TESTVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -98,9 +94,9 @@ for C in ${CMD}; do
 done
 
 
-HealpixVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Min" | awk -F":" '{ print $2 }')
-HealpixVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Max" | awk -F":" '{ print $2 }')
-HealpixBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Blacklist" | awk -F":" '{ print $2 }')
+HealpixVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Healpix-Min" | awk -F":" '{ print $2 }')
+HealpixVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Healpix-Max" | awk -F":" '{ print $2 }')
+HealpixBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Healpix-Blacklist" | awk -F":" '{ print $2 }')
 
 HealpixVersionMinString=${HealpixVersionMin}
 HealpixVersionMaxString=${HealpixVersionMax}
@@ -156,8 +152,8 @@ if [ "${GOOD}" == "true" ]; then
 fi  
 
 if [ "${CHECK}" == "true" ]; then
-  if (`test -f ${HEALPIXPATH}/bin/ftversion`); then
-    rv=$(${HEALPIXPATH}/bin/ftversion | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
+  if (`test -f "${HEALPIXPATH}/bin/ftversion"`); then
+    rv=$("${HEALPIXPATH}/bin/ftversion" | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
     version=`echo ${rv} | awk -F. '{ print $1 }'`;
     release=`echo ${rv} | awk -F. '{ print $2 }'`;
     HealpixVersion=$((100*10#${version} + 10#${release}))

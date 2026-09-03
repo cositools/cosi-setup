@@ -196,7 +196,7 @@ if [[ "${COSIPATH}" == "" ]]; then
     echo " * Creating new COSItools directory at ${COSIPATH}"
   fi
 else 
-  COSIPATH=$(absolutefilename ${COSIPATH}})
+  COSIPATH=$(absolutefilename "${COSIPATH}}")
 fi
 
 if [[ "${COSIPATH}" != "${COSIPATH% *}" ]]; then
@@ -214,7 +214,7 @@ if [[ ! -d "${COSIPATH}" ]]; then
   fi
 fi
 echo " * Using this path to install the COSItools: ${COSIPATH}"
-cd ${COSIPATH}
+cd "${COSIPATH}"
 echo " * Switched to the COSItools path"
 
 
@@ -235,7 +235,7 @@ if [[ -d cosi-setup ]]; then
     exit 1
   fi
 else 
-  git clone ${GITBASEDIR}/cosi-setup cosi-setup
+  git clone "${GITBASEDIR}/cosi-setup" cosi-setup
   if [ "$?" != "0" ]; then
     echo ""
     echo "ERROR: Unable to clone cosi-setup!"
@@ -291,7 +291,7 @@ echo "" >> ${LOGFILE}
 echo "*********************************************" >> ${LOGFILE}
 echo "" >> ${LOGFILE}
 echo "" >> ${LOGFILE}
-./setup-system-info.sh >> ${LOGFILE}
+./setup-system-info.sh >> "${LOGFILE}"
 if [ "$?" != "0" ]; then
   echo "" >> ${LOGFILE}
   echo "ERROR: Unable to find the system info setup script!" >> ${LOGFILE}

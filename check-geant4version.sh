@@ -35,14 +35,10 @@ confhelp() {
 }
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -60,9 +56,9 @@ GEANT4PATH=""
 TESTVERSION=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-c*=* ]]; then
-    GEANT4PATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    GEANT4PATH=`echo "${C}" | awk -F"=" '{ print $2 }'`
     CHECK="true"
     GET="false"
     GOOD="false"
@@ -84,7 +80,7 @@ for C in ${CMD}; do
     GET="false"
     MAX="false"
     GOOD="true"
-    TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TESTVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -98,9 +94,9 @@ for C in ${CMD}; do
 done
 
 
-Geant4VersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Min" | awk -F":" '{ print $2 }')
-Geant4VersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Max" | awk -F":" '{ print $2 }')
-Geant4BlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Blacklist" | awk -F":" '{ print $2 }')
+Geant4VersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Geant4-Min" | awk -F":" '{ print $2 }')
+Geant4VersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Geant4-Max" | awk -F":" '{ print $2 }')
+Geant4BlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Geant4-Blacklist" | awk -F":" '{ print $2 }')
 
 Geant4VersionMinString=${Geant4VersionMin}
 Geant4VersionMaxString=${Geant4VersionMax}
@@ -157,12 +153,12 @@ fi
 
 
 if [ "${CHECK}" == "true" ]; then
-  if (`test -f ${GEANT4PATH}/source/global/management/include/G4Version.hh`); then
-    rv=`grep "#define G4VERSION_NUMBER" ${GEANT4PATH}/source/global/management/include/G4Version.hh`; 
+  if (`test -f "${GEANT4PATH}/source/global/management/include/G4Version.hh"`); then
+    rv=`grep "#define G4VERSION_NUMBER" "${GEANT4PATH}/source/global/management/include/G4Version.hh"`; 
     version=`echo $rv | awk -F" " '{ print $3 }'`;
     Geant4VersionString="$((${version} / 100)).$(( (${version} / 10) % 10 )).$((${version} % 10))"
-  elif [ -f ${GEANT4PATH}/bin/geant4-config ]; then
-    Geant4VersionString=`${GEANT4PATH}/bin/geant4-config --version`
+  elif [ -f "${GEANT4PATH}/bin/geant4-config" ]; then
+    Geant4VersionString=`"${GEANT4PATH}/bin/geant4-config" --version`
   else
     echo " "
     echo "ERROR: The given directory ${GEANT4PATH} does no contain a correct Geant4 installation"

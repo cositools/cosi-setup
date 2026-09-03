@@ -35,14 +35,10 @@ confhelp() {
 }
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -60,9 +56,9 @@ HEASoftPATH=""
 TESTVERSION=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-c*=* ]]; then
-    HEASoftPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    HEASoftPATH=`echo "${C}" | awk -F"=" '{ print $2 }'`
     CHECK="true"
     GET="false"
     GOOD="false"
@@ -84,7 +80,7 @@ for C in ${CMD}; do
     GET="false"
     MAX="false"
     GOOD="true"
-    TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TESTVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -98,9 +94,9 @@ for C in ${CMD}; do
 done
 
 
-HEASoftVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Min" | awk -F":" '{ print $2 }')
-HEASoftVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Max" | awk -F":" '{ print $2 }')
-HEASoftBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Blacklist" | awk -F":" '{ print $2 }')
+HEASoftVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "HEASoft-Min" | awk -F":" '{ print $2 }')
+HEASoftVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "HEASoft-Max" | awk -F":" '{ print $2 }')
+HEASoftBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "HEASoft-Blacklist" | awk -F":" '{ print $2 }')
 
 HEASoftVersionMinString=${HEASoftVersionMin}
 HEASoftVersionMaxString=${HEASoftVersionMax}
@@ -156,8 +152,8 @@ if [ "${GOOD}" == "true" ]; then
 fi  
 
 if [ "${CHECK}" == "true" ]; then
-  if (`test -f ${HEASoftPATH}/bin/ftversion`); then
-    rv=$(${HEASoftPATH}/bin/ftversion | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
+  if (`test -f "${HEASoftPATH}/bin/ftversion"`); then
+    rv=$("${HEASoftPATH}/bin/ftversion" | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
     version=`echo ${rv} | awk -F. '{ print $1 }'`;
     release=`echo ${rv} | awk -F. '{ print $2 }'`;
     HEASoftVersion=$((100*10#${version} + 10#${release}))

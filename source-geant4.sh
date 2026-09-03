@@ -81,8 +81,8 @@ if [[ -f ${__TMP_PATH}/bin/geant4.sh ]]; then
 
   export G4NEUTRONHP_USE_ONLY_PHOTONEVAPORATION=1
   
-elif (test -f ${__TMP_PATH}/env.sh); then
-  source ${__TMP_PATH}/env.sh > /dev/null  
+elif (test -f "${__TMP_PATH}/env.sh"); then
+  source "${__TMP_PATH}/env.sh" > /dev/null  
 
   export LD_LIBRARY_PATH=${G4INSTALL}/lib/${G4SYSTEM}:${LD_LIBRARY_PATH}
   if [[ `uname -a` == *Darwin* ]]; then

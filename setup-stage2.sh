@@ -67,8 +67,8 @@ HEALPIXPATH=""
 
 # The directory where to install ROOT, Geant4, HEASoft, and Healpix
 EXTERNALPATH=${COSIPATH}/external
-if [ ! -d ${EXTERNALPATH} ]; then
-  mkdir ${EXTERNALPATH}
+if [ ! -d "${EXTERNALPATH}" ]; then
+  mkdir "${EXTERNALPATH}"
 fi
 
 # Name of the stash where we backup data
@@ -90,7 +90,7 @@ AUTOPACKAGEINSTALL=false
 
 # Prepare the environment script
 ENVFILE="${COSIPATH}/new-source-script.sh"
-rm -f ${ENVFILE}
+rm -f "${ENVFILE}"
 echo "#/bin/bash" >> ${ENVFILE}
 echo " " >> ${ENVFILE}
 echo "# You can call this file everytime you want to work with COSItools via" >> ${ENVFILE}
@@ -109,7 +109,7 @@ echo "COSITOOLSDIR=${COSIPATH}" >> ${ENVFILE}
 
 # Use the help of the main setup script since it describes the options
 confhelp() {
-  ${COSIPATH}/cosi-setup/setup.sh --help
+  "${COSIPATH}/cosi-setup/setup.sh" --help
 }
 
 # Tell the user where to look for past and present issues
@@ -247,7 +247,7 @@ fi
 
 
 if [ "${GEANT4PATH}" != "" ]; then
-  GEANT4PATH=`absolutefilename ${GEANT4PATH}`
+  GEANT4PATH=`absolutefilename "${GEANT4PATH}"`
 fi
 if [[ "${GEANT4PATH}" != "${GEANT4PATH% *}" ]]; then
   echo "ERROR: Geant4 needs to be installed in a path without spaces,"
@@ -267,7 +267,7 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
 elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]] ; then
   echo " * Download the latest version of HEASoft"
 else
-  HEASOFTPATH=`absolutefilename ${HEASOFTPATH}`
+  HEASOFTPATH=`absolutefilename "${HEASOFTPATH}"`
   if [[ "${HEASOFTPATH}" != "${HEASOFTPATH% *}" ]]; then
     echo "ERROR: HEASoft needs to be installed in a path without spaces,"
     echo "       but you chose: \"${HEASOFTPATH}\""
@@ -285,7 +285,7 @@ if [[ "${HEALPIXPATH}" == "off" ]]; then
 elif [[ "${HEALPIXPATH}" == "" ]] ; then
   echo " * Download the latest version of Healpix"
 else
-  HEALPIXPATH=`absolutefilename ${HEALPIXPATH}`
+  HEALPIXPATH=`absolutefilename "${HEALPIXPATH}"`
   if [[ "${HEALPIXPATH}" != "${HEALPIXPATH% *}" ]]; then
     echo "ERROR: Healpix needs to be installed in a path without spaces,"
     echo "       but you chose: \"${HEALPIXPATH}\""
@@ -474,7 +474,7 @@ else
         exit 1
       fi
 
-      ${SETUPPATH}/setup-packages-macports.sh
+      "${SETUPPATH}/setup-packages-macports.sh"
       EXITCODE=$?
       if [ "${EXITCODE}" != "0" ]; then
         # The error message is part of the above script
@@ -489,7 +489,7 @@ else
           exit 1
         fi
 
-        ${SETUPPATH}/setup-packages-brew.sh
+        "${SETUPPATH}/setup-packages-brew.sh"
         EXITCODE=$?
         if [ "${EXITCODE}" != "0" ]; then
           # The error message is part of the above script
@@ -497,7 +497,7 @@ else
         fi
         
         # We need a specific version of python for the next steps, and brew does not set it, thus we have to do it:
-        PATHTOPYTHON=$(${SETUPPATH}/setup-packages-brew.sh --python-path)
+        PATHTOPYTHON=$("${SETUPPATH}/setup-packages-brew.sh" --python-path)
         if [[ ${PATHTOPYTHON} == *libexec* ]]; then
           export PATH=${PATHTOPYTHON}:${PATH}
         else
@@ -529,9 +529,9 @@ else
     fi
 
     if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
-      ${SETUPPATH}/setup-packages-linux.sh --autoinstall
+      "${SETUPPATH}/setup-packages-linux.sh" --autoinstall
     else
-      ${SETUPPATH}/setup-packages-linux.sh
+      "${SETUPPATH}/setup-packages-linux.sh"
     fi
     EXITCODE=$?
     if [ "${EXITCODE}" != "0" ]; then
@@ -565,7 +565,7 @@ if [[ ! -f ${SETUPPATH}/check-pythonversion.sh ]]; then
   exit 1
 fi
 
-PYTHONEXE=$(${SETUPPATH}/check-pythonversion.sh --get-interpreter)
+PYTHONEXE=$("${SETUPPATH}/check-pythonversion.sh" --get-interpreter)
 if [ "$?" != "0" ]; then
   # The error message is part of the above script
   exit 1
@@ -627,7 +627,7 @@ if [[ ${ISPATH} == TRUE ]]; then
     exit 1
   fi
   
-  ${SETUPPATH}/check-rootversion.sh --check=${ROOTPATH}
+  "${SETUPPATH}/check-rootversion.sh" "--check=${ROOTPATH}"
   if [ "$?" != "0" ]; then
     echo " "
     echo "ERROR: The directory ${ROOTPATH} cannot be used as your ROOT install for COSItools."
@@ -638,7 +638,7 @@ if [[ ${ISPATH} == TRUE ]]; then
   echo "ROOTDIR=$(cd $(dirname ${ROOTPATH}); pwd)/$(basename ${ROOTPATH})" >> ${ENVFILE}
   
   # Source ROOT to be available for later installs
-  . ${SETUPPATH}/source-root.sh -p=$(cd $(dirname ${ROOTPATH}); pwd)/$(basename ${ROOTPATH})
+  . "${SETUPPATH}/source-root.sh" -p=$(cd $(dirname "${ROOTPATH}"); pwd)/$(basename "${ROOTPATH}")
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source ROOT"
@@ -656,18 +656,18 @@ else
   
   echo "Switching to build-root.sh script..."
   
-  cd ${EXTERNALPATH}
+  cd "${EXTERNALPATH}"
   
-  bash ${SETUPPATH}/build-root.sh -root=${ROOTPATH} -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
+  bash "${SETUPPATH}/build-root.sh" "-root=${ROOTPATH}" "-source=${ENVFILE}" -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
-  NEWROOTDIR=`grep ROOTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  NEWROOTDIR=`grep ROOTDIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
   if [[ -d ${NEWROOTDIR} ]]; then
     if [[ -f ${NEWROOTDIR}/BuildLogROOT.txt ]]; then
-      mv ${NEWROOTDIR}/BuildLogROOT.txt ${NEWROOTDIR}/BuildLogROOT_before$(date +'%y%m%d%H%M%S').txt
+      mv "${NEWROOTDIR}/BuildLogROOT.txt" "${NEWROOTDIR}/BuildLogROOT_before$(date +'%y%m%d%H%M%S').txt"
     fi
-    mv BuildLogROOT.txt ${NEWROOTDIR}
+    mv BuildLogROOT.txt "${NEWROOTDIR}"
   fi
 
   # Now handle build errors
@@ -692,7 +692,7 @@ else
   fi
   
   # Source ROOT to be available for later installs
-  . ${SETUPPATH}/source-root.sh -p=${NEWROOTDIR}
+  . "${SETUPPATH}/source-root.sh" "-p=${NEWROOTDIR}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source ROOT"
@@ -725,7 +725,7 @@ if [ "${GEANT4PATH}" != "" ]; then
     exit 1
   fi
   
-  ${SETUPPATH}/check-geant4version.sh --check=${GEANT4PATH}
+  "${SETUPPATH}/check-geant4version.sh" "--check=${GEANT4PATH}"
   if [ "$?" != "0" ]; then
     echo " "
     echo "ERROR: The directory ${GEANT4PATH} cannot be used as your Geant4 install for COSItools."
@@ -736,7 +736,7 @@ if [ "${GEANT4PATH}" != "" ]; then
   echo "GEANT4DIR=$(cd $(dirname ${GEANT4PATH}); pwd)/$(basename ${GEANT4PATH})" >> ${ENVFILE}
   
   # Source Geant4 to be available for later installs
-  . ${SETUPPATH}/source-geant4.sh -p=$(cd $(dirname ${GEANT4PATH}); pwd)/$(basename ${GEANT4PATH})
+  . "${SETUPPATH}/source-geant4.sh" -p=$(cd $(dirname "${GEANT4PATH}"); pwd)/$(basename "${GEANT4PATH}")
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source Geant4"
@@ -753,18 +753,18 @@ else
   fi
   
   echo "Switching to build-geant4.sh script..."
-  cd ${EXTERNALPATH}
+  cd "${EXTERNALPATH}"
   
-  bash ${SETUPPATH}/build-geant4.sh -source=${ENVFILE} -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
+  bash "${SETUPPATH}/build-geant4.sh" "-source=${ENVFILE}" -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Geant4 dir, copy the build log there
-  NEWGEANT4DIR=`grep GEANT4DIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  NEWGEANT4DIR=`grep GEANT4DIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
   if [[ -d ${NEWGEANT4DIR} ]]; then
     if [[ -f ${NEWGEANT4DIR}/BuildLogGeant4.txt ]]; then
-      mv ${NEWGEANT4DIR}/BuildLogGeant4.txt ${NEWGEANT4DIR}/BuildLogGeant4_before$(date +'%y%m%d%H%M%S').txt
+      mv "${NEWGEANT4DIR}/BuildLogGeant4.txt" "${NEWGEANT4DIR}/BuildLogGeant4_before$(date +'%y%m%d%H%M%S').txt"
     fi
-    mv BuildLogGeant4.txt ${NEWGEANT4DIR}
+    mv BuildLogGeant4.txt "${NEWGEANT4DIR}"
   fi
 
   # Now handle build errors
@@ -776,7 +776,7 @@ else
   fi
   
   # Source Geant4 to be available for later installs
-  . ${SETUPPATH}/source-geant4.sh -p=${NEWGEANT4DIR}
+  . "${SETUPPATH}/source-geant4.sh" "-p=${NEWGEANT4DIR}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source Geant4"
@@ -822,19 +822,19 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
     fi
   
     echo "Switching to build-cfitsio.sh script..."
-    cd ${EXTERNALPATH}
+    cd "${EXTERNALPATH}"
 
-    ${SETUPPATH}/build-cfitsio.sh -source=${ENVFILE} 2>&1 | tee BuildLogCFitsIO.txt
+    "${SETUPPATH}/build-cfitsio.sh" "-source=${ENVFILE}" 2>&1 | tee BuildLogCFitsIO.txt
     RESULT=${PIPESTATUS[0]}
   
   
     # If we have a new cfitsio dir, copy the build log there
-    NEWCFITSIODIR=`grep CFITSIODIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+    NEWCFITSIODIR=`grep CFITSIODIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
     if [[ -d ${NEWCFITSIODIR} ]]; then
       if [[ -f ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ]]; then
-        mv ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ${NEWCFITSIODIR}/BuildLogCFitsIO_before$(date +'%y%m%d%H%M%S').txt
+        mv "${NEWCFITSIODIR}/BuildLogCFitsIO.txt" "${NEWCFITSIODIR}/BuildLogCFitsIO_before$(date +'%y%m%d%H%M%S').txt"
       fi
-      mv BuildLogCFitsIO.txt ${NEWCFITSIODIR}
+      mv BuildLogCFitsIO.txt "${NEWCFITSIODIR}"
     fi
   
     # Now handle build errors
@@ -846,7 +846,7 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
     fi
   
     # Source cfitsio to be available for later installs
-    . ${SETUPPATH}/source-cfitsio.sh -p=${NEWCFITSIODIR}
+    . "${SETUPPATH}/source-cfitsio.sh" "-p=${NEWCFITSIODIR}"
     if [[ "$?" != "0" ]]; then
       echo " "
       echo "ERROR: Unable to source cfitsio"
@@ -856,7 +856,7 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
     # The build-script will have added cfitsio to the environment file
   fi
 
-  cd ${COSIPATH}
+  cd "${COSIPATH}"
 
   echo " "
   echo "SUCCESS: We have a usable cfitsio version!"
@@ -873,19 +873,19 @@ elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]]; then
   fi
 
   echo "Switching to build-heasoft.sh script..."
-  cd ${EXTERNALPATH}
+  cd "${EXTERNALPATH}"
 
-  ${SETUPPATH}/build-heasoft.sh -source=${ENVFILE} -patch=yes 2>&1 | tee BuildLogHEASoft.txt
+  "${SETUPPATH}/build-heasoft.sh" "-source=${ENVFILE}" -patch=yes 2>&1 | tee BuildLogHEASoft.txt
   RESULT=${PIPESTATUS[0]}
 
 
   # If we have a new HEASoft dir, copy the build log there
-  NEWHEASOFTDIR=`grep HEASOFTDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  NEWHEASOFTDIR=`grep HEASOFTDIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
   if [[ -d ${NEWHEASOFTDIR} ]]; then
     if [[ -f ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ]]; then
-      mv ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt
+      mv "${NEWHEASOFTDIR}/BuildLogHEASoft.txt" "${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt"
     fi
-    mv BuildLogHEASoft.txt ${NEWHEASOFTDIR}
+    mv BuildLogHEASoft.txt "${NEWHEASOFTDIR}"
   fi
 
   # Now handle build errors
@@ -897,7 +897,7 @@ elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]]; then
   fi
 
   # Source HEASoft to be available for later installs
-  . ${SETUPPATH}/source-heasoft.sh -p=${NEWHEASOFTDIR}
+  . "${SETUPPATH}/source-heasoft.sh" "-p=${NEWHEASOFTDIR}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source HEAsoft"
@@ -906,7 +906,7 @@ elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]]; then
 
   # The build-script will have added HEAsoft to the environment file
 
-  cd ${COSIPATH}
+  cd "${COSIPATH}"
 
   echo " "
   echo "SUCCESS: We have a usable HEASoft version!"
@@ -921,7 +921,7 @@ else
     exit 1
   fi
   
-  ${SETUPPATH}/check-heasoftversion.sh --check=${HEASOFTPATH}
+  "${SETUPPATH}/check-heasoftversion.sh" "--check=${HEASOFTPATH}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: The directory ${HEASOFTPATH} cannot be used as your HEASoft install for COSItools."
@@ -932,14 +932,14 @@ else
   echo "HEASOFTDIR=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})" >> ${ENVFILE}
   
   # Source HEASoft to be available for later installs
-  . ${SETUPPATH}/source-heasoft.sh -p=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})
+  . "${SETUPPATH}/source-heasoft.sh" -p=$(cd $(dirname "${HEASOFTPATH}"); pwd)/$(basename "${HEASOFTPATH}")
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source HEAsoft"
     exit 1
   fi
   
-  cd ${COSIPATH}
+  cd "${COSIPATH}"
 
   echo " "
   echo "SUCCESS: We have a usable HEASoft version!"
@@ -973,7 +973,7 @@ elif [ "${HEALPIXPATH}" != "" ]; then
     exit 1
   fi
   
-  ${SETUPPATH}/check-healpixversion.sh --check=${HEALPIXPATH}
+  "${SETUPPATH}/check-healpixversion.sh" "--check=${HEALPIXPATH}"
   if [ "$?" != "0" ]; then
     echo " "
     echo "ERROR: The directory ${HEALPIXPATH} cannot be used as your Healpix install for COSItools."
@@ -984,7 +984,7 @@ elif [ "${HEALPIXPATH}" != "" ]; then
   echo "HEALPIXDIR=$(cd $(dirname ${HEALPIXPATH}); pwd)/$(basename ${HEALPIXPATH})" >> ${ENVFILE}
   
   # Source Healpix to be available for later installs
-  . ${SETUPPATH}/source-healpix.sh -p=$(cd $(dirname ${HEALPIXPATH}); pwd)/$(basename ${HEALPIXPATH})
+  . "${SETUPPATH}/source-healpix.sh" -p=$(cd $(dirname "${HEALPIXPATH}"); pwd)/$(basename "${HEALPIXPATH}")
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source Healpix"
@@ -1001,18 +1001,18 @@ else
   fi
   
   echo "Switching to build-healpix.sh script..."
-  cd ${EXTERNALPATH}
+  cd "${EXTERNALPATH}"
   
-  bash ${SETUPPATH}/build-healpix.sh -source=${ENVFILE} 2>&1 | tee BuildLogHealpix.txt
+  bash "${SETUPPATH}/build-healpix.sh" "-source=${ENVFILE}" 2>&1 | tee BuildLogHealpix.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Healpix dir, copy the build log there
-  NEWHEALPIXDIR=`grep HEALPIXDIR\= ${ENVFILE} | awk -F= '{ print $2 }'`
+  NEWHEALPIXDIR=`grep HEALPIXDIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
   if [[ -d ${NEWHEALPIXDIR} ]]; then
     if [[ -f ${NEWHEALPIXDIR}/BuildLogHealpix.txt ]]; then
-      mv ${NEWHEALPIXDIR}/BuildLogHealpix.txt ${NEWHEALPIXDIR}/BuildLogHealpix_before$(date +'%y%m%d%H%M%S').txt
+      mv "${NEWHEALPIXDIR}/BuildLogHealpix.txt" "${NEWHEALPIXDIR}/BuildLogHealpix_before$(date +'%y%m%d%H%M%S').txt"
     fi
-    mv BuildLogHealpix.txt ${NEWHEALPIXDIR}
+    mv BuildLogHealpix.txt "${NEWHEALPIXDIR}"
   fi
 
   # Now handle build errors
@@ -1024,7 +1024,7 @@ else
   fi
   
   # Source Healpix to be available for later installs
-  . ${SETUPPATH}/source-healpix.sh -p=${NEWHEALPIXDIR}
+  . "${SETUPPATH}/source-healpix.sh" "-p=${NEWHEALPIXDIR}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source Healpix"
@@ -1056,7 +1056,7 @@ if [[ ! -f ${SETUPPATH}/setup-retrieve-git-repository.sh ]]; then
 fi
 
 MEGALIBBRANCH=develop-cosi
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=megalib -b=${MEGALIBBRANCH} -r=https://github.com/zoglauer/megalib.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}" -n=megalib -b=${MEGALIBBRANCH} -r=https://github.com/zoglauer/megalib.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1066,7 +1066,7 @@ if [ ${REPOSTATUS} -ge 2 ]; then
 fi  
 
 
-cd ${COSIPATH}/megalib
+cd "${COSIPATH}/megalib"
 
 # Check if MEGAlib has been compiled
 if [ ${REPOSTATUS} -eq 0 ]; then
@@ -1114,7 +1114,7 @@ fi
 
 echo "MEGALIBDIR=${COSIPATH}/megalib" >> ${ENVFILE}
 
-cd ${COSIPATH}
+cd "${COSIPATH}"
 
 echo " "
 echo "SUCCESS: MEGAlib has been installed" 
@@ -1131,7 +1131,7 @@ echo "Installing nuclearizer"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=nuclearizer -b=${BRANCH} -r=https://github.com/cositools/nuclearizer.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}" -n=nuclearizer -b=${BRANCH} -r=https://github.com/cositools/nuclearizer.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1140,7 +1140,7 @@ if [ ${REPOSTATUS} -ge 2 ]; then
   exit 1
 fi  
 
-cd ${COSIPATH}/nuclearizer
+cd "${COSIPATH}/nuclearizer"
 
 # Check if Nuclearizer has been compiled
 if [ ${REPOSTATUS} -eq 0 ]; then
@@ -1171,7 +1171,7 @@ fi
 
 echo "NUCLEARIZERDIR=${COSIPATH}/nuclearizer" >> ${ENVFILE}
 
-cd ${COSIPATH}
+cd "${COSIPATH}"
 
 echo " "
 echo "SUCCESS: Nuclearizer has been installed" 
@@ -1188,7 +1188,7 @@ echo "Installing cosipy"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy -b=${BRANCH} -r=https://github.com/cositools/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}" -n=cosipy -b=${BRANCH} -r=https://github.com/cositools/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1212,7 +1212,7 @@ echo "Installing cosipy-classic"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosipy-classic -b=${BRANCH} -r=https://github.com/tsiegert/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}" -n=cosipy-classic -b=${BRANCH} -r=https://github.com/tsiegert/cosipy.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1236,7 +1236,7 @@ echo "Installing cosi-data-challenges"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-data-challenges -b=${BRANCH} -r=https://github.com/cositools/cosi-data-challenges.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}" -n=cosi-data-challenges -b=${BRANCH} -r=https://github.com/cositools/cosi-data-challenges.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1260,7 +1260,7 @@ echo "Installing cosi-docs"
 echo " "
 
 echo "Switching to file setup-retrieve-git-repository.sh"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=cosi-docs -b=${BRANCH} -r=https://github.com/cositools/cosi-docs.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}" -n=cosi-docs -b=${BRANCH} -r=https://github.com/cositools/cosi-docs.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1291,7 +1291,7 @@ fi
 # First retrieve the mass model repositories
 
 echo "Retrieving Coserl"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-coserl -b=${BRANCH} -r=https://github.com/cositools/massmodel-coserl.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}/massmodels" -n=massmodel-coserl -b=${BRANCH} -r=https://github.com/cositools/massmodel-coserl.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1316,7 +1316,7 @@ done
 echo ""
 
 echo "Retrieving COSI balloon"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-cosi-balloon -b=${BRANCH} -r=https://github.com/cositools/massmodel-cosi-balloon.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}/massmodels" -n=massmodel-cosi-balloon -b=${BRANCH} -r=https://github.com/cositools/massmodel-cosi-balloon.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1342,7 +1342,7 @@ echo ""
 
 
 echo "Retrieving Compton sphere"
-${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH}/massmodels -n=massmodel-comptonsphere -b=${BRANCH} -r=https://github.com/cositools/massmodel-comptonsphere.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+"${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}/massmodels" -n=massmodel-comptonsphere -b=${BRANCH} -r=https://github.com/cositools/massmodel-comptonsphere.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
 REPOSTATUS=$?
 if [ ${REPOSTATUS} -ge 2 ]; then
   echo " "
@@ -1366,7 +1366,7 @@ for V in ${VERSIONEDBRANCHES}; do
 done
 echo ""
 
-cd ${COSIPATH}
+cd "${COSIPATH}"
 
 
 
@@ -1381,7 +1381,7 @@ if [[ ${EXTRAS} != "" ]]; then
     echo "Installing extra repository ${REPO}"
     echo " "
     echo "Switching to file setup-retrieve-git-repository.sh"
-    ${SETUPPATH}/setup-retrieve-git-repository.sh -c=${COSIPATH} -n=${REPO} -b=${BRANCH} -r=https://github.com/cositools/${REPO}.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
+    "${SETUPPATH}/setup-retrieve-git-repository.sh" "-c=${COSIPATH}" -n=${REPO} -b=${BRANCH} -r=https://github.com/cositools/${REPO}.git -p=${GITPULLBEHAVIOR} -s=${STASHNAME}
     REPOSTATUS=$?
     if [ ${REPOSTATUS} -ge 2 ]; then
       echo " "
@@ -1407,7 +1407,7 @@ echo " "
 
 
 if [[ $(uname -a) != *-686-* ]]; then
-  cd ${SETUPPATH}
+  cd "${SETUPPATH}"
 
   if [[ ! -f ${SETUPPATH}/setup-python3.sh ]]; then
     echo ""
@@ -1415,7 +1415,7 @@ if [[ $(uname -a) != *-686-* ]]; then
     exit 1
   fi
 
-  ${SETUPPATH}/setup-python3.sh
+  "${SETUPPATH}/setup-python3.sh"
   if [ "$?" != "0" ]; then
     # The error message is part of the above script
     exit 1
@@ -1433,7 +1433,7 @@ if [[ $(uname -a) != *-686-* ]]; then
     exit 1
   fi
 
-  ${SETUPPATH}/setup-check-cosipy.sh
+  "${SETUPPATH}/setup-check-cosipy.sh"
   if [ "$?" != "0" ]; then
     # The error message is part of the above script
     issuereport
@@ -1467,13 +1467,13 @@ echo "# Order is important!" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-geant4.sh -p=\${GEANT4DIR}" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-megalib.sh -p=\${MEGALIBDIR}" >> ${ENVFILE}
 echo ". ${SETUPPATH}/source-nuclearizer.sh -p=\${NUCLEARIZERDIR}" >> ${ENVFILE}
-if grep -q "CFITSIODIR" ${ENVFILE}; then
+if grep -q "CFITSIODIR" "${ENVFILE}"; then
   echo ". ${SETUPPATH}/source-cfitsio.sh -p=\${CFITSIODIR}" >> ${ENVFILE}
 fi
-if grep -q "HEASOFTDIR" ${ENVFILE}; then
+if grep -q "HEASOFTDIR" "${ENVFILE}"; then
   echo ". ${SETUPPATH}/source-heasoft.sh -p=\${HEASOFTDIR}" >> ${ENVFILE}
 fi
-if grep -q "HEALPIXDIR" ${ENVFILE}; then
+if grep -q "HEALPIXDIR" "${ENVFILE}"; then
   echo ". ${SETUPPATH}/source-healpix.sh -p=\${HEALPIXDIR}" >> ${ENVFILE}
 fi
 echo ". ${SETUPPATH}/source-root.sh -p=\${ROOTDIR}" >> ${ENVFILE}
@@ -1488,14 +1488,14 @@ echo "alias cosi='cd ${COSIPATH}; source python-env/bin/activate'" >> ${ENVFILE}
 echo " "
 
 echo "Renaming and moving the environment script"
-mv ${ENVFILE} ${COSIPATH}/source.sh
-chmod +x ${COSIPATH}/source.sh
+mv "${ENVFILE}" "${COSIPATH}/source.sh"
+chmod +x "${COSIPATH}/source.sh"
 
 echo "Linking it at the default MEGAlib location"
-if [ -f ${COSIPATH}/megalib/bin/source-megalib.sh ]; then
-  rm ${COSIPATH}/megalib/bin/source-megalib.sh
+if [ -f "${COSIPATH}/megalib/bin/source-megalib.sh" ]; then
+  rm "${COSIPATH}/megalib/bin/source-megalib.sh"
 fi
-ln -s ${COSIPATH}/source.sh ${COSIPATH}/megalib/bin/source-megalib.sh  
+ln -s "${COSIPATH}/source.sh" "${COSIPATH}/megalib/bin/source-megalib.sh"  
 
 echo " "
 echo " "
@@ -1506,7 +1506,7 @@ if [[ ! -f ${SETUPPATH}/setup-terminal.sh ]]; then
   exit 1
 fi
 
-${SETUPPATH}/setup-terminal.sh
+"${SETUPPATH}/setup-terminal.sh"
 
 
 ############################################################################################################

@@ -22,7 +22,7 @@ fi
 export PYTHONPATH=""
 
 # Activate the environment
-. ${PENV}/bin/activate
+. "${PENV}/bin/activate"
 if [[ "$?" != "0" ]]; then
   echo ""
   echo "ERROR: Unable to activate the python environment!"

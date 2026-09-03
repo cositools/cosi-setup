@@ -176,23 +176,23 @@ fi
 ############################################################################################################
 # Step 5: Setup the repository
 
-cd ${COSIPATH}
+cd "${COSIPATH}"
 
 # Check if the requested branch exits:
 if [ "${GITBRANCH}" == "" ]; then
   GITBRANCH="main"
 fi
 
-FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "${GITBRANCH}")
+FOUNDBRANCH=$(git ls-remote --heads "${GITPATH}" | awk -F"refs/heads/" '{ print $2 }' | grep -x "${GITBRANCH}")
 if [[ ${FOUNDBRANCH} != ${GITBRANCH} ]]; then
   echo " "
   echo "INFO: The desired branch \"${GITBRANCH}\" does not exit in the repository"
-  FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "main")
+  FOUNDBRANCH=$(git ls-remote --heads "${GITPATH}" | awk -F"refs/heads/" '{ print $2 }' | grep -x "main")
   if [[ ${FOUNDBRANCH} == main ]]; then
     echo "      Switching to the main branch..."
     GITBRANCH="main"
   else
-    FOUNDBRANCH=$(git ls-remote --heads ${GITPATH} | awk -F"refs/heads/" '{ print $2 }' | grep -x "master")
+    FOUNDBRANCH=$(git ls-remote --heads "${GITPATH}" | awk -F"refs/heads/" '{ print $2 }' | grep -x "master")
     if [[ ${FOUNDBRANCH} == master ]]; then
       echo "         Switching to the master branch..."
       GITBRANCH="master"
@@ -208,7 +208,7 @@ fi
 # The repository does not exist - clone it
 if [[ ! -d ${NAME} ]]; then
   echo "Using git to clone the repository ${GITPATH} into the local directory ${NAME}..."
-  git clone ${GITPATH} ${NAME}
+  git clone "${GITPATH}" ${NAME}
   if [ "$?" != "0" ]; then
     echo " "
     echo "ERROR: Unable to clone the requested repository from git"
@@ -222,7 +222,7 @@ else
   cd ${NAME}
 
   # Check if we are already on the requested branch with the latest commit
-  REMOTEBRANCHHASH=$(git ls-remote ${GITPATH} ${GITBRANCH} | awk -F" " '{ print $1 }' | xargs)
+  REMOTEBRANCHHASH=$(git ls-remote "${GITPATH}" ${GITBRANCH} | awk -F" " '{ print $1 }' | xargs)
   LOCALBRANCHHASH=$(git rev-parse HEAD | xargs)
   if [[ ${REMOTEBRANCHHASH} == ${LOCALBRANCHHASH} ]]; then
     echo "We are already on the requested branch with the latest commit"
@@ -245,7 +245,7 @@ else
     fi
   elif [[ ${GITPULLBEHAVIOR} == "no" ]]; then
     echo "Keeping existing repository as is"
-    cd ${COSIPATH}
+    cd "${COSIPATH}"
     exit 0
   fi
 fi
@@ -287,7 +287,7 @@ if [ "$?" != "0" ]; then
   exit 100
 fi 
 
-cd ${COSIPATH}
+cd "${COSIPATH}"
 
 exit 1
 

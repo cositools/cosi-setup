@@ -22,7 +22,7 @@ COSIPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; cd ..; pwd -P )"
 
 # Check if the source script exits
 
-if [ ! -f ${COSIPATH}/source.sh ]; then
+if [ ! -f "${COSIPATH}/source.sh" ]; then
   echo " "
   echo "ERROR: source.sh not found: ${COSIPATH}/source.sh"
   exit 1
@@ -53,7 +53,7 @@ elif [[ ${SHELL} == *zsh* ]]; then
 fi
 
 if [[ ${PROFILE} != "" ]]; then
-  HASSOURCER=$(grep "${SOURCER}" ${PROFILE})
+  HASSOURCER=$(grep "${SOURCER}" "${PROFILE}")
   if [[ ${HASSOURCER} != "" ]]; then
     echo " "
     echo "Your shell configuration file (${PROFILE}) already contains the COSI source script."

@@ -18,7 +18,7 @@ OSTYPE=$(uname -s | awk '{print tolower($0)}')
 # The configuration options
 CONFIGUREOPTIONS=" "
 
-# No deprecated  and developer arnings - we are not the maintainers of the cmake files
+# No deprecated and developer warnings - we are not the maintainers of the cmake files
 CONFIGUREOPTIONS+=" -Wno-dev -DCMAKE_WARN_DEPRECATED=OFF"
 
 # Install path relative to the build path --- simply one up in this script
@@ -180,14 +180,10 @@ confhelp() {
 }
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -207,23 +203,23 @@ KEEPENVASIS="off"
 WANTEDVERSION=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-t*=* ]]; then
-    TARBALL=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-s*=* ]] || [[ ${C} == *-e*=* ]]; then
-    ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
+    ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-m*=* ]]; then
-    MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
+    MAXTHREADS=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-d*=* ]]; then
-    DEBUG=`echo ${C} | awk -F"=" '{ print $2 }'`
+    DEBUG=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-p*=* ]]; then
-    PATCH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-cl*=* ]]; then
-    CLEANUP=`echo ${C} | awk -F"=" '{ print $2 }'`
+    CLEANUP=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-r*=* ]]; then
-    WANTEDVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
+    WANTEDVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-k*=* ]]; then
-    KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
+    KEEPENVASIS=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -362,7 +358,7 @@ ROOTTOPDIR=""
 if [[ ${TARBALL} == "" ]]; then
   # Get desired version:
   if [[ ${WANTEDVERSION} == "" ]]; then
-    WANTEDVERSION=`${SETUPPATH}/check-rootversion.sh --get-max`
+    WANTEDVERSION=`"${SETUPPATH}/check-rootversion.sh" --get-max`
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine required ROOT version!"
       exit 1
@@ -396,7 +392,7 @@ if [[ ${TARBALL} == "" ]]; then
     for V in ${ALLROOTVER}; do
       NEWWANTED=${V//v/}
       NEWWANTED=${NEWWANTED//-/.}
-      ${SETUPPATH}/check-rootversion.sh --good-version=${NEWWANTED} > /dev/null
+      "${SETUPPATH}/check-rootversion.sh" --good-version=${NEWWANTED} > /dev/null
       if [ "$?" != "0" ]; then
         echo "Skipping blacklisted ${NEWWANTED}..."
         continue
@@ -417,9 +413,9 @@ if [[ ${TARBALL} == "" ]]; then
 
   # Check if it already exists locally
   REQUIREDOWNLOAD="true"
-  if [ -f ${TARBALL} ]; then
+  if [ -f "${TARBALL}" ]; then
     # check if the gziped file is not corrupted
-    gunzip -t ${TARBALL} >/dev/null 2>&1
+    gunzip -t "${TARBALL}" >/dev/null 2>&1
     if [ "$?" != "0" ]; then
       REQUIREDOWNLOAD="true"
       echo "Tarball already exists, but is corrupted. Requiring re-download."
@@ -438,7 +434,7 @@ if [[ ${TARBALL} == "" ]]; then
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
     echo "Starting the download from GitHub."
     echo " "
-    curl -L https://github.com/root-project/root/tarball/${NEWWANTED_GITNAME} -o ${TARBALL}
+    curl -L https://github.com/root-project/root/tarball/${NEWWANTED_GITNAME} -o "${TARBALL}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to download the tarball from GitHub!"
       exit 1
@@ -447,7 +443,7 @@ if [[ ${TARBALL} == "" ]]; then
 fi
 
 # Check if the tarball exists
-if [ ! -f ${TARBALL} ]; then
+if [ ! -f "${TARBALL}" ]; then
   echo "ERROR: The tar ball \"${TARBALL}\" does not exist!"
   exit 1
 fi
@@ -457,7 +453,7 @@ fi
 echo "Name of the used ROOT tarball: ${TARBALL}"
 
 # Determine the name of the top level directory in the tar ball
-ROOTTOPDIR=`tar tzf ${TARBALL} | sed -e 's@/.*@@' | uniq`
+ROOTTOPDIR=`tar tzf "${TARBALL}" | sed -e 's@/.*@@' | uniq`
 RESULT=$?
 if [ "${RESULT}" != "0" ]; then
   echo "ERROR: Cannot find top level directory in the tar ball!"
@@ -466,14 +462,14 @@ fi
 
 # Check if it has the correct version:
 VER=""
-if tar -tf ${TARBALL} | grep -q "${ROOTTOPDIR}/build/version_number"; then
-  VER=`tar xfzO ${TARBALL} ${ROOTTOPDIR}/build/version_number | sed 's|/|.|g'`
-elif tar -tf ${TARBALL} | grep -q "${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx"; then
-  VER+=$(tar xfzO ${TARBALL} ${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx | grep "ROOT_VERSION_MAJOR" | head -n 1 | awk '{ print $3 }')
+if tar -tf "${TARBALL}" | grep -q "${ROOTTOPDIR}/build/version_number"; then
+  VER=`tar xfzO "${TARBALL}" "${ROOTTOPDIR}/build/version_number" | sed 's|/|.|g'`
+elif tar -tf "${TARBALL}" | grep -q "${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx"; then
+  VER+=$(tar xfzO "${TARBALL}" "${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx" | grep "ROOT_VERSION_MAJOR" | head -n 1 | awk '{ print $3 }')
   VER+="."
-  VER+=$(tar xfzO ${TARBALL} ${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx | grep "ROOT_VERSION_MINOR" | head -n 1 | awk '{ print $3 }')
+  VER+=$(tar xfzO "${TARBALL}" "${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx" | grep "ROOT_VERSION_MINOR" | head -n 1 | awk '{ print $3 }')
   VER+="."
-  VER+=$(tar xfzO ${TARBALL} ${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx | grep "ROOT_VERSION_PATCH" | head -n 1 | awk '{ print $3 }')
+  VER+=$(tar xfzO "${TARBALL}" "${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx" | grep "ROOT_VERSION_PATCH" | head -n 1 | awk '{ print $3 }')
 else
   echo "ERROR: Cannot find the ROOT version in the tarball!"
   exit 1
@@ -490,7 +486,7 @@ if [[ ${WANTEDVERSION} != "" ]]; then
     exit 1
   fi
 else
-  ${SETUPPATH}/check-rootversion.sh --good-version=${VER}
+  "${SETUPPATH}/check-rootversion.sh" --good-version=${VER}
   if [ "$?" != "0" ]; then
     if [[ ${WANTEDVERSION} != "master" ]]; then
       echo "ERROR: The ROOT tarball does not contain an acceptable ROOT version!"
@@ -515,8 +511,8 @@ ROOTBUILDDIR=root_v${VER}-build     # Attention: the cleanup checks this name pa
 
 
 echo "Checking for old installation..."
-if [ -d ${ROOTDIR} ]; then
-  cd ${ROOTDIR}
+if [ -d "${ROOTDIR}" ]; then
+  cd "${ROOTDIR}"
   if [ -f COMPILE_SUCCESSFUL ]; then
 
     SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
@@ -583,15 +579,15 @@ fi
 
 
 echo "Unpacking..."
-mkdir ${ROOTDIR}
-cd ${ROOTDIR}
-tar xfz ../${TARBALL} > /dev/null
+mkdir "${ROOTDIR}"
+cd "${ROOTDIR}"
+tar xfz "../${TARBALL}" > /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the ROOT tarball!"
   exit 1
 fi
-mv ${ROOTTOPDIR} ${ROOTSOURCEDIR}
-mkdir ${ROOTBUILDDIR}
+mv "${ROOTTOPDIR}" "${ROOTSOURCEDIR}"
+mkdir "${ROOTBUILDDIR}"
 
 
 
@@ -599,7 +595,7 @@ PATCHAPPLIED="Patch not applied"
 if [[ ${PATCH} == on ]]; then
   echo "Patching..."
   if [ -f "${SETUPPATH}/patches/${ROOTCORE}.patch" ]; then
-    patch -p1 < ${SETUPPATH}/patches/${ROOTCORE}.patch
+    patch -p1 < "${SETUPPATH}/patches/${ROOTCORE}.patch"
     if [ "$?" != "0" ]; then
       echo "ERROR: Something went wrong applying the ROOT patch!"
       exit 1
@@ -615,14 +611,14 @@ fi
 
 
 echo "Configuring..."
-cd ${ROOTBUILDDIR}
+cd "${ROOTBUILDDIR}"
 export ROOTSYS=${ROOTDIR}
 #if [[ ${OSTYPE} == *arwin* ]]; then
 #  export CPLUS_INCLUDE_PATH=`xcrun --show-sdk-path`/usr/include
 #  export LIBRARY_PATH=$LIBRARY_PATH:`xcrun --show-sdk-path`/usr/lib
 #fi
 echo "Configure command: cmake ${CONFIGUREOPTIONS} ${DEBUGOPTIONS} ../${ROOTSOURCEDIR}"
-cmake ${CONFIGUREOPTIONS} ${DEBUGOPTIONS} ../${ROOTSOURCEDIR}
+cmake ${CONFIGUREOPTIONS} ${DEBUGOPTIONS} "../${ROOTSOURCEDIR}"
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring (cmake'ing) ROOT!"
   exit 1
@@ -669,7 +665,7 @@ if [[ ${CLEANUP} == on ]]; then
   echo "Cleaning up ..."
   # Just a sanity check before our remove...
   if [[ ${ROOTBUILDDIR} == root_v*-build ]]; then
-    rm -rf ${ROOTBUILDDIR}
+    rm -rf "${ROOTBUILDDIR}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to remove build directory!"
       exit 1
@@ -678,7 +674,7 @@ if [[ ${CLEANUP} == on ]]; then
     echo "INFO: Not cleaning up the build directory, because it is not named as expected: ${ROOTBUILDDIR}"
   fi
   if [[ ${ROOTSOURCEDIR} == root_v*-source ]]; then
-    rm -rf ${ROOTSOURCEDIR}
+    rm -rf "${ROOTSOURCEDIR}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to remove source directory!"
       exit 1
@@ -707,8 +703,8 @@ echo " " >> COMPILE_SUCCESSFUL
 
 echo "Setting permissions..."
 cd ..
-chown -R ${USER}:${GROUP} ${ROOTDIR}
-chmod -R go+rX ${ROOTDIR}
+chown -R ${USER}:${GROUP} "${ROOTDIR}"
+chmod -R go+rX "${ROOTDIR}"
 
 
 if [ "${ENVFILE}" != "" ]; then

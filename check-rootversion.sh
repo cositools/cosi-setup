@@ -37,14 +37,10 @@ confhelp() {
 }
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -62,9 +58,9 @@ ROOTPATH=""
 TESTVERSION=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-c*=* ]]; then
-    ROOTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    ROOTPATH=`echo "${C}" | awk -F"=" '{ print $2 }'`
     CHECK="true"
     GET="false"
     GOOD="false"
@@ -86,7 +82,7 @@ for C in ${CMD}; do
     GET="false"
     MAX="false"
     GOOD="true"
-    TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TESTVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -99,9 +95,9 @@ for C in ${CMD}; do
   fi
 done
 
-RootVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Min" | awk -F":" '{ print $2 }')
-RootVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Max" | awk -F":" '{ print $2 }')
-RootBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Blacklist" | awk -F":" '{ print $2 }')
+RootVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "ROOT-Min" | awk -F":" '{ print $2 }')
+RootVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "ROOT-Max" | awk -F":" '{ print $2 }')
+RootBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "ROOT-Blacklist" | awk -F":" '{ print $2 }')
 
 RootVersionMinString=${RootVersionMin}
 RootVersionMaxString=${RootVersionMax}
@@ -165,13 +161,13 @@ if [ "${GOOD}" == "true" ]; then
 fi  
 
 if [ "${CHECK}" == "true" ]; then
-  if [ ! -f ${ROOTPATH}/bin/root-config ]; then
+  if [ ! -f "${ROOTPATH}/bin/root-config" ]; then
     echo " "
     echo "ERROR: The given directory ${ROOTPATH} does no contain a correct ROOT installation"
     exit 1;
   fi
 
-  rv=`${ROOTPATH}/bin/root-config --version`
+  rv=`"${ROOTPATH}/bin/root-config" --version`
   version=`echo $rv | awk -F. '{ print $1 }'`;
   release=`echo $rv | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'`;
   patch=`echo $rv | awk -F/ '{ print $2 }'| sed 's/0*//'`;

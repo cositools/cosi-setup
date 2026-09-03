@@ -67,14 +67,10 @@ confhelp() {
 
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -86,12 +82,12 @@ TARBALL=""
 ENVFILE=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-t*=* ]]; then
-    TARBALL=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
     echo "Using this tarball: ${TARBALL}"
   elif [[ ${C} == *-s* ]]; then
-    ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
+    ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
     echo "Using this environment file: ${ENVFILE}"
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
@@ -113,7 +109,7 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given cfitsio tarball is ${TARBALL}"
 
   # Check if it has the correct version:
-  VER=`echo ${TARBALL} | awk -Fcfitsio- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
+  VER=`echo "${TARBALL}" | awk -Fcfitsio- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
   echo "Version of cfitsio is: ${VER}"
 else
   # Download it
@@ -134,8 +130,8 @@ else
   REQUIREDOWNLOAD="true"
   if [ -f "${TARBALL}" ]; then
     # ... and has the same size
-    LOCALSIZE=$(wc -c < ${TARBALL} | tr -d ' ')
-    REMOTESIZE=$(curl -s --head https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/${TARBALL} | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
+    LOCALSIZE=$(wc -c < "${TARBALL}" | tr -d ' ')
+    REMOTESIZE=$(curl -s --head "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/${TARBALL}" | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine remote tarball size"
       exit 1
@@ -157,7 +153,7 @@ else
     echo " "
     echo "curl -O -C - https://heasarc.gsfc.nasa.gov/FTP/software/lcfitsio/release/${TARBALL}"
     echo " "
-    curl -O https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/${TARBALL}
+    curl -O "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/${TARBALL}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to download the tarball from the cfitsio website!"
       exit 1
@@ -165,7 +161,7 @@ else
   fi
 
   # Check for the version number:
-  VER=`echo ${TARBALL} | awk -Fcfitsio- '{ print $2 }' | awk -F.tar '{ print $1 }'`;
+  VER=`echo "${TARBALL}" | awk -Fcfitsio- '{ print $2 }' | awk -F.tar '{ print $1 }'`;
   echo "Version of cfitsio is: ${VER}"
 fi
 
@@ -213,7 +209,7 @@ fi
 echo "Unpacking..."
 mkdir cfitsio_v${VER}
 cd cfitsio_v${VER}
-tar xfz ../${TARBALL} > /dev/null
+tar xfz "../${TARBALL}" > /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the cfitsio tarball!"
   exit 1

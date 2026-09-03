@@ -69,7 +69,7 @@ fi
 
 
 # Finally source the ROOT setup:
-source ${__TMP_PATH}/bin/thisroot.sh
+source "${__TMP_PATH}/bin/thisroot.sh"
 
 
 return

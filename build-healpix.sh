@@ -52,14 +52,10 @@ confhelp() {
 
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -71,12 +67,12 @@ TARBALL=""
 ENVFILE=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-t*=* ]]; then
-    TARBALL=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
     echo "Using this tarball: ${TARBALL}"
   elif [[ ${C} == *-s* ]]; then
-    ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
+    ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
     echo "Using this environment file: ${ENVFILE}"
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
@@ -99,7 +95,7 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given healpix tarball is ${TARBALL}"
 
   # Check if it has the correct version:
-  VER=`echo ${TARBALL} | awk -Fhealpix- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
+  VER=`echo "${TARBALL}" | awk -Fhealpix- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
   echo "Version of healpix is: ${VER}"
 else
   # Download it
@@ -123,7 +119,7 @@ else
   REQUIREDOWNLOAD="true"
   if [ -f "${TARBALL}" ]; then
     # ... and has the same size
-    LOCALSIZE=$(wc -c < ${TARBALL} | tr -d ' ')
+    LOCALSIZE=$(wc -c < "${TARBALL}" | tr -d ' ')
     REMOTESIZE=$(curl -L -I ${LINK} | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine remote tarball size"
@@ -143,7 +139,7 @@ else
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
     echo "Starting the download."
     echo " "
-    curl -L ${LINK} -o ${TARBALL}
+    curl -L ${LINK} -o "${TARBALL}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to download the tarball from the healpix website!"
       exit 1
@@ -204,7 +200,7 @@ MAINDIR=$(pwd)
 
 
 echo "Unpacking..."
-tar xfz ../${TARBALL} 2> /dev/null
+tar xfz "../${TARBALL}" 2> /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the healpix tarball!"
   exit 1
@@ -214,11 +210,11 @@ mv Healpix_${VER} healpix_v${VER}-source
 
 
 echo "Building helper library libsharp..."
-cd ${MAINDIR}/healpix_v${VER}-source/src/common_libraries/libsharp
+cd "${MAINDIR}/healpix_v${VER}-source/src/common_libraries/libsharp"
 if [ ! -f "./configure" ]; then 
   autoreconf -i
 fi
-sh configure --prefix=${MAINDIR} > config_libsharp.log 2>&1
+sh configure "--prefix=${MAINDIR}" > config_libsharp.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring libsharp!"
   echo "       Check the file "$(pwd)"/config_libsharp.log"
@@ -236,13 +232,13 @@ if [ "$?" != "0" ]; then
   echo "       Check the file "$(pwd)"/install_libsharp.log"
   exit 1
 fi
-cd ${MAINDIR}
+cd "${MAINDIR}"
 
 
 
 echo "Configuring..."
 # Minimze the LD_LIBRARY_PATH to prevent problems with multiple readline's
-cd ${MAINDIR}/healpix_v${VER}-source/src/cxx
+cd "${MAINDIR}/healpix_v${VER}-source/src/cxx"
 
 make distclean 2>/dev/null || true
 
@@ -251,14 +247,14 @@ make distclean 2>/dev/null || true
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${MAINDIR}/lib/pkgconfig
 
 if [[ "${ENVFILE}" != "" ]]; then
-  HEASOFTDIR=$(cat ${ENVFILE} | grep HEASOFTDIR)
+  HEASOFTDIR=$(cat "${ENVFILE}" | grep HEASOFTDIR)
   if [[ ${HEASOFTDIR} != "" ]]; then
     export CFITSIO_INCDIR=${HEASOFTDIR}/include
     export CFITSIO_LIBDIR=${HEASOFTDIR}/lib
   fi
 fi 
 
-sh configure ${CONFIGUREOPTIONS} --prefix=${MAINDIR} > config.log 2>&1
+sh configure ${CONFIGUREOPTIONS} "--prefix=${MAINDIR}" > config.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring healpix!"
   echo "       Check the file "$(pwd)"/config.log"
@@ -288,7 +284,7 @@ fi
 
 
 echo "Store our success story..."
-cd ${MAINDIR}
+cd "${MAINDIR}"
 rm -f COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
@@ -296,7 +292,7 @@ echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
 
 
 echo "Setting permissions..."
-cd ${MAINDIR}/..
+cd "${MAINDIR}/.."
 chown -R ${USER}:${GROUP} healpix_v${VER}
 chmod -R go+rX healpix_v${VER}
 
@@ -339,7 +335,7 @@ cd $COSITOOLS
 
 if [ ! -f $TARBALL ]; then
   echo "Downloading HEALPix ${HPX_VER}..."
-  wget https://downloads.sourceforge.net/project/healpix/Healpix_${HPX_VER}/${TARBALL}
+  wget "https://downloads.sourceforge.net/project/healpix/Healpix_${HPX_VER}/${TARBALL}"
 fi
 
 if [ ! -d $INSTALL_DIR ]; then

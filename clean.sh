@@ -99,13 +99,13 @@ fi
 if [[ ${CLEANCPP} == "TRUE" ]]; then
   if [[ -d ${COSITOOLSDIR}/nuclearizer ]]; then
     echo "Cleaning nuclearizer"
-    cd ${COSITOOLSDIR}/nuclearizer
+    cd "${COSITOOLSDIR}/nuclearizer"
     make clean
   fi
 
   if [[ -d ${COSITOOLSDIR}/megalib ]]; then
     echo "Cleaning MEGAlib"
-    cd ${COSITOOLSDIR}/megalib
+    cd "${COSITOOLSDIR}/megalib"
     make clean
   fi
 fi
@@ -113,7 +113,7 @@ fi
 if [[ ${CLEANEXTERNAL} == "TRUE" ]]; then
   if [[ -d ${COSITOOLSDIR}/external ]]; then
     echo "Removing external libraries/programs"
-    cd ${COSITOOLSDIR}/external
+    cd "${COSITOOLSDIR}/external"
     rm -rf root*
     rm -rf geant4*
     rm -rf cfitsio*
@@ -124,7 +124,7 @@ fi
 if [[ ${CLEANPYTHON} == "TRUE" ]]; then
   if [[ -d ${COSITOOLSDIR}/python-env ]]; then
     echo "Removing python environment"
-    rm -rf ${COSITOOLSDIR}/python-env
+    rm -rf "${COSITOOLSDIR}/python-env"
   fi
 fi
 

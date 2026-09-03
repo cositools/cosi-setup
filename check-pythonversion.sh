@@ -41,14 +41,10 @@ confhelp() {
 }
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -67,7 +63,7 @@ PYTHONEXE=""
 TESTVERSION=""
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-get-int* ]]; then
     PYTHONEXE=""
     CHECK="false"
@@ -75,7 +71,7 @@ for C in ${CMD}; do
     GOOD="false"
     INTERPRETER="true"
   elif [[ ${C} == *-c*=* ]]; then
-    PYTHONEXE=`echo ${C} | awk -F"=" '{ print $2 }'`
+    PYTHONEXE=`echo "${C}" | awk -F"=" '{ print $2 }'`
     CHECK="true"
     GET="false"
     GOOD="false"
@@ -97,7 +93,7 @@ for C in ${CMD}; do
     GET="false"
     MAX="false"
     GOOD="true"
-    TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TESTVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -110,9 +106,9 @@ for C in ${CMD}; do
   fi
 done
 
-PythonVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Min" | awk -F":" '{ print $2 }')
-PythonVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Max" | awk -F":" '{ print $2 }')
-PythonBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Blacklist" | awk -F":" '{ print $2 }')
+PythonVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Python-Min" | awk -F":" '{ print $2 }')
+PythonVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Python-Max" | awk -F":" '{ print $2 }')
+PythonBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Python-Blacklist" | awk -F":" '{ print $2 }')
 
 PythonVersionMinString=${PythonVersionMin}
 PythonVersionMaxString=${PythonVersionMax}
@@ -193,7 +189,7 @@ if [ "${INTERPRETER}" == "true" ]; then
   fi
 
   # Everything but the name of the interpreter goes to stderr
-  ${SETUPPATH}/check-pythonversion.sh --check=${PY} >&2
+  "${SETUPPATH}/check-pythonversion.sh" "--check=${PY}" >&2
   if [[ "$?" != "0" ]]; then
     exit 1
   fi
@@ -203,13 +199,13 @@ if [ "${INTERPRETER}" == "true" ]; then
 fi
 
 if [ "${CHECK}" == "true" ]; then
-  if ! type ${PYTHONEXE} >/dev/null 2>&1; then
+  if ! type "${PYTHONEXE}" >/dev/null 2>&1; then
     echo " "
     echo "ERROR: The given python interpreter \"${PYTHONEXE}\" does not exist"
     exit 1;
   fi
 
-  pv=`${PYTHONEXE} --version 2>&1 | awk '{ print $2 }'`
+  pv=`"${PYTHONEXE}" --version 2>&1 | awk '{ print $2 }'`
 
   # Reject development versions, e.g., 3.15.0rc1
   if [[ ! ${pv} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then

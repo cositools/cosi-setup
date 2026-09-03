@@ -29,6 +29,9 @@ CONFIGUREOPTIONS="${CONFIGUREOPTIONS} -DCMAKE_INSTALL_PREFIX=.. -DGEANT4_USE_GDM
 CONFIGUREOPTIONS+=" -DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 CONFIGUREOPTIONS+=" -DGEANT4_USE_SYSTEM_ZLIB=ON"
 
+# No deprecated and developer warnings - we are not the maintainers of the cmake files
+CONFIGUREOPTIONS+=" -Wno-dev -DCMAKE_WARN_DEPRECATED=OFF"
+
 # Reduce the warning messages:
 WARNINGS="-Wno-shadow -Wno-implicit-fallthrough -Wno-overloaded-virtual -Wno-deprecated-copy -Wno-unused-result -Wno-format-overflow="
 
@@ -104,14 +107,10 @@ confhelp() {
 }
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -132,24 +131,24 @@ CLEANUP="off"
 KEEPENVASIS="false"
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-t*=* ]]; then
-    TARBALL=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-s*=* ]] || [[ ${C} == *-e*=* ]]; then
-    ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
+    ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
     echo "Using this environment file: ${ENVFILE}"
   elif [[ ${C} == *-m*=* ]]; then
-    MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
+    MAXTHREADS=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-d*=* ]]; then
-    DEBUG=`echo ${C} | awk -F"=" '{ print $2 }'`
+    DEBUG=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-p*=* ]]; then
-    PATCH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-cl*=* ]]; then
-    CLEANUP=`echo ${C} | awk -F"=" '{ print $2 }'`
+    CLEANUP=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-g*=* ]]; then
-    WANTEDVERSION=`echo ${C} | awk -F"=" '{ print $2 }'`
+    WANTEDVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-k* ]]; then
-    KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
+    KEEPENVASIS=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -280,7 +279,7 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given Geant4 tarball is ${TARBALL}"
   
   # Check if it has the correct version:
-  NUMVER=`echo ${TARBALL} | awk -F'geant4[-.]v?' '{ print $NF }' | awk -F.t '{ print $1 }'`;
+  NUMVER=`echo "${TARBALL}" | awk -F'geant4[-.]v?' '{ print $NF }' | awk -F.t '{ print $1 }'`;
   VER="v${NUMVER}"
   # Old versions use a zero-padded minor, i.e. 10.02 is the same version as 10.2
   SHORTVER=`echo ${NUMVER} | awk -F. '{ printf "%d.%d", $1, $2 }'`;
@@ -292,7 +291,7 @@ if [ "${TARBALL}" != "" ]; then
       exit 1
     fi
   else 
-    ${SETUPPATH}/check-geant4version.sh --good-version=${NUMVER}
+    "${SETUPPATH}/check-geant4version.sh" --good-version=${NUMVER}
     if [ "$?" != "0" ]; then
       echo "ERROR: The Geant4 tarball you supplied does not contain an acceptable Geant4 version!"
       exit 1
@@ -303,7 +302,7 @@ else
   
   if [[ ${WANTEDVERSION} == "" ]]; then
     # Get desired version:
-    WANTEDVERSION=`${SETUPPATH}/check-geant4version.sh --get-max`
+    WANTEDVERSION=`"${SETUPPATH}/check-geant4version.sh" --get-max`
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine required Geant4 version!"
       exit 1
@@ -330,10 +329,10 @@ else
   
   # Check if it already exists locally
   REQUIREDOWNLOAD="true"
-  if [ -f ${TARBALL} ]; then
+  if [ -f "${TARBALL}" ]; then
     # ... and has the same size
-    LOCALSIZE=`wc -c < ${TARBALL} | tr -d ' '`
-    SAMESIZE=`curl -s --head ${WEBSITE}/${TARBALL}`
+    LOCALSIZE=`wc -c < "${TARBALL}" | tr -d ' '`
+    SAMESIZE=`curl -s --head "${WEBSITE}/${TARBALL}"`
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine remote tarball size"
       exit 1
@@ -351,14 +350,14 @@ else
     echo " "
     echo "curl -O -C - ${WEBSITE}/${TARBALL}"
     echo " "
-    curl -O ${WEBSITE}/${TARBALL}
+    curl -O "${WEBSITE}/${TARBALL}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to download the tarball from the Geant4 website!"
       exit 1
     fi
   fi
   
-  VER=`echo ${TARBALL} | awk -Fgeant4. '{ print $2 }' | awk -F.t '{ print $1 }'`;
+  VER=`echo "${TARBALL}" | awk -Fgeant4. '{ print $2 }' | awk -F.t '{ print $1 }'`;
   if [ "$?" != "0" ]; then
     echo "ERROR: Something went wrong during determining the Geant4 version"
     exit 1
@@ -386,8 +385,8 @@ if [[ ${GEANT4CORE} == "geant4_v11.02.p02" ]]; then
 fi
 
 echo "Checking for old installation..."
-if [ -d ${GEANT4DIR} ]; then
-  cd ${GEANT4DIR}
+if [ -d "${GEANT4DIR}" ]; then
+  cd "${GEANT4DIR}"
   if [ -f COMPILE_SUCCESSFUL ]; then
   
     SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
@@ -453,12 +452,12 @@ fi
 
 
 echo "Unpacking..."
-mkdir ${GEANT4DIR}
-cd ${GEANT4DIR}
+mkdir "${GEANT4DIR}"
+cd "${GEANT4DIR}"
 if ( [[ ${TARBALL} == *.tgz ]] || [[ ${TARBALL} == *.tar.gz ]] ); then
-  tar xfz ../${TARBALL} > /dev/null
+  tar xfz "../${TARBALL}" > /dev/null
 elif [[ $1 == *.tar ]] ; then
-  tar xf ../${TARBALL} > /dev/null
+  tar xf "../${TARBALL}" > /dev/null
 else
   echo "ERROR: File has unknown suffix: $1 (known: tgz, tar.gz, tar)"
   exit 1
@@ -467,8 +466,8 @@ if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the Geant4 tarball!"
   exit 1
 fi
-mv geant4-${VER} ${GEANT4SOURCEDIR}
-mkdir ${GEANT4BUILDDIR}
+mv geant4-${VER} "${GEANT4SOURCEDIR}"
+mkdir "${GEANT4BUILDDIR}"
 
 
 
@@ -476,7 +475,7 @@ PATCHAPPLIED="Patch not applied"
 if [[ ${PATCH} == on ]]; then
   echo "Patching... "
   if [[ -f "${SETUPPATH}/patches/${GEANT4CORE}.patch" ]]; then
-    patch -p1 < ${SETUPPATH}/patches/${GEANT4CORE}.patch
+    patch -p1 < "${SETUPPATH}/patches/${GEANT4CORE}.patch"
     if [ "$?" != "0" ]; then
       echo "ERROR: Something went wrong applying the Geant4 patch!"
       exit 1
@@ -492,9 +491,9 @@ fi
 
 
 echo "Configuring ..."
-cd ${GEANT4BUILDDIR}
+cd "${GEANT4BUILDDIR}"
 echo "Configure command: cmake ${CONFIGUREOPTIONS} ${DEBUGOPTIONS} ../${GEANT4SOURCEDIR}"
-cmake ${CONFIGUREOPTIONS} -DCMAKE_CXX_FLAGS="${NOWARNINGS}" ${DEBUGOPTIONS} ../${GEANT4SOURCEDIR}
+cmake ${CONFIGUREOPTIONS} ${DEBUGOPTIONS} "../${GEANT4SOURCEDIR}"
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring (cmake'ing) Geant4!"
   exit 1
@@ -545,7 +544,7 @@ if [[ ${CLEANUP} == on ]]; then
   echo "Cleaning up ..."
   # Just a sanity check before our remove...
   if [[ ${GEANT4BUILDDIR} == geant4_v*-build ]]; then 
-    rm -rf ${GEANT4BUILDDIR}
+    rm -rf "${GEANT4BUILDDIR}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to remove buuld directory!"
       exit 1
@@ -554,7 +553,7 @@ if [[ ${CLEANUP} == on ]]; then
     echo "INFO: Not cleaning up the build directory, because it is not named as expected: ${GEANT4BUILDDIR}"
   fi
   if [[ ${GEANT4SOURCEDIR} == geant4_v*-source ]]; then 
-    rm -rf ${GEANT4SOURCEDIR}
+    rm -rf "${GEANT4SOURCEDIR}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to remove source directory!"
       exit 1
@@ -583,8 +582,8 @@ echo " " >> COMPILE_SUCCESSFUL
 
 echo "Setting permissions..."
 cd ..
-chown -R ${USER}:${GROUP} ${GEANT4DIR}
-chmod -R go+rX ${GEANT4DIR}
+chown -R ${USER}:${GROUP} "${GEANT4DIR}"
+chmod -R go+rX "${GEANT4DIR}"
 
 
 

@@ -106,14 +106,10 @@ setuphelp() {
 
 
 # Store command line
-CMD=""
-while [[ $# -gt 0 ]] ; do
-    CMD="${CMD} $1"
-    shift
-done
+CMD=( "$@" )
 
 # Check for help
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -126,15 +122,15 @@ ENVFILE=""
 PATCH="off"
 
 # Overwrite default options with user options:
-for C in ${CMD}; do
+for C in "${CMD[@]}"; do
   if [[ ${C} == *-t*=* ]]; then
-    TARBALL=`echo ${C} | awk -F"=" '{ print $2 }'`
+    TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
     echo "Using this tarball: ${TARBALL}"
   elif [[ ${C} == *-s* ]]; then
-    ENVFILE=`echo ${C} | awk -F"=" '{ print $2 }'`
+    ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
     echo "Using this environment file: ${ENVFILE}"
   elif [[ ${C} == *-p*=* ]]; then
-    PATCH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp
@@ -167,7 +163,7 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given HEASoft tarball is ${TARBALL}"
 
   # Check if it has the correct version:
-  VER=`echo ${TARBALL} | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
+  VER=`echo "${TARBALL}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
   echo "Version of HEASoft is: ${VER}"
 else
   # Download it
@@ -188,8 +184,8 @@ else
   REQUIREDOWNLOAD="true"
   if [ -f "${TARBALL}" ]; then
     # ... and has the same size
-    LOCALSIZE=$(wc -c < ${TARBALL} | tr -d ' ')
-    REMOTESIZE=$(curl -s --head https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL} | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
+    LOCALSIZE=$(wc -c < "${TARBALL}" | tr -d ' ')
+    REMOTESIZE=$(curl -s --head "https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}" | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine remote tarball size"
       exit 1
@@ -211,7 +207,7 @@ else
     echo " "
     echo "curl -O -C - https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}"
     echo " "
-    curl -O https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}
+    curl -O "https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}"
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to download the tarball from the HEASoft website!"
       exit 1
@@ -219,7 +215,7 @@ else
   fi
 
   # Check for the version number:
-  VER=`echo ${TARBALL} | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
+  VER=`echo "${TARBALL}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
   echo "Version of HEASoft is: ${VER}"
 fi
 
@@ -304,7 +300,7 @@ fi
 
 
 echo "Unpacking..."
-tar xfz ${TARBALL} > /dev/null
+tar xfz "${TARBALL}" > /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the HEASoft tarball!"
   exit 1
@@ -318,7 +314,7 @@ if [[ ${PATCH} == on ]]; then
   echo "Patching..."
   if [ -f "${SETUPPATH}/patches/${HEASOFTCORE}.patch" ]; then
     cd heasoft_v${VER}
-    patch -p1 < ${SETUPPATH}/patches/${HEASOFTCORE}.patch
+    patch -p1 < "${SETUPPATH}/patches/${HEASOFTCORE}.patch"
     if [ "$?" != "0" ]; then
       echo "ERROR: Something went wrong applying the HEASoft patch!"
       exit 1
@@ -377,7 +373,7 @@ if [ -d ../*libc*/lib ]; then
   LIBDIR=../*libc*/lib
 fi
 if [[ ${LIBDIR} != "" ]]; then
-  cd ${LIBDIR}
+  cd "${LIBDIR}"
   CFITSIO=`find . -name "libcfitsio.[so|a|dylib|dll]"`
   LONGCFITSIO=`find . -name "libcfitsio_*[so|a|dylib|dll]"`
   if ( [ "${CFITSIO}" == "" ] && [ "${LONGCFITSIO}" != "" ] ); then
