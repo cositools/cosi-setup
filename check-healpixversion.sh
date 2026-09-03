@@ -125,9 +125,17 @@ fi
 
 
 if [ "${GOOD}" == "true" ]; then
+  # Reject anything which is not a version, e.g. v11.2.2 or master
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+ ]]; then
+    echo ""
+    echo "ERROR: Healpix version (${TESTVERSION}) is not acceptable"
+    echo "       It is not a valid version string."
+    exit 1
+  fi
+
   version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
   release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  HealpixVersion=$((100*${version} + ${release}))
+  HealpixVersion=$((100*10#${version} + 10#${release}))
   
   if ([ ${HealpixVersion} -ge ${HealpixVersionMin} ] && [ ${HealpixVersion} -le ${HealpixVersionMax} ]); then
     if [[ " ${HealpixBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${HealpixBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
@@ -152,7 +160,7 @@ if [ "${CHECK}" == "true" ]; then
     rv=$(${HEALPIXPATH}/bin/ftversion | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
     version=`echo ${rv} | awk -F. '{ print $1 }'`;
     release=`echo ${rv} | awk -F. '{ print $2 }'`;
-    HealpixVersion=$((100*${version} + ${release}))
+    HealpixVersion=$((100*10#${version} + 10#${release}))
   else
     echo " "
     echo "ERROR: The given directory ${HEALPIXPATH} does no contain a correct Healpix installation"

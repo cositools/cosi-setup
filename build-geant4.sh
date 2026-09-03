@@ -280,17 +280,19 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given Geant4 tarball is ${TARBALL}"
   
   # Check if it has the correct version:
-  VER=`echo ${TARBALL} | awk -Fgeant4- '{ print $2 }' | awk -F.t '{ print $1 }'`;
-  SHORTVER=`echo ${TARBALL} | awk -Fgeant4- '{ print $2 }' | awk -F.t '{ print $1 }' | awk -F.p '{ print $1 }'`;
+  NUMVER=`echo ${TARBALL} | awk -F'geant4[-.]v?' '{ print $NF }' | awk -F.t '{ print $1 }'`;
+  VER="v${NUMVER}"
+  # Old versions use a zero-padded minor, i.e. 10.02 is the same version as 10.2
+  SHORTVER=`echo ${NUMVER} | awk -F. '{ printf "%d.%d", $1, $2 }'`;
   echo "Version of Geant4 is: ${VER}"
   
   if [[ ${WANTEDVERSION} != "" ]]; then
-    if [[ ${SHORTVER} != ${WANTEDVERSION} ]]; then
+    if [[ ${SHORTVER} != `echo ${WANTEDVERSION} | awk -F. '{ printf "%d.%d", $1, $2 }'` ]]; then
       echo "ERROR: You stated you want version ${WANTEDVERSION} but the tar ball has version ${SHORTVER}!"
       exit 1
     fi
   else 
-    ${SETUPPATH}/check-geant4version.sh --good-version=${VER}
+    ${SETUPPATH}/check-geant4version.sh --good-version=${NUMVER}
     if [ "$?" != "0" ]; then
       echo "ERROR: The Geant4 tarball you supplied does not contain an acceptable Geant4 version!"
       exit 1

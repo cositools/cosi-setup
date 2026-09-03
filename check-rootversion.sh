@@ -125,17 +125,25 @@ if [ "${GET}" == "true" ]; then
 fi
 
 if [ "${GOOD}" == "true" ]; then
+  # Reject anything which is not a version, e.g. v11.2.2 or master
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+ ]]; then
+    echo ""
+    echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
+    echo "       It is not a valid version string."
+    exit 1
+  fi
+
   if [[ ${TESTVERSION} == */* ]]; then
     version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-    release=`echo ${TESTVERSION} | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }' | sed 's/0*//'`;
+    release=`echo ${TESTVERSION} | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'`;
     patch=`echo ${TESTVERSION} | awk -F/ '{ print $2 }'`;
   else
     version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-    release=`echo ${TESTVERSION} | awk -F. '{ print $2 }' | sed 's/0*//'`;
+    release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
     patch=`echo ${TESTVERSION} | awk -F. '{ print $3 }'`;
   fi
   
-  RootVersion=$((100*${version} + ${release}))
+  RootVersion=$((100*10#${version} + 10#${release}))
   RootVersionString=${TESTVERSION//\//.}
   
   if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then
@@ -165,9 +173,9 @@ if [ "${CHECK}" == "true" ]; then
 
   rv=`${ROOTPATH}/bin/root-config --version`
   version=`echo $rv | awk -F. '{ print $1 }'`;
-  release=`echo $rv | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'| sed 's/0*//'`;
+  release=`echo $rv | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'`;
   patch=`echo $rv | awk -F/ '{ print $2 }'| sed 's/0*//'`;
-  RootVersion=$((100*${version} + ${release}))
+  RootVersion=$((100*10#${version} + 10#${release}))
   RootVersionString=${rv//\//.}
 
   if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then

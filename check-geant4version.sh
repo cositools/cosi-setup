@@ -125,9 +125,17 @@ fi
 
 
 if [ "${GOOD}" == "true" ]; then
+  # Reject anything which is not a version, e.g. v11.2.2 or master
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+ ]]; then
+    echo ""
+    echo "ERROR: Geant4 version (${TESTVERSION}) is not acceptable"
+    echo "       It is not a valid version string."
+    exit 1
+  fi
+
   version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
   release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  Geant4Version=$((100*${version} + ${release}))
+  Geant4Version=$((100*10#${version} + 10#${release}))
   
   if ([ ${Geant4Version} -ge ${Geant4VersionMin} ] && [ ${Geant4Version} -le ${Geant4VersionMax} ]); then
     if [[ " ${Geant4BlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${Geant4BlackList} " == *" ${TESTVERSION%.*} "* ]]; then

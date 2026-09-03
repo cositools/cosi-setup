@@ -125,9 +125,17 @@ fi
 
 
 if [ "${GOOD}" == "true" ]; then
+  # Reject anything which is not a version, e.g. v11.2.2 or master
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+ ]]; then
+    echo ""
+    echo "ERROR: HEASoft version (${TESTVERSION}) is not acceptable"
+    echo "       It is not a valid version string."
+    exit 1
+  fi
+
   version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
   release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  HEASoftVersion=$((100*${version} + ${release}))
+  HEASoftVersion=$((100*10#${version} + 10#${release}))
   
   if ([ ${HEASoftVersion} -ge ${HEASoftVersionMin} ] && [ ${HEASoftVersion} -le ${HEASoftVersionMax} ]); then
     if [[ " ${HEASoftBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${HEASoftBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
@@ -152,7 +160,7 @@ if [ "${CHECK}" == "true" ]; then
     rv=$(${HEASoftPATH}/bin/ftversion | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
     version=`echo ${rv} | awk -F. '{ print $1 }'`;
     release=`echo ${rv} | awk -F. '{ print $2 }'`;
-    HEASoftVersion=$((100*${version} + ${release}))
+    HEASoftVersion=$((100*10#${version} + 10#${release}))
   else
     echo " "
     echo "ERROR: The given directory ${HEASoftPATH} does no contain a correct HEASoft installation"
