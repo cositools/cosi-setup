@@ -105,6 +105,12 @@ HealpixBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Blackli
 HealpixVersionMinString=${HealpixVersionMin}
 HealpixVersionMaxString=${HealpixVersionMax}
 
+if [[ ! ${HealpixVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${HealpixVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
+  echo ""
+  echo "ERROR: Unable to read a valid Healpix version range from ${SETUPPATH}/allowed-versions.txt"
+  exit 1
+fi
+
 HealpixVersionMin=$(echo ${HealpixVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
 HealpixVersionMax=$(echo ${HealpixVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 

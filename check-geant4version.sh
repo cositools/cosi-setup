@@ -105,6 +105,12 @@ Geant4BlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Geant4-Blacklist
 Geant4VersionMinString=${Geant4VersionMin}
 Geant4VersionMaxString=${Geant4VersionMax}
 
+if [[ ! ${Geant4VersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${Geant4VersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
+  echo ""
+  echo "ERROR: Unable to read a valid Geant4 version range from ${SETUPPATH}/allowed-versions.txt"
+  exit 1
+fi
+
 Geant4VersionMin=$(echo ${Geant4VersionMinString} | awk -F. '{ print 100*$1 + $2 }')
 Geant4VersionMax=$(echo ${Geant4VersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 

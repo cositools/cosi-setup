@@ -117,6 +117,12 @@ PythonBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Blacklist
 PythonVersionMinString=${PythonVersionMin}
 PythonVersionMaxString=${PythonVersionMax}
 
+if [[ ! ${PythonVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${PythonVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
+  echo ""
+  echo "ERROR: Unable to read a valid python version range from ${SETUPPATH}/allowed-versions.txt"
+  exit 1
+fi
+
 PythonVersionMin=$(echo ${PythonVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
 PythonVersionMax=$(echo ${PythonVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 

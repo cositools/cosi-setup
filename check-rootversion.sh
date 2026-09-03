@@ -106,6 +106,12 @@ RootBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Blacklist" | 
 RootVersionMinString=${RootVersionMin}
 RootVersionMaxString=${RootVersionMax}
 
+if [[ ! ${RootVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${RootVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
+  echo ""
+  echo "ERROR: Unable to read a valid ROOT version range from ${SETUPPATH}/allowed-versions.txt"
+  exit 1
+fi
+
 RootVersionMin=$(echo ${RootVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
 RootVersionMax=$(echo ${RootVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 

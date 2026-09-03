@@ -105,6 +105,12 @@ HEASoftBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Blackli
 HEASoftVersionMinString=${HEASoftVersionMin}
 HEASoftVersionMaxString=${HEASoftVersionMax}
 
+if [[ ! ${HEASoftVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${HEASoftVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
+  echo ""
+  echo "ERROR: Unable to read a valid HEASoft version range from ${SETUPPATH}/allowed-versions.txt"
+  exit 1
+fi
+
 HEASoftVersionMin=$(echo ${HEASoftVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
 HEASoftVersionMax=$(echo ${HEASoftVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
 
