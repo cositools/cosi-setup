@@ -101,7 +101,7 @@ done
 
 RootVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Min" | awk -F":" '{ print $2 }')
 RootVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Max" | awk -F":" '{ print $2 }')
-RootBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Blacklist")
+RootBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "ROOT-Blacklist" | awk -F":" '{ print $2 }')
 
 RootVersionMinString=${RootVersionMin}
 RootVersionMaxString=${RootVersionMax}
@@ -130,9 +130,10 @@ if [ "${GOOD}" == "true" ]; then
   fi
   
   RootVersion=$((100*${version} + ${release}))
+  RootVersionString=${TESTVERSION//\//.}
   
   if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then
-    if [[ ${RootBlackList} == *${RootVersion}${patch}* ]]; then
+    if [[ " ${RootBlackList} " == *" ${RootVersionString} "* ]] || [[ " ${RootBlackList} " == *" ${RootVersionString%.*} "* ]]; then
       echo ""
       echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
       echo "       It has been black listed as not working."
@@ -161,15 +162,16 @@ if [ "${CHECK}" == "true" ]; then
   release=`echo $rv | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'| sed 's/0*//'`;
   patch=`echo $rv | awk -F/ '{ print $2 }'| sed 's/0*//'`;
   RootVersion=$((100*${version} + ${release}))
+  RootVersionString=${rv//\//.}
 
   if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then
-    if [[ ${RootBlackList} == *${RootVersion}.${patch}* ]]; then
+    if [[ " ${RootBlackList} " == *" ${RootVersionString} "* ]] || [[ " ${RootBlackList} " == *" ${RootVersionString%.*} "* ]]; then
       echo ""
-      echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
+      echo "ERROR: ROOT version (${rv}) is not acceptable"
       echo "       It has been black listed as not working."
       exit 1
     else 
-      echo "Found a good ROOT version: ${TESTVERSION}"
+      echo "Found a good ROOT version: ${rv}"
       exit 0
     fi 
   else

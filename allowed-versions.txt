@@ -5,6 +5,10 @@
 #
 # Description:
 # This script contains a list of allowed versions of ROOT, Geant4, and HEAsoft
+#
+# The blacklists contain the versions which are known not to work, separated by spaces.
+# Give either the full version, e.g. 6.38.02, or just major.minor, e.g. 6.38, to
+# blacklist all its patch releases.
 
 # ROOT:
 ROOT-Min:6.36
@@ -14,22 +18,22 @@ ROOT-Blacklist:
 # Geant4: Only 11.2
 Geant4-Min:11.2
 Geant4-Max:11.2
-Geant4-Blacklist:notimplemented
+Geant4-Blacklist:
 
 # HEASoft:
 HEASoft-Min:6.31
 HEASoft-Max:6.99
-HEASoft-Blacklist:notimplemented
+HEASoft-Blacklist:
 
 # Healpix
 Healpix-Min:3.83
 Healpix-Max:3.99
-Healpix-Blacklist:notimplemented
+Healpix-Blacklist:
 
 # Python:
 Python-Min:3.12
 Python-Max:3.15
-Python-Blacklist:notimplemented
+Python-Blacklist:
 
 
 

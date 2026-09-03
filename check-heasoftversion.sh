@@ -100,6 +100,7 @@ done
 
 HEASoftVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Min" | awk -F":" '{ print $2 }')
 HEASoftVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Max" | awk -F":" '{ print $2 }')
+HEASoftBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "HEASoft-Blacklist" | awk -F":" '{ print $2 }')
 
 HEASoftVersionMinString=${HEASoftVersionMin}
 HEASoftVersionMaxString=${HEASoftVersionMax}
@@ -123,8 +124,15 @@ if [ "${GOOD}" == "true" ]; then
   HEASoftVersion=$((100*${version} + ${release}))
   
   if ([ ${HEASoftVersion} -ge ${HEASoftVersionMin} ] && [ ${HEASoftVersion} -le ${HEASoftVersionMax} ]); then
-    echo "Found a good HEASoft version: ${TESTVERSION}"
-    exit 0
+    if [[ " ${HEASoftBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${HEASoftBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
+      echo ""
+      echo "ERROR: HEASoft version (${TESTVERSION}) is not acceptable"
+      echo "       It has been black listed as not working."
+      exit 1
+    else
+      echo "Found a good HEASoft version: ${TESTVERSION}"
+      exit 0
+    fi
   else
     echo ""
     echo "ERROR: HEASoft version (${TESTVERSION}) is not acceptable"
@@ -146,8 +154,15 @@ if [ "${CHECK}" == "true" ]; then
   fi
 
   if ([ ${HEASoftVersion} -ge ${HEASoftVersionMin} ] && [ ${HEASoftVersion} -le ${HEASoftVersionMax} ]); then
-    echo "The given HEASoft version ${rv} is acceptable"
-    exit 0;
+    if [[ " ${HEASoftBlackList} " == *" ${rv} "* ]] || [[ " ${HEASoftBlackList} " == *" ${rv%.*} "* ]]; then
+      echo ""
+      echo "ERROR: HEASoft version (${rv}) is not acceptable"
+      echo "       It has been black listed as not working."
+      exit 1
+    else
+      echo "The given HEASoft version ${rv} is acceptable"
+      exit 0;
+    fi
   else
     echo ""
     echo "ERROR: No acceptable HEASoft version found: ${HEASoftVersion} (min: ${HEASoftVersionMinString}, max: ${HEASoftVersionMaxString})"

@@ -112,7 +112,7 @@ done
 
 PythonVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Min" | awk -F":" '{ print $2 }')
 PythonVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Max" | awk -F":" '{ print $2 }')
-PythonBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Blacklist")
+PythonBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Python-Blacklist" | awk -F":" '{ print $2 }')
 
 PythonVersionMinString=${PythonVersionMin}
 PythonVersionMaxString=${PythonVersionMax}
@@ -145,7 +145,7 @@ if [ "${GOOD}" == "true" ]; then
   PythonVersion=$((100*${version} + ${release}))
 
   if ([ ${PythonVersion} -ge ${PythonVersionMin} ] && [ ${PythonVersion} -le ${PythonVersionMax} ]); then
-    if [[ ${PythonBlackList} == *${PythonVersion}.${patch}* ]]; then
+    if [[ " ${PythonBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${PythonBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
       echo ""
       echo "ERROR: python version (${TESTVERSION}) is not acceptable"
       echo "       It has been black listed as not working."
@@ -211,7 +211,7 @@ if [ "${CHECK}" == "true" ]; then
   PythonVersion=$((100*${version} + ${release}))
 
   if ([ ${PythonVersion} -ge ${PythonVersionMin} ] && [ ${PythonVersion} -le ${PythonVersionMax} ]); then
-    if [[ ${PythonBlackList} == *${PythonVersion}.${patch}* ]]; then
+    if [[ " ${PythonBlackList} " == *" ${pv} "* ]] || [[ " ${PythonBlackList} " == *" ${pv%.*} "* ]]; then
       echo ""
       echo "ERROR: python version (${pv}) is not acceptable"
       echo "       It has been black listed as not working."

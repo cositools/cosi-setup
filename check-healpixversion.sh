@@ -100,6 +100,7 @@ done
 
 HealpixVersionMin=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Min" | awk -F":" '{ print $2 }')
 HealpixVersionMax=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Max" | awk -F":" '{ print $2 }')
+HealpixBlackList=$(cat ${SETUPPATH}/allowed-versions.txt | grep "Healpix-Blacklist" | awk -F":" '{ print $2 }')
 
 HealpixVersionMinString=${HealpixVersionMin}
 HealpixVersionMaxString=${HealpixVersionMax}
@@ -123,8 +124,15 @@ if [ "${GOOD}" == "true" ]; then
   HealpixVersion=$((100*${version} + ${release}))
   
   if ([ ${HealpixVersion} -ge ${HealpixVersionMin} ] && [ ${HealpixVersion} -le ${HealpixVersionMax} ]); then
-    echo "Found a good Healpix version: ${TESTVERSION}"
-    exit 0
+    if [[ " ${HealpixBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${HealpixBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
+      echo ""
+      echo "ERROR: Healpix version (${TESTVERSION}) is not acceptable"
+      echo "       It has been black listed as not working."
+      exit 1
+    else
+      echo "Found a good Healpix version: ${TESTVERSION}"
+      exit 0
+    fi
   else
     echo ""
     echo "ERROR: Healpix version (${TESTVERSION}) is not acceptable"
@@ -146,8 +154,15 @@ if [ "${CHECK}" == "true" ]; then
   fi
 
   if ([ ${HealpixVersion} -ge ${HealpixVersionMin} ] && [ ${HealpixVersion} -le ${HealpixVersionMax} ]); then
-    echo "The given Healpix version ${rv} is acceptable"
-    exit 0;
+    if [[ " ${HealpixBlackList} " == *" ${rv} "* ]] || [[ " ${HealpixBlackList} " == *" ${rv%.*} "* ]]; then
+      echo ""
+      echo "ERROR: Healpix version (${rv}) is not acceptable"
+      echo "       It has been black listed as not working."
+      exit 1
+    else
+      echo "The given Healpix version ${rv} is acceptable"
+      exit 0;
+    fi
   else
     echo ""
     echo "ERROR: No acceptable Healpix version found: ${HealpixVersion} (min: ${HealpixVersionMinString}, max: ${HealpixVersionMaxString})"
