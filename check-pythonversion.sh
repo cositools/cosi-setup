@@ -176,18 +176,6 @@ if [ "${INTERPRETER}" == "true" ]; then
   # Choose the python version
   PY="python3"
 
-  # In case of OpenSUSE, choose the latest installed python version
-  if [[ $(uname -s) != *arwin* ]]; then
-    OSNAME=$(cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }' | tr -d '"')
-    if [[ ${OSNAME} == opensuse-leap ]]; then
-      PYVERNEW=$(zypper search -i python3*-base | tail -1 | awk -F"|" '{ print $2 }' | xargs | sed 's/-base$//')
-      PYVERNEW=${PYVERNEW:0:7}.${PYVERNEW:7}
-      if [[ ${PYVERNEW} != "" ]]; then
-        PY=${PYVERNEW}
-      fi
-    fi
-  fi
-
   # Everything but the name of the interpreter goes to stderr
   "${SETUPPATH}/check-pythonversion.sh" "--check=${PY}" >&2
   if [[ "$?" != "0" ]]; then

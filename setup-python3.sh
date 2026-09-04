@@ -161,10 +161,10 @@ if [[ $(uname -s) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
     fi
   fi
 
-  pip3 install tensorflow-macos
+  pip3 install tensorflow
   if [[ "$?" != "0" ]]; then
     echo ""
-    echo "ERROR: Unable to install tensorflow-macos!"
+    echo "ERROR: Unable to install tensorflow!"
     exit 1; 
   fi
       

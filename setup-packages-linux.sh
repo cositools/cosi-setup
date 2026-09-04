@@ -58,6 +58,17 @@ for C in "${CMD[@]}"; do
   fi
 done
 
+# The automatic package installation is only intended for automatic build tests inside a container, switch it off anywhere else
+if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+  if [[ ! -f /run/.containerenv ]] && [[ ! -f /.dockerenv ]]; then
+    echo " "
+    echo "WARNING: The automatic package installation is only intended for automatic build tests inside a container."
+    echo "         Switching it off - any missing packages along with installation instructions will be listed below."
+    echo " "
+    AUTOPACKAGEINSTALL="FALSE"
+  fi
+fi
+
 
 
 ###############################################################################
@@ -330,9 +341,15 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     elif (( ${VERSIONID} == 8 )) ; then
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python36-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled powertools && sudo dnf install -y epel-release"
+      echo " "
+      echo "ERROR: Redhat 8 is no longer supported."
+      exit 255
     elif (( ${VERSIONID} == 9 )) ; then
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
+      echo " "
+      echo "ERROR: Redhat 9 is no longer supported."
+      exit 255
     elif (( ${VERSIONID} >= 10 )) && (( ${VERSIONID} <= 100 )) ; then
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"

@@ -369,11 +369,18 @@ fi
 
 # Create a libcfitsio.so, etc. link
 LIBDIR=""
-if [ -d ../*libc*/lib ]; then
-  LIBDIR=../*libc*/lib
-fi
+for D in ../*libc*/lib; do
+  if [ -d "${D}" ]; then
+    LIBDIR="${D}"
+    break
+  fi
+done
 if [[ ${LIBDIR} != "" ]]; then
   cd "${LIBDIR}"
+  if [ "$?" != "0" ]; then
+    echo "ERROR: Unable to enter the HEASoft library directory ${LIBDIR}"
+    exit 1
+  fi
   CFITSIO=`find . -name "libcfitsio.[so|a|dylib|dll]"`
   LONGCFITSIO=`find . -name "libcfitsio_*[so|a|dylib|dll]"`
   if ( [ "${CFITSIO}" == "" ] && [ "${LONGCFITSIO}" != "" ] ); then
