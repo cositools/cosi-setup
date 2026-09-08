@@ -53,7 +53,7 @@ REPOSETUP=true
 CMD=( "$@" )
 
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-auto* ]]; then
+  if [[ ${C} == --au* ]] || [[ ${C} == -au* ]]; then
     AUTOPACKAGEINSTALL="TRUE"
   fi
 done
@@ -449,7 +449,7 @@ fi
 
 if [[ ${IsArchClone} -eq 1 ]]; then
 
-  REQUIRED_PAC="yay git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost xerces-c gl2ps autoconf automake libtool pkgconf patch fakeroot debugedit"
+  REQUIRED_PAC="git git-lfs gawk make gcc gcc-fortran gdb valgrind binutils libx11 libxpm libxft libxext openssl pcre glu glew ftgl fftw graphviz avahi libldap python3 tk libxml2 krb5 gsl cmake libxmu curl doxygen blas lapack expect dos2unix ncurses boost xerces-c gl2ps autoconf automake libtool pkgconf patch fakeroot debugedit"
 
   if [[ "${REQUIRED_PAC}" == "" ]]; then exit 0; fi
 
@@ -468,75 +468,32 @@ if [[ ${IsArchClone} -eq 1 ]]; then
     fi
   done
   
-  REQUIRED_AUR="healpix"
-
-  # Check if each of the packages exists:
-  for PACKAGE in ${REQUIRED_AUR}; do
-    # Check if the package is exists
-    EXISTS=$(curl -s "https://aur.archlinux.org/rpc/?v=5&type=info&arg[]=${PACKAGE}" | grep -o '"resultcount":1')
-    if [[ -z "${EXISTS}" ]]; then
-      echo "Does not exist (AUR): ${PACKAGE}"
-      continue
-    fi
-    
-    # Check if it is already installed
-    pacman -Qi "${PACKAGE}" >/dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-      echo "Not installed (AUR): ${PACKAGE}"
-      TOBEINSTALLED_AUR="${TOBEINSTALLED_AUR} ${PACKAGE}"
-    fi
-
-  done
-
-  
-  if [[ "${TOBEINSTALLED_PAC}" != "" ]] || [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
+  if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
     if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
       echo " "
       echo "Performing an automatic installation of the packages. I will do the following:"
-      if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
-        echo "sudo pacman -Syu --noconfirm ${TOBEINSTALLED_PAC}"
-      fi
-      if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
-        echo "yay -S --noconfirm ${TOBEINSTALLED_AUR}"
-      fi
+      echo "sudo pacman -Syu --noconfirm ${TOBEINSTALLED_PAC}"
       echo " "
 
-      if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
-        # Arch does not support partial upgrades, thus we have to do a full one
-        sudo pacman -Syu --noconfirm ${TOBEINSTALLED_PAC}
-        if [[ "$?" != "0" ]]; then
-          echo " "
-          echo "ERROR: Something went wrong with the automatic package installation."
-          exit 255
-        fi
+      # Arch does not support partial upgrades, thus we have to do a full one
+      sudo pacman -Syu --noconfirm ${TOBEINSTALLED_PAC}
+      if [[ "$?" != "0" ]]; then
+        echo " "
+        echo "ERROR: Something went wrong with the automatic package installation."
+        exit 255
       fi
 
-      if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
-        # yay must not be called via sudo
-        if ! command -v yay >& /dev/null; then
-          echo " "
-          echo "yay not found - building and installing it from the AUR..."
-          YAYBUILDDIR=$(mktemp -d)
-          git clone https://aur.archlinux.org/yay.git "${YAYBUILDDIR}/yay"
-          if [[ "$?" != "0" ]]; then
-            echo " "
-            echo "ERROR: Unable to clone yay from the AUR."
-            exit 255
-          fi
-          (cd "${YAYBUILDDIR}/yay" && makepkg -si --noconfirm)
-          if [[ "$?" != "0" ]]; then
-            echo " "
-            echo "ERROR: Something went wrong building/installing yay."
-            exit 255
-          fi
-          rm -rf "${YAYBUILDDIR}"
+      # pacman can resolve a conflict by not installing a package, thus verify
+      MISSING=""
+      for PACKAGE in ${TOBEINSTALLED_PAC}; do
+        if ! pacman -Qi "${PACKAGE}" >/dev/null 2>&1; then
+          MISSING+="${PACKAGE} "
         fi
-        yay -S --noconfirm ${TOBEINSTALLED_AUR}
-        if [[ "$?" != "0" ]]; then
-          echo " "
-          echo "ERROR: Something went wrong with the automatic package installation."
-          exit 255
-        fi
+      done
+      if [[ ${MISSING} != "" ]]; then
+        echo " "
+        echo "ERROR: The following packages could not be installed: ${MISSING}"
+        exit 255
       fi
 
       echo " "
@@ -545,12 +502,7 @@ if [[ ${IsArchClone} -eq 1 ]]; then
     else
       echo " "
       echo "Do the following to install all required packages:"
-      if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
-        echo "sudo pacman -S ${TOBEINSTALLED_PAC}"
-      fi
-      if [[ "${TOBEINSTALLED_AUR}" != "" ]]; then
-        echo "yay -S ${TOBEINSTALLED_AUR}"
-      fi
+      echo "sudo pacman -S ${TOBEINSTALLED_PAC}"
       echo " "
       exit 255
     fi

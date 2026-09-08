@@ -141,7 +141,7 @@ if [ "${GOOD}" == "true" ]; then
   fi
 
   # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+ ]]; then
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     echo ""
     echo "ERROR: python version (${TESTVERSION}) is not acceptable"
     echo "       It is not a valid version string."

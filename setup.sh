@@ -95,8 +95,8 @@ confhelp() {
   echo "    --heasoft=off      Do not install HEASoft - use a built-in version."
   echo "    --heasoft=[path]   Use the version of HEASoft found in the path. If it is not compatible, the script will stop with an error."
   echo " "
-  echo "--healpix=[options: empty, off (default), or path to existing Healpix installation]"
-  echo "    --healpix=         Download and install the latest compatible version."
+  echo "--healpix=[options: empty (default), off, or path to existing Healpix installation]"
+  echo "    --healpix=         Download and install the latest compatible version (default)."
   echo "    --healpix=off      Do not install Healpix - use a built-in version."
   echo "    --healpix=[path]   Use the version of Healpix found in the path. If it is not compatible, the script will stop with an error."
   echo " "
@@ -306,11 +306,11 @@ if [[ $@ != *-heas* ]]; then
   ADDITIONALOPTIONS+=" --heasoft=cfitsio"
 fi
 if [[ $@ != *-heal* ]]; then
-  ADDITIONALOPTIONS+=" --healpix=off"
+  ADDITIONALOPTIONS+=" --healpix="
 fi
 
 # Filter "--setup-branch"
-CMD=(); for a in "$@"; do [[ $a == *-s=* ]] || CMD+=("$a"); done
+CMD=(); for a in "$@"; do [[ $a == *-s*-b* ]] || [[ $a == *-s=* ]] || CMD+=("$a"); done
 
 set -o pipefail # This ensures the $? catches any error in the pipeline
 ./setup-stage2.sh "${CMD[@]}" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  

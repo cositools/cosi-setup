@@ -96,8 +96,8 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
     --heasoft=off      Do not install HEASoft - use a built-in version.
     --heasoft=[path]   Use the version of HEASoft found in the path. If it is not compatible, the script will stop with an error.
  
---healpix=[options: empty, off (default), or path to existing Healpix installation]
-    --healpix=         Download and install the latest compatible version.
+--healpix=[options: empty (default), off, or path to existing Healpix installation]
+    --healpix=         Download and install the latest compatible version (default).
     --healpix=off      Do not install Healpix - use a built-in version.
     --healpix=[path]   Use the version of Healpix found in the path. If it is not compatible, the script will stop with an error.
  

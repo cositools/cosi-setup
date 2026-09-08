@@ -147,7 +147,7 @@ done
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]]; then
+  if [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]] && [[ ${C} != *-s*-b* ]]; then
     BRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
   elif [[ ${C} == *-ro*=* ]]; then
     ROOTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
@@ -169,7 +169,7 @@ for C in "${CMD[@]}"; do
     IGNOREMISSINGPACKAGES=true
   elif [[ ${C} == *-k*-e* ]]; then
     KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-auto* ]]; then
+  elif [[ ${C} == --au* ]] || [[ ${C} == -au* ]]; then
     AUTOPACKAGEINSTALL=true
   elif [[ ${C} == *-e* ]] && [[ ${C} != *-k*-e* ]]; then
     EXTRAS=`echo ${C} | awk -F"=" '{ print $2 }'`

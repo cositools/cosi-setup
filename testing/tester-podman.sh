@@ -30,6 +30,10 @@ SETUPCMD='/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools
 # The command line
 CMD=( "$@" )
 
+# Test result counters - anything which is not a pass counts as a failure
+PASSED=0
+FAILURES=0
+
 # Default values for optional command line parameters
 OSLIST=""
 
@@ -115,8 +119,12 @@ ExpandOSRange() {
     MAJOR="${BASH_REMATCH[2]}"   # e.g. "9", n/a
   fi
 
-  if [[ -z "${MAJOR}" ]] || [[ ! ${STEP} =~ ^[0-9]+$ ]]; then
+  if [[ -z "${MAJOR}" ]]; then
     echo "ERROR: \"${ENTRY}\" is not a valid range - expected repo:N+, repo:N+STEP, repo:prefixN+, or repo:N.MM+STEP, e.g. fedora:43+, quay.io/centos/centos:stream9+, ubuntu:22.04+2" >&2
+    exit 1
+  fi
+  if [[ ! ${STEP} =~ ^[1-9][0-9]*$ ]]; then
+    echo "ERROR: \"${ENTRY}\" has an invalid step \"${STEP}\" - the step must be an integer of 1 or larger, e.g. ubuntu:22.04+2" >&2
     exit 1
   fi
 
@@ -158,7 +166,7 @@ GetBootstrap() {
     *suse*)
       echo "zypper --non-interactive install curl git sudo"
       ;;
-    archlinux:*|*manjaro*)
+    archlinux*|*manjaro*)
       echo "pacman -Syu --noconfirm curl git sudo"
       ;;
     *)
@@ -173,9 +181,6 @@ GetBootstrap() {
 ExpandSetup() {
   local IMAGE="$1"
   case "$IMAGE" in
-    rockylinux*|almalinux*|*centos*|opensuse/leap*)
-      echo "--healpix= "
-      ;;
     *)
       echo ""  # unknown family - caller will skip
       ;;
@@ -197,6 +202,7 @@ TestSingleOS() {
 
   if [[ -z "${BOOTSTRAP}" ]]; then
     echo "SKIP: ${IMAGE} (unrecognized OS family, add a case in GetBootstrap() function)" | tee -a "${LOGDIR}/summary.txt"
+    FAILURES=$((FAILURES + 1))
     return
   fi
 
@@ -205,12 +211,15 @@ TestSingleOS() {
   # today" can be told apart from "COSItools failed to install".
   if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; { ${BOOTSTRAP}; } || exit 90; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && sudo -H -u tester bash -lc 'cd; ${CMD}'" > "$LOG" 2>&1; then
     echo "PASS: ${IMAGE}" | tee -a "${LOGDIR}/summary.txt"
+    PASSED=$((PASSED + 1))
   else
     STATUS=$?
     if [[ ${STATUS} -eq 90 ]]; then
       echo "INFRA-FAIL: ${IMAGE} (could not bootstrap the container -- broken distro repository/mirror, not a COSItools problem; see ${LOG})" | tee -a "${LOGDIR}/summary.txt"
+      FAILURES=$((FAILURES + 1))
     else
       echo "FAIL: ${IMAGE} (see ${LOG})" | tee -a "${LOGDIR}/summary.txt"
+      FAILURES=$((FAILURES + 1))
     fi
   fi
 }
@@ -287,7 +296,12 @@ done
 
 echo ""
 echo "Done. Logs + summary in ${LOGDIR}"
+echo "Passed: ${PASSED}, failed: ${FAILURES} (skipped and infrastructure failures count as failures)"
 echo ""
+
+if [[ ${FAILURES} -gt 0 ]]; then
+  exit 1
+fi
 
 exit 0
 
