@@ -15,6 +15,15 @@
 ############################################################################################################
 # Step 1: Define default parameters
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="all c++-code external python-env help"
+
 # The command line
 CMD=( "$@" )
 
@@ -58,21 +67,42 @@ confhelp() {
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-a* ]]; then
-    CLEANCPP=TRUE
-    CLEANEXTERNAL=TRUE
-    CLEANPYTHON=TRUE
-  elif [[ ${C} == *-c* ]]; then
-    CLEANCPP=TRUE
-  elif [[ ${C} == *-e* ]]; then
-    CLEANEXTERNAL=TRUE
-  elif [[ ${C} == *-p* ]]; then
-    CLEANPYTHON=TRUE
-  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
     echo ""
-    confhelp
-    exit 0
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"./clean.sh --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
+    echo ""
+    echo "ERROR: Unknown command line option: ${C}"
+    echo "       See \"./clean.sh --help\" for a list of options"
+    exit 1
   fi
+
+  case ${OPTION} in
+    all)
+      CLEANCPP=TRUE
+      CLEANEXTERNAL=TRUE
+      CLEANPYTHON=TRUE
+      ;;
+    c++-code)
+      CLEANCPP=TRUE
+      ;;
+    external)
+      CLEANEXTERNAL=TRUE
+      ;;
+    python-env)
+      CLEANPYTHON=TRUE
+      ;;
+    help)
+      echo ""
+      confhelp
+      exit 0
+      ;;
+  esac
 done
 
 if [[ ${CLEANCPP} != "TRUE" ]] && [[ ${CLEANEXTERNAL} != "TRUE" ]] && [[ ${CLEANPYTHON} != "TRUE" ]]; then

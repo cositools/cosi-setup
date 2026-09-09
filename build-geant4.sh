@@ -9,8 +9,6 @@
 # This script downloads, compiles, and installs Geant4
 
 
-# Path to where this file is located
-SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # Operating system type
 OSTYPE=$(uname -s | awk '{print tolower($0)}')
@@ -106,12 +104,21 @@ confhelp() {
   echo " "
 }
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="tarball sourcescript maxthreads debug patch cleanup geant keepenvironmentasis help"
+
 # Store command line
 CMD=( "$@" )
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  if [[ ${C} == "-h" ]] || [[ $(resolveoption "${C}" "${SETUPOPTIONS}") == "help" ]]; then
     echo ""
     confhelp
     exit 0
@@ -132,33 +139,53 @@ KEEPENVASIS="false"
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-t*=* ]]; then
-    TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-s*=* ]] || [[ ${C} == *-e*=* ]]; then
-    ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
-    echo "Using this environment file: ${ENVFILE}"
-  elif [[ ${C} == *-m*=* ]]; then
-    MAXTHREADS=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-d*=* ]]; then
-    DEBUG=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-p*=* ]]; then
-    PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-cl*=* ]]; then
-    CLEANUP=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-g*=* ]]; then
-    WANTEDVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-k* ]]; then
-    KEEPENVASIS=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
     echo ""
-    confhelp
-    exit 0
-  else
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"$0 --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
     echo ""
     echo "ERROR: Unknown command line option: ${C}"
     echo "       See \"$0 --help\" for a list of options"
     exit 1
   fi
+
+  case ${OPTION} in
+    tarball)
+      TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ;;
+    sourcescript)
+      ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      echo "Using this environment file: ${ENVFILE}"
+      ;;
+    maxthreads)
+      MAXTHREADS=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ;;
+    debug)
+      DEBUG=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ;;
+    patch)
+      PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ;;
+    cleanup)
+      CLEANUP=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ;;
+    geant)
+      WANTEDVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ;;
+    keepenvironmentasis)
+      KEEPENVASIS=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ;;
+    help)
+      echo ""
+      confhelp
+      exit 0
+      ;;
+  esac
 done
 
 

@@ -34,20 +34,26 @@ confhelp() {
   echo " "
 }
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="check get-max get-min good-version help"
+
 # Store command line
 CMD=( "$@" )
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  if [[ ${C} == "-h" ]] || [[ $(resolveoption "${C}" "${SETUPOPTIONS}") == "help" ]]; then
     echo ""
     confhelp
     exit 0
   fi
 done
-
-# Path to where this file is located
-SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 CHECK="false"
 GET="false"
@@ -57,40 +63,29 @@ TESTVERSION=""
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-c*=* ]]; then
-    HEASoftPATH=`echo "${C}" | awk -F"=" '{ print $2 }'`
-    CHECK="true"
-    GET="false"
-    GOOD="false"
-  elif [[ ${C} == *-get-ma* ]]; then
-    HEASoftPATH=""
-    CHECK="false"
-    GET="true"
-    MAX="true"
-    GOOD="false"
-  elif [[ ${C} == *-get-mi* ]]; then
-    HEASoftPATH=""
-    CHECK="false"
-    GET="true"
-    MAX="false"
-    GOOD="false"
-  elif [[ ${C} == *-go* ]]; then
-    HEASoftPATH=""
-    CHECK="false"
-    GET="false"
-    MAX="false"
-    GOOD="true"
-    TESTVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
     echo ""
-    confhelp
-    exit 0
-  else
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"$0 --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
     echo ""
     echo "ERROR: Unknown command line option: ${C}"
     echo "       See \"$0 --help\" for a list of options"
     exit 1
   fi
+
+  case ${OPTION} in
+    check)        HEASoftPATH=`echo ${C} | awk -F"=" '{ print $2 }'`; CHECK="true";  GET="false"; GOOD="false" ;;
+    get-max)      HEASoftPATH="";                                        CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
+    get-min)      HEASoftPATH="";                                        CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
+    good-version) HEASoftPATH="";                                        CHECK="false"; GET="false"; MAX="false"; GOOD="true"
+                  TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'` ;;
+    help)         echo ""; confhelp; exit 0 ;;
+  esac
 done
 
 

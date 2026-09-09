@@ -25,7 +25,21 @@ IMAGES=(
   "arch:latest"
 )
 
-SETUPCMD='/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --auto --setup-branch=feature/auto-install '
+# The cosi-setup branch under test. Both the bootstrap setup.sh and the cloned
+# repository are taken from it, so that stage 1 and stage 2 are always the same
+# version. It must be pushed to GitHub, since the container downloads it from there.
+SETUPBRANCH="feature/auto-install"
+
+SETUPCMD="/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/${SETUPBRANCH}/setup.sh)\" _ --auto --setup-branch=${SETUPBRANCH} "
+
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")/.." >/dev/null 2>&1 ; pwd -P )"
+
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="os help"
 
 # The command line
 CMD=( "$@" )
@@ -231,7 +245,7 @@ TestSingleOS() {
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  if [[ ${C} == "-h" ]] || [[ $(resolveoption "${C}" "${SETUPOPTIONS}") == "help" ]]; then
     confhelp
     exit 0
   fi
@@ -249,14 +263,23 @@ fi
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-os*=* ]]; then
-    OSLIST=`echo ${C} | awk -F"=" '{ print $2 }'`
-  else
-    echo ""
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"./tester-podman.sh --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
     echo "ERROR: Unknown command line option: ${C}"
     echo "       See \"./tester-podman.sh --help\" for a list of options"
     exit 1
   fi
+
+  case ${OPTION} in
+    os)   OSLIST=`echo ${C} | awk -F"=" '{ print $2 }'` ;;
+    help) confhelp; exit 0 ;;
+  esac
 done
 
 # If the user gave a list of OSes, it replaces the built-in IMAGES array

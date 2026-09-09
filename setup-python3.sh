@@ -33,20 +33,38 @@ confhelp() {
 ############################################################################################################
 # Step 1: Extract the command line parameters
 
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="help"
+
 # Store command line
 CMD=( "$@" )
 
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
     echo ""
-    confhelp
-    exit 0
-  else
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"./setup-python3.sh --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
     echo ""
     echo "ERROR: Unknown command line option: ${C}"
     echo "       See \"./setup-python3.sh --help\" for a list of options"
     exit 1
   fi
+
+  case ${OPTION} in
+    help)
+      echo ""
+      confhelp
+      exit 0
+      ;;
+  esac
 done
 
 

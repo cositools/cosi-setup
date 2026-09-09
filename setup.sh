@@ -115,6 +115,56 @@ confhelp() {
   echo " "
 }
 
+# Every option the setup accepts, not just the ones this script uses. The full list is
+# needed so that an abbreviation means the same thing here as in the stage 2 script -
+# with only the first three, "--he" would resolve to "help" here but be ambiguous there.
+# This script acts on the first three, everything else is passed on to stage 2.
+SETUPOPTIONS="cositoolspath setup-branch branch root geant heasoft healpix optimization debug pull-behavior-git maxthreads ignore-missing-packages keep-environment-as-is auto extras help"
+
+# Resolve a command line argument to the full name of the option it names.
+#
+# An option may be abbreviated as long as the abbreviation is unique, the same way the
+# GNU tools do it. With the options "branch heasoft healpix help" for example:
+#   --branch=develop  ->  branch    the full name
+#   --b=develop       ->  branch    unique abbreviation, no other option starts with b
+#   --heas=cfitsio    ->  heasoft   unique, --heal would give healpix
+#   --he              ->  ambiguous, it matches heasoft, healpix and help
+#   --bogus           ->  unknown
+#
+# Only the text in front of the "=" is compared, thus the value of an option can never
+# be mistaken for another option: "--branch=my-auto-fix" cannot trigger "auto", and
+# "--root=/opt/gcc-auto" cannot either. This is why the comparison is done here instead
+# of matching the whole argument against a pattern.
+#
+# ${1}: the command line argument, e.g. "--heas=cfitsio"
+# ${2}: the known option names, separated by spaces, e.g. "branch heasoft healpix help"
+#
+# Returns 0 and echoes the resolved option name, e.g. "heasoft"
+#         1 and echoes nothing if no option starts with the given name
+#         2 and echoes all candidates if the abbreviation is not unique
+resolveoption() {
+  # Everything from the "=" on is the value, and the dashes are not part of the name
+  local NAME="${1%%=*}"
+  NAME="${NAME#--}"
+  NAME="${NAME#-}"
+  if [[ ${NAME} == "" ]]; then return 1; fi
+
+  # Collect all options the name could stand for. A full name always wins, even if it
+  # happens to be the beginning of a longer option as well.
+  local MATCHES="" O
+  for O in ${2}; do
+    if [[ ${O} == "${NAME}" ]]; then echo "${O}"; return 0; fi
+    if [[ ${O} == ${NAME}* ]]; then MATCHES+="${O} "; fi
+  done
+
+  # Turn the matches into positional parameters, since that is how we count them
+  set -- ${MATCHES}
+  if [[ $# == 1 ]]; then echo "${1}"; return 0; fi
+  if [[ $# == 0 ]]; then return 1; fi
+  echo "${MATCHES}"
+  return 2
+}
+
 absolutefilename() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
@@ -125,7 +175,7 @@ absolutefilename() {
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  if [[ ${C} == "-h" ]] || [[ $(resolveoption "${C}" "${SETUPOPTIONS}") == "help" ]]; then
     echo ""
     confhelp
     exit 0
@@ -134,17 +184,12 @@ done
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-co*=* ]]; then
-    COSIPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]] && [[ ${C} != *-s*-b* ]]; then
-    GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-s* ]]; then
-    GITSETUPBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
-    echo ""
-    confhelp
-    exit 0
-  fi
+  # Options not handled here are for the stage 2 script, which reports bad ones
+  case $(resolveoption "${C}" "${SETUPOPTIONS}") in
+    cositoolspath) COSIPATH=`echo "${C}" | awk -F"=" '{ print $2 }'` ;;
+    branch)        GITBRANCH=`echo "${C}" | awk -F"=" '{ print $2 }'` ;;
+    setup-branch)  GITSETUPBRANCH=`echo "${C}" | awk -F"=" '{ print $2 }'` ;;
+  esac
 done
 
 
@@ -309,8 +354,13 @@ if [[ $@ != *-heal* ]]; then
   ADDITIONALOPTIONS+=" --healpix="
 fi
 
-# Filter "--setup-branch"
-CMD=(); for a in "$@"; do [[ $a == *-s*-b* ]] || [[ $a == *-s=* ]] || CMD+=("$a"); done
+# Filter the options which only this script understands and which stage 2 must not see
+CMD=(); for a in "$@"; do
+  case $(resolveoption "${a}" "${SETUPOPTIONS}") in
+    setup-branch|cositoolspath) ;;
+    *)                          CMD+=("${a}") ;;
+  esac
+done
 
 set -o pipefail # This ensures the $? catches any error in the pipeline
 ./setup-stage2.sh "${CMD[@]}" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  

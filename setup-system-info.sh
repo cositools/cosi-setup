@@ -17,6 +17,15 @@
 # Step 1: Define default parameters
 
 # The command line
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="output help"
+
 CMD=( "$@" )
 
 # The path to the COSItools install
@@ -56,7 +65,7 @@ confhelp() {
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  if [[ ${C} == "-h" ]] || [[ $(resolveoption "${C}" "${SETUPOPTIONS}") == "help" ]]; then
     echo ""
     confhelp
     exit 0
@@ -65,13 +74,31 @@ done
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-o*=* ]]; then
-    OUTPUT=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
     echo ""
-    confhelp
-    exit 0
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"./setup-system-info.sh --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
+    echo ""
+    echo "ERROR: Unknown command line option: ${C}"
+    echo "       See \"./setup-system-info.sh --help\" for a list of options"
+    exit 1
   fi
+
+  case ${OPTION} in
+    output)
+      OUTPUT=`echo ${C} | awk -F"=" '{ print $2 }'`
+      ;;
+    help)
+      echo ""
+      confhelp
+      exit 0
+      ;;
+  esac
 done
 
 

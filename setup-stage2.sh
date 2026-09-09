@@ -35,6 +35,9 @@ COSIPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; cd ..; pwd -P )"
 # The path where the setup scripts are
 SETUPPATH="${COSIPATH}/cosi-setup"
 
+# The shared helper functions, e.g. resolveoption and absolutefilename
+. "${SETUPPATH}/setup-helpers.sh"
+
 # The path to the COSItools install
 GITBASEDIR="https://github.com/cositools"
 GITBRANCH="main"
@@ -107,6 +110,11 @@ echo "COSITOOLSDIR=${COSIPATH}" >> ${ENVFILE}
 # Helper functions
 
 
+# Every option this script accepts. Abbreviations are resolved against this list, thus
+# a new option has to be added here as well as to the case statement further below.
+SETUPOPTIONS="branch root geant heasoft healpix optimization debug pull-behavior-git maxthreads ignore-missing-packages keep-environment-as-is auto extras help"
+
+
 # Use the help of the main setup script since it describes the options
 confhelp() {
   "${COSIPATH}/cosi-setup/setup.sh" --help
@@ -121,16 +129,6 @@ issuereport() {
   echo " "
 }
 
-absolutefilename() {
-  local TARGET="$1"
-  if [ -d "${TARGET}" ]; then
-    (cd "${TARGET}" && pwd)
-  elif [ -e "${TARGET}" ]; then
-    (cd "$(dirname "${TARGET}")" && echo "$(pwd)/$(basename "${TARGET}")")
-  else
-    (cd "$(dirname "${TARGET}")" 2>/dev/null && echo "$(pwd)/$(basename "${TARGET}")") || return 1
-  fi
-}
 
 
 ############################################################################################################
@@ -138,7 +136,7 @@ absolutefilename() {
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  if [[ ${C} == "-h" ]] || [[ $(resolveoption "${C}" "${SETUPOPTIONS}") == "help" ]]; then
     echo ""
     confhelp
     exit 0
@@ -147,43 +145,38 @@ done
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-b* ]] && [[ ${C} != *-p*-b* ]] && [[ ${C} != *-s*-b* ]]; then
-    BRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-ro*=* ]]; then
-    ROOTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-g*=* ]] && [[ ${C} != *-p*-g* ]] ; then
-    GEANT4PATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-heas*=* ]]; then
-    HEASOFTPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-heal*=* ]]; then
-    HEALPIXPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-o*=* ]]; then
-    CPPOPT=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-d*=* ]]; then
-    CPPDEBUG=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-p*=* ]]; then
-    GITPULLBEHAVIOR=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-ma*=* ]]; then
-    MAXTHREADS=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == *-i*-m* ]]; then
-    IGNOREMISSINGPACKAGES=true
-  elif [[ ${C} == *-k*-e* ]]; then
-    KEEPENVASIS=`echo ${C} | awk -F"=" '{ print $2 }'`
-  elif [[ ${C} == --au* ]] || [[ ${C} == -au* ]]; then
-    AUTOPACKAGEINSTALL=true
-  elif [[ ${C} == *-e* ]] && [[ ${C} != *-k*-e* ]]; then
-    EXTRAS=`echo ${C} | awk -F"=" '{ print $2 }'`
-    EXTRAS=${EXTRAS/,/ }
-  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
     echo ""
-    confhelp
-    exit 0
-  else
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"./setup.sh --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
     echo ""
     echo "ERROR: Unknown command line option: ${C}"
     echo "       See \"./setup.sh --help\" for a list of options"
     exit 1
   fi
+
+  VALUE=`echo ${C} | awk -F"=" '{ print $2 }'`
+
+  case ${OPTION} in
+    branch)                  BRANCH="${VALUE}" ;;
+    root)                    ROOTPATH="${VALUE}" ;;
+    geant)                   GEANT4PATH="${VALUE}" ;;
+    heasoft)                 HEASOFTPATH="${VALUE}" ;;
+    healpix)                 HEALPIXPATH="${VALUE}" ;;
+    optimization)            CPPOPT="${VALUE}" ;;
+    debug)                   CPPDEBUG="${VALUE}" ;;
+    pull-behavior-git)       GITPULLBEHAVIOR="${VALUE}" ;;
+    maxthreads)              MAXTHREADS="${VALUE}" ;;
+    ignore-missing-packages) IGNOREMISSINGPACKAGES=true ;;
+    keep-environment-as-is)  KEEPENVASIS="${VALUE}" ;;
+    auto)                    AUTOPACKAGEINSTALL=true ;;
+    extras)                  EXTRAS="${VALUE}"; EXTRAS=${EXTRAS/,/ } ;;
+  esac
 done
 
 

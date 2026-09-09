@@ -66,12 +66,21 @@ confhelp() {
 }
 
 
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="tarball sourcescript help"
+
 # Store command line
 CMD=( "$@" )
 
 # Check for help
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  if [[ ${C} == "-h" ]] || [[ $(resolveoption "${C}" "${SETUPOPTIONS}") == "help" ]]; then
     echo ""
     confhelp
     exit 0
@@ -83,22 +92,36 @@ ENVFILE=""
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
-  if [[ ${C} == *-t*=* ]]; then
-    TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
-    echo "Using this tarball: ${TARBALL}"
-  elif [[ ${C} == *-s* ]]; then
-    ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
-    echo "Using this environment file: ${ENVFILE}"
-  elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
     echo ""
-    confhelp
-    exit 0
-  else
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"$0 --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
     echo ""
     echo "ERROR: Unknown command line option: ${C}"
     echo "       See \"$0 --help\" for a list of options"
     exit 1
   fi
+
+  case ${OPTION} in
+    tarball)
+      TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      echo "Using this tarball: ${TARBALL}"
+      ;;
+    sourcescript)
+      ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      echo "Using this environment file: ${ENVFILE}"
+      ;;
+    help)
+      echo ""
+      confhelp
+      exit 0
+      ;;
+  esac
 done
 
 
