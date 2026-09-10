@@ -21,7 +21,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="cositoolspath branch repositorypath pull-behavior-git name stashname help"
+SETUPOPTIONS="cosi-tools-path branch repository-path pull-behavior-git name stash-name help"
 
 CMD=( "$@" )
 
@@ -53,7 +53,7 @@ confhelp() {
   echo "    Choose a specific branch of the COSItools git repositories."
   echo "    If the option is not given or the branch does not exist then the main/master is chosen."
   echo " "
-  echo "--repositorypath=[name of the git path]"
+  echo "--repository-path=[name of the git path]"
   echo "    The path to the git repository"
   echo " "
   echo "--pull-behavior-git=[stash (default), merge]"
@@ -62,10 +62,10 @@ confhelp() {
   echo "     \"merge\": merge the changes -- the script will stop on error"
   echo "     \"no\": Do not change existing repositories in any way (no pull, no branch switch, etc.)"
   echo " "
-  echo "--cositoolspath=[absolute path to COSItools]"
+  echo "--cosi-tools-path=[absolute path to COSItools]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
   echo " "
-  echo "--stashname=[name under which to stash changes in the repository if --pull-behavior-git=stash]"
+  echo "--stash-name=[name under which to stash changes in the repository if --pull-behavior-git=stash]"
   echo "    This is the name under which existing chnages to the repository are stashed."
   echo " "
   echo "--help or -h"
@@ -112,13 +112,13 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    cositoolspath)
+    cosi-tools-path)
       COSIPATH=$(optionvalue "${C}")
       ;;
     branch)
       GITBRANCH=$(optionvalue "${C}")
       ;;
-    repositorypath)
+    repository-path)
       GITPATH=$(optionvalue "${C}")
       ;;
     pull-behavior-git)
@@ -127,7 +127,7 @@ for C in "${CMD[@]}"; do
     name)
       NAME=$(optionvalue "${C}")
       ;;
-    stashname)
+    stash-name)
       STASHNAME=$(optionvalue "${C}")
       ;;
     help)

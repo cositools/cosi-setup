@@ -49,7 +49,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 
 ```
  
---cositoolspath=[path to COSItools - default: "COSItools"]
+--cosi-tools-path=[path to COSItools - default: "COSItools"]
     This is the path to where the COSItools will be installed. If the path exists, we will try to update them.
  
 --branch=[name of a git branch - default: main]
@@ -70,7 +70,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 --ignore-missing-packages
     Do not check for missing packages.
  
---keep-environment=[off/no, on/yes - default: off]
+--keep-environment-as-is=[off/no, on/yes - default: off]
     By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty
     to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not.
     If you use this flag make sure the COSItools source script has not been called in the terminal you are using.
@@ -101,7 +101,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
     --healpix=off      Do not install Healpix - use a built-in version.
     --healpix=[path]   Use the version of Healpix found in the path. If it is not compatible, the script will stop with an error.
  
---maxthreads=[integer >=1]
+--max-threads=[integer >=1]
     The maximum number of threads to be used for compilation. Default is the number of cores in your system.
  
 --debug=[off/no (default), on/yes]
@@ -123,25 +123,21 @@ We strongly recommend to stick with long(ish)-term support versions such as Ubun
 
 #### Ubuntu & derivatives
 
-Version 24.04 and 22.04 should work with the default one-line install script. We have no indications sofar that any distributions derived from Ubuntu are not working. We only test long-term support (LTE) versions.
+Version 24.04 and later work with the default one-line install script. Version 23.10 and earlier, including 22.04, are no longer supported and the setup will stop with an error. We have no indications sofar that any distributions derived from Ubuntu are not working. We only test long-term support (LTS) versions.
 
 #### Redhat derivatives
 
 ##### Redhat, Rocky & Alma
 
-These operating systems do not come with a Healpix package by default, thus Healpix has to be compiled during installation. Please use these options:
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/main/setup.sh)" _ --healpix=
-```
-Version 8, 9 & 10 should work.
+Version 10 and later work with the default one-line install script. Version 9 and earlier are no longer supported and the setup will stop with an error.
 
 ##### Fedora
 
-The one-line install should work. Latest tested version is 41. Fedora tends to be close to the cutting edge. Thus, consider to stay one version behind the latest version.
+The one-line install should work for version 43 and later; earlier versions are not supported. Fedora tends to be close to the cutting edge. Thus, consider to stay one version behind the latest version.
 
 ##### Centos Stream
 
-The one-line install should work. Latest tested version is 9.
+The one-line install should work. Latest tested version is Stream 10.
 
 ##### Scientific Linux and Centos 8 or earlier
 
@@ -151,7 +147,7 @@ Not supported. These versions are too old to run COSItools. Please use a contain
 
 ##### Leap
 
-Leap is currently not working since it doesn't have a builtin version of healpix --- contributions of a healpix build-script are welcome.
+Leap 16 works. Healpix is compiled as part of the installation, thus the missing Healpix package is no longer an obstacle. Leap 15 and earlier are no longer supported.
 
 ##### Tumbleweed
 
@@ -164,11 +160,11 @@ The SUSE Linux Enterprise Server Distribution is a hit and miss, and depends on 
 
 #### Debian
 
-The one-line install should work. Latest tested version is 12.
+The one-line install should work for version 13 and later. Version 12 and earlier are no longer supported and the setup will stop with an error.
 
 #### Other Linux systems
 
-No other systems have been been tested yet or are supported. Especially avoid any cutting edge rolling releases such as Arch (it sometimes compiles there, sometimes not), Gentoo, etc.
+Arch and Manjaro are part of the automated container tests, but as cutting edge rolling releases they might break at any moment in time. Alpine is not supported due to an incompatibility between ROOT and Alpine. No other systems have been tested or are supported.
 
 ### macOS 
 
@@ -199,7 +195,7 @@ Sometimes things can break badly on macOS. In this case it usually helps to comp
 
 ### Windows
 
-Please use Ubuntu 24.04 or 22.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access. There is a known bug in WSL2 which makes the MEGAlib/ROOT menu bars show up at random places on the screen. That'a a WSL2 / ROOT bug.
+Please use Ubuntu 26.04 or 24.04 using the Windows subsystem for Linux (WSL). Windows 11 together with WSL2 is strongly recommended for easy GUI access. There is a known bug in WSL2 which makes the MEGAlib/ROOT menu bars show up at random places on the screen. That'a a WSL2 / ROOT bug.
 
 
 ### Clusters and supercomputers

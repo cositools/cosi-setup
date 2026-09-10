@@ -149,20 +149,20 @@ confhelp() {
   echo "--tarball=[file name of ROOT tar ball]"
   echo "    Use this tarball instead of downloading it from the ROOT website"
   echo " "
-  echo "--rootversion=[e.g. 5.34, 6.10, v6-28-02, master]"
+  echo "--root-version=[e.g. 5.34, 6.10, v6-28-02, master]"
   echo "    Use the given ROOT version instead of the required one."
   echo " "
-  echo "--sourcescript=[file name of new environment script]"
+  echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for HEASoft."
   echo " "
   echo "--debug=[off/no, on/yes - default: off]"
   echo "    Compile with degugging options."
   echo " "
-  echo "--keepenvironmentasis=[false/off/no, true/on/yes - default: false]"
+  echo "--keep-environment-as-is=[false/off/no, true/on/yes - default: false]"
   echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty to avoid most libray conflicts."
   echo "    This flag toggles this behaviour and lets you decide to keep your environment or not."
   echo " "
-  echo "--maxthreads=[integer >=1 - default: 1]"
+  echo "--max-threads=[integer >=1 - default: 1]"
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
   echo "--patch=[yes or no - default: no]"
@@ -184,7 +184,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball sourcescript maxthreads debug patch cleanup rootversion keepenvironmentasis help"
+SETUPOPTIONS="tarball source-script max-threads debug patch cleanup root-version keep-environment-as-is help"
 
 # Store command line
 CMD=( "$@" )
@@ -230,10 +230,10 @@ for C in "${CMD[@]}"; do
     tarball)
       TARBALL=$(optionvalue "${C}")
       ;;
-    sourcescript)
+    source-script)
       ENVFILE=$(optionvalue "${C}")
       ;;
-    maxthreads)
+    max-threads)
       MAXTHREADS=$(optionvalue "${C}")
       ;;
     debug)
@@ -245,10 +245,10 @@ for C in "${CMD[@]}"; do
     cleanup)
       CLEANUP=$(optionvalue "${C}")
       ;;
-    rootversion)
+    root-version)
       WANTEDVERSION=$(optionvalue "${C}")
       ;;
-    keepenvironmentasis)
+    keep-environment-as-is)
       KEEPENVASIS=$(optionvalue "${C}")
       ;;
     help)

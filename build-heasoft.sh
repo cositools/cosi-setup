@@ -63,7 +63,7 @@ confhelp() {
   echo "--tarball=[file name of HEASoft tar ball]"
   echo "    Use this tarball instead of downloading it from the HEASoft website"
   echo " "
-  echo "--sourcescript=[file name of new environment script]"
+  echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for HEASoft."
   echo " "
   echo "--patch=[yes or no - default: no]"
@@ -111,7 +111,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball sourcescript patch help"
+SETUPOPTIONS="tarball source-script patch help"
 
 # Store command line
 CMD=( "$@" )
@@ -151,7 +151,7 @@ for C in "${CMD[@]}"; do
       TARBALL=$(optionvalue "${C}")
       echo "Using this tarball: ${TARBALL}"
       ;;
-    sourcescript)
+    source-script)
       ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
       ;;

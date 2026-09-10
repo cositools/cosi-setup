@@ -84,3 +84,22 @@ optionvalue() {
     *)   printf '%s' "" ;;
   esac
 }
+
+# Interpret the value of a boolean command line option. Such an option may be given on its
+# own, e.g. "--auto", in which case it has no value and means "true", or with an explicit
+# value, e.g. "--auto=no". Accepted are true/on/yes and false/off/no in any capitalization,
+# abbreviated the same way as everywhere else in these scripts, e.g. "t", "n", "off".
+#
+# ${1}: the value of the option, i.e. what optionvalue returned. Empty means "true".
+#
+# Returns 0 and echoes "true" or "false"
+#         1 and echoes nothing if the value does not name a boolean
+booleanvalue() {
+  local VALUE
+  VALUE=$(echo "${1}" | tr '[:upper:]' '[:lower:]')
+  case "${VALUE}" in
+    ""|t*|on|y*) echo "true";  return 0 ;;
+    f*|of*|n*)   echo "false"; return 0 ;;
+  esac
+  return 1
+}

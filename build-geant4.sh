@@ -76,20 +76,20 @@ confhelp() {
   echo "--tarball=[file name of Geant4 tarball]"
   echo "    Use this tarball instead of downloading it from the Geant4 website" 
   echo " "
-  echo "--geant4version=[e.g. 10.02 (but not 10.02.p03)]"
+  echo "--geant4-version=[e.g. 10.02 (but not 10.02.p03)]"
   echo "    Specifiy the Geant4 version (ignores the requested version), if empty read he default version stated oin the setup scripts"
   echo " "
-  echo "--sourcescript=[file name of new environment script]"
+  echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for Geant4." 
   echo " "
   echo "--debug=[off/no, on/yes - default: off]"
   echo "    Compile with degugging options."
   echo " "
-  echo "--keepenvironmentasis=[false/off/no, true/on/yes - default: false]"
+  echo "--keep-environment-as-is=[false/off/no, true/on/yes - default: false]"
   echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty to avoid most libray conflicts."
   echo "    This flag toggles this behaviour and lets you decide to keep your environment or not."
   echo " "
-  echo "--maxthreads=[integer >=1 - default: off]"
+  echo "--max-threads=[integer >=1 - default: off]"
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
   echo "--patch=[yes or no - default no]"
@@ -111,7 +111,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball sourcescript maxthreads debug patch cleanup geant4version keepenvironmentasis help"
+SETUPOPTIONS="tarball source-script max-threads debug patch cleanup geant4-version keep-environment-as-is help"
 
 # Store command line
 CMD=( "$@" )
@@ -158,11 +158,11 @@ for C in "${CMD[@]}"; do
     tarball)
       TARBALL=$(optionvalue "${C}")
       ;;
-    sourcescript)
+    source-script)
       ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
       ;;
-    maxthreads)
+    max-threads)
       MAXTHREADS=$(optionvalue "${C}")
       ;;
     debug)
@@ -174,10 +174,10 @@ for C in "${CMD[@]}"; do
     cleanup)
       CLEANUP=$(optionvalue "${C}")
       ;;
-    geant4version)
+    geant4-version)
       WANTEDVERSION=$(optionvalue "${C}")
       ;;
-    keepenvironmentasis)
+    keep-environment-as-is)
       KEEPENVASIS=$(optionvalue "${C}")
       ;;
     help)

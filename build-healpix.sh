@@ -41,7 +41,7 @@ confhelp() {
   echo "--tarball=[file name of the healpix tar ball]"
   echo "    Use this tarball instead of downloading it from the healpix website"
   echo " "
-  echo "--sourcescript=[file name of new environment script]"
+  echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for healpix."
   echo " "
   echo "--help or -h"
@@ -58,7 +58,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball sourcescript help"
+SETUPOPTIONS="tarball source-script help"
 
 # Store command line
 CMD=( "$@" )
@@ -97,7 +97,7 @@ for C in "${CMD[@]}"; do
       TARBALL=$(optionvalue "${C}")
       echo "Using this tarball: ${TARBALL}"
       ;;
-    sourcescript)
+    source-script)
       ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
       ;;

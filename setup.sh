@@ -44,7 +44,7 @@ confhelp() {
   echo " "
   echo "Options:"
   echo " "
-  echo "--cositoolspath=[path to COSItools - default: \"COSItools\"]"
+  echo "--cosi-tools-path=[path to COSItools - default: \"COSItools\"]"
   echo "    This is the path to where the COSItools will be installed. If the path exists, we will try to update them."
   echo " "
   echo "--setup-branch=[name of a git branch - default: main]"
@@ -69,7 +69,7 @@ confhelp() {
   echo "--ignore-missing-packages"
   echo "    Do not check for missing packages."
   echo " "
-  echo "--keep-environment=[off/no, on/yes - default: off]"
+  echo "--keep-environment-as-is=[off/no, on/yes - default: off]"
   echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty"
   echo "    to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not."
   echo "    If you use this flag make sure the COSItools source script has not been called in the terminal you are using."
@@ -100,7 +100,7 @@ confhelp() {
   echo "    --healpix=off      Do not install Healpix - use a built-in version."
   echo "    --healpix=[path]   Use the version of Healpix found in the path. If it is not compatible, the script will stop with an error."
   echo " "
-  echo "--maxthreads=[integer >=1]"
+  echo "--max-threads=[integer >=1]"
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
   echo "--debug=[off/no (default), on/yes]"
@@ -119,7 +119,7 @@ confhelp() {
 # needed so that an abbreviation means the same thing here as in the stage 2 script -
 # with only the first three, "--he" would resolve to "help" here but be ambiguous there.
 # This script acts on the first three, everything else is passed on to stage 2.
-SETUPOPTIONS="cositoolspath setup-branch branch root geant heasoft healpix optimization debug pull-behavior-git maxthreads ignore-missing-packages keep-environment-as-is auto extras help"
+SETUPOPTIONS="cosi-tools-path setup-branch branch root geant heasoft healpix optimization debug pull-behavior-git max-threads ignore-missing-packages keep-environment-as-is auto extras help"
 
 # Resolve a command line argument to the full name of the option it names.
 #
@@ -209,9 +209,9 @@ done
 for C in "${CMD[@]}"; do
   # Options not handled here are for the stage 2 script, which reports bad ones
   case $(resolveoption "${C}" "${SETUPOPTIONS}") in
-    cositoolspath) COSIPATH=$(optionvalue "${C}") ;;
-    branch)        GITBRANCH=$(optionvalue "${C}") ;;
-    setup-branch)  GITSETUPBRANCH=$(optionvalue "${C}") ;;
+    cosi-tools-path) COSIPATH=$(optionvalue "${C}") ;;
+    branch)          GITBRANCH=$(optionvalue "${C}") ;;
+    setup-branch)    GITSETUPBRANCH=$(optionvalue "${C}") ;;
   esac
 done
 
@@ -394,13 +394,13 @@ fi
 # Filter the options which only this script understands and which stage 2 must not see
 CMD=(); for a in "$@"; do
   case $(resolveoption "${a}" "${SETUPOPTIONS}") in
-    setup-branch|cositoolspath) ;;
-    *)                          CMD+=("${a}") ;;
+    setup-branch|cosi-tools-path) ;;
+    *)                            CMD+=("${a}") ;;
   esac
 done
 
 set -o pipefail # This ensures the $? catches any error in the pipeline
-./setup-stage2.sh "${CMD[@]}" ${ADDITIONALOPTIONS} 2>&1 | tee -a log/Build_$(date +"%Y%m%d-%H%M%S").log  
+./setup-stage2.sh "${CMD[@]}" ${ADDITIONALOPTIONS} 2>&1 | tee -a "${LOGFILE}"
 EXITCODE=$?
 if [ "${EXITCODE}" != "0" ]; then
   if [ "${EXITCODE}" == "255" ]; then

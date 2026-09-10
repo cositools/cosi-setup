@@ -104,7 +104,17 @@ done
 
 
 ############################################################################################################
-# Step 4: Create the summary 
+# Step 4: Create the summary
+
+# With --output the whole summary goes into that file instead of to the terminal
+if [[ ${OUTPUT} != "" ]]; then
+  if ! exec > "${OUTPUT}"; then
+    echo ""
+    echo "ERROR: Unable to write to the output file ${OUTPUT}"
+    exit 1
+  fi
+fi
+
 
 SEPARATOR="\n*****************************\n"
 

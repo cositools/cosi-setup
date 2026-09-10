@@ -46,26 +46,82 @@ REQUIRED=""
 EXTRATEXT=""
 TOBEINSTALLED=""
 SUPPORTEDVERSION="TRUE"
-AUTOPACKAGEINSTALL="FALSE"
+AUTOPACKAGEINSTALL="false"
 REPOSETUP=true
+
+confhelp() {
+  echo ""
+  echo "This script checks whether all packages required by the COSItools are installed."
+  echo " "
+  echo "Usage: ./setup-packages-linux.sh [options]";
+  echo " "
+  echo " "
+  echo "Options:"
+  echo " "
+  echo "--autoinstall[=false/off/no, true/on/yes - default: false]"
+  echo "    Install the missing packages instead of only listing them."
+  echo "    This is only intended for automatic build tests and is ignored outside a container."
+  echo " "
+  echo "--help or -h"
+  echo "    Show this help."
+  echo " "
+  echo " "
+}
+
+# Path to where this file is located
+SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# The shared helper functions, e.g. resolveoption
+. "${SETUPPATH}/setup-helpers.sh"
+
+# Every option this script accepts. Abbreviations are resolved against this list.
+SETUPOPTIONS="autoinstall help"
 
 # The command line
 CMD=( "$@" )
 
 for C in "${CMD[@]}"; do
-  if [[ ${C} == --au* ]] || [[ ${C} == -au* ]]; then
-    AUTOPACKAGEINSTALL="TRUE"
+  # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
+  RESULT=0
+  OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  if [[ ${RESULT} == 2 ]]; then
+    echo ""
+    echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
+    echo "       See \"./setup-packages-linux.sh --help\" for a list of options"
+    exit 1
+  elif [[ ${RESULT} != 0 ]]; then
+    echo ""
+    echo "ERROR: Unknown command line option: ${C}"
+    echo "       See \"./setup-packages-linux.sh --help\" for a list of options"
+    exit 1
   fi
+
+  case ${OPTION} in
+    autoinstall)
+      # Without booleanvalue "--autoinstall=no" would switch the installation on
+      if ! AUTOPACKAGEINSTALL=$(booleanvalue "$(optionvalue "${C}")"); then
+        echo ""
+        echo "ERROR: Unknown value for the --autoinstall option: ${C}"
+        echo "       Use true/on/yes or false/off/no, or give the option without a value"
+        exit 1
+      fi
+      ;;
+    help)
+      echo ""
+      confhelp
+      exit 0
+      ;;
+  esac
 done
 
 # The automatic package installation is only intended for automatic build tests inside a container, switch it off anywhere else
-if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
   if [[ ! -f /run/.containerenv ]] && [[ ! -f /.dockerenv ]]; then
     echo " "
     echo "WARNING: The automatic package installation is only intended for automatic build tests inside a container."
     echo "         Switching it off - any missing packages along with installation instructions will be listed below."
     echo " "
-    AUTOPACKAGEINSTALL="FALSE"
+    AUTOPACKAGEINSTALL="false"
   fi
 fi
 
@@ -160,7 +216,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     done
   
     if [[ "${TOBEINSTALLED}" != "" ]]; then
-      if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+      if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
         echo " "
         echo "Performing an automatic installation of the packages. I will do the following:"
         echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
@@ -256,7 +312,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     
   
     if [[ "${TOBEINSTALLED}" != "" ]]; then
-      if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+      if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
         echo " "
         echo "Performing an automatic installation of the packages. I will do the following:"
         echo "sudo zypper refresh"
@@ -396,7 +452,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
   
   
     if [[ "${TOBEINSTALLED}" != "" ]]; then
-      if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+      if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
         echo " "
         echo "Performing an automatic installation of the packages. I will do the following:"
         if [[ ${REPOSETUP} != true ]]; then
@@ -454,11 +510,13 @@ if [[ ${IsArchClone} -eq 1 ]]; then
   if [[ "${REQUIRED_PAC}" == "" ]]; then exit 0; fi
 
   # Check if each of the packages exists:
+  NONEXISTENT_PAC=""
   for PACKAGE in ${REQUIRED_PAC}; do
     # Check if the package is installed
     if ! pacman -Si ${PACKAGE} >& /dev/null; then
       # Check if it exists at all:
       echo "Does not exist: ${PACKAGE}"
+      NONEXISTENT_PAC="${NONEXISTENT_PAC} ${PACKAGE}"
     else
       if ! pacman -Qi ${PACKAGE} >& /dev/null; then
         # Check if it exists at all:
@@ -467,9 +525,19 @@ if [[ ${IsArchClone} -eq 1 ]]; then
       fi
     fi
   done
-  
+
+  # A package which is not in the repositories cannot be installed, thus stop here instead
+  # of reporting further down that everything is fine
+  if [[ "${NONEXISTENT_PAC}" != "" ]]; then
+    echo " "
+    echo "ERROR: The following required packages do not exist in the Arch repositories:${NONEXISTENT_PAC}"
+    echo "       Either the package database is out of date - try \"sudo pacman -Sy\" -"
+    echo "       or the list of required packages in this script has to be updated."
+    exit 255
+  fi
+
   if [[ "${TOBEINSTALLED_PAC}" != "" ]]; then
-    if [[ ${AUTOPACKAGEINSTALL} == TRUE ]]; then
+    if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
       echo " "
       echo "Performing an automatic installation of the packages. I will do the following:"
       echo "sudo pacman -Syu --noconfirm ${TOBEINSTALLED_PAC}"

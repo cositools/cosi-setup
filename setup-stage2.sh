@@ -112,7 +112,7 @@ echo "COSITOOLSDIR=${COSIPATH}" >> ${ENVFILE}
 
 # Every option this script accepts. Abbreviations are resolved against this list, thus
 # a new option has to be added here as well as to the case statement further below.
-SETUPOPTIONS="branch root geant heasoft healpix optimization debug pull-behavior-git maxthreads ignore-missing-packages keep-environment-as-is auto extras help"
+SETUPOPTIONS="branch root geant heasoft healpix optimization debug pull-behavior-git max-threads ignore-missing-packages keep-environment-as-is auto extras help"
 
 
 # Use the help of the main setup script since it describes the options
@@ -171,10 +171,10 @@ for C in "${CMD[@]}"; do
     optimization)            CPPOPT="${VALUE}" ;;
     debug)                   CPPDEBUG="${VALUE}" ;;
     pull-behavior-git)       GITPULLBEHAVIOR="${VALUE}" ;;
-    maxthreads)              MAXTHREADS="${VALUE}" ;;
-    ignore-missing-packages) IGNOREMISSINGPACKAGES=true ;;
+    max-threads)             MAXTHREADS="${VALUE}" ;;
+    ignore-missing-packages) IGNOREMISSINGPACKAGES="${VALUE}" ;;
     keep-environment-as-is)  KEEPENVASIS="${VALUE}" ;;
-    auto)                    AUTOPACKAGEINSTALL=true ;;
+    auto)                    AUTOPACKAGEINSTALL="${VALUE}" ;;
     extras)                  EXTRAS="${VALUE}"; EXTRAS=${EXTRAS//,/ } ;;
   esac
 done
@@ -201,6 +201,24 @@ KEEPENVASIS=`echo ${KEEPENVASIS} | tr '[:upper:]' '[:lower:]'`
 GITPULLBEHAVIOR=`echo ${GITPULLBEHAVIOR} | tr '[:upper:]' '[:lower:]'`
 
 # Provide feed back and perform error checks:
+
+# Both flags may be given on their own, e.g. "--auto", or with a value, e.g. "--auto=no".
+# Without booleanvalue "--auto=no" would switch the automatic installation on.
+if ! BOOLEAN=$(booleanvalue "${IGNOREMISSINGPACKAGES}"); then
+  echo " "
+  echo "ERROR: Unknown value for the --ignore-missing-packages option: ${IGNOREMISSINGPACKAGES}"
+  echo "       Use true/on/yes or false/off/no, or give the option without a value"
+  exit 1
+fi
+IGNOREMISSINGPACKAGES="${BOOLEAN}"
+
+if ! BOOLEAN=$(booleanvalue "${AUTOPACKAGEINSTALL}"); then
+  echo " "
+  echo "ERROR: Unknown value for the --auto option: ${AUTOPACKAGEINSTALL}"
+  echo "       Use true/on/yes or false/off/no, or give the option without a value"
+  exit 1
+fi
+AUTOPACKAGEINSTALL="${BOOLEAN}"
 
 if [[ "${IGNOREMISSINGPACKAGES}" == true ]]; then
   echo " * Do not check for missing packages"
@@ -659,7 +677,7 @@ else
   
   cd "${EXTERNALPATH}"
   
-  bash "${SETUPPATH}/build-root.sh" "-root=${ROOTPATH}" "-source=${ENVFILE}" -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
+  bash "${SETUPPATH}/build-root.sh" "-root=${ROOTPATH}" "-source=${ENVFILE}" -patch=yes --debug=${CPPDEBUG} --max-threads=${MAXTHREADS} --cleanup=yes --keep-environment-as-is=${KEEPENVASIS} 2>&1 | tee BuildLogROOT.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
@@ -756,7 +774,7 @@ else
   echo "Switching to build-geant4.sh script..."
   cd "${EXTERNALPATH}"
   
-  bash "${SETUPPATH}/build-geant4.sh" "-source=${ENVFILE}" -patch=yes --debug=${CPPDEBUG} --maxthreads=${MAXTHREADS} --cleanup=yes --keepenvironmentasis=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
+  bash "${SETUPPATH}/build-geant4.sh" "-source=${ENVFILE}" -patch=yes --debug=${CPPDEBUG} --max-threads=${MAXTHREADS} --cleanup=yes --keep-environment-as-is=${KEEPENVASIS} 2>&1 | tee BuildLogGeant4.txt
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Geant4 dir, copy the build log there

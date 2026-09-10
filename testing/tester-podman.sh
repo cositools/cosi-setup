@@ -25,21 +25,15 @@ IMAGES=(
   "arch:latest"
 )
 
-# The cosi-setup branch under test. Both the bootstrap setup.sh and the cloned
-# repository are taken from it, so that stage 1 and stage 2 are always the same
-# version. It must be pushed to GitHub, since the container downloads it from there.
-SETUPBRANCH="feature/auto-install"
-
-SETUPCMD="/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/${SETUPBRANCH}/setup.sh)\" _ --auto --setup-branch=${SETUPBRANCH} "
-
-# Path to where this file is located
-SETUPPATH="$( cd -- "$(dirname "$0")/.." >/dev/null 2>&1 ; pwd -P )"
+# Path to where this file is located, and to the repository it belongs to
+TESTERPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+SETUPPATH="$( cd -- "${TESTERPATH}/.." >/dev/null 2>&1 ; pwd -P )"
 
 # The shared helper functions, e.g. resolveoption
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="os help"
+SETUPOPTIONS="os setup-branch help"
 
 # The command line
 CMD=( "$@" )
@@ -50,6 +44,11 @@ FAILURES=0
 
 # Default values for optional command line parameters
 OSLIST=""
+
+# The cosi-setup branch under test. Both the bootstrap setup.sh and the cloned repository
+# are taken from it, so that stage 1 and stage 2 are always the same version. Empty means
+# use the branch this working copy is on.
+SETUPBRANCH=""
 
 
 ############################################################################################################
@@ -81,6 +80,10 @@ confhelp() {
   echo "    These short names are resolved to their full image name:"
   echo "    rocky, alma, centos, leap, tumbleweed, manjaro, arch"
   echo "    Example: --os=rocky:10+,arch"
+  echo " "
+  echo "--setup-branch=[name of a cosi-setup git branch - default: the branch of this working copy]"
+  echo "    Test this branch instead of the one this working copy is on."
+  echo "    The containers download the branch from GitHub, thus it has to be pushed first."
   echo " "
   echo "--help or -h"
   echo "    Show this help."
@@ -211,6 +214,13 @@ TestSingleOS() {
   local LOG="$LOGDIR/$TAG.log"
   local CMD="${SETUPCMD}$(ExpandSetup "$IMAGE")"
 
+  # Only ask podman for a terminal when there is one, otherwise the run fails right away
+  # with "the input device is not a TTY" in an automated test without a terminal
+  local TTYFLAG=""
+  if [[ -t 0 ]]; then
+    TTYFLAG="-t"
+  fi
+
   echo " "
   echo "Testing ${IMAGE}..."
 
@@ -223,7 +233,7 @@ TestSingleOS() {
   # Exit code 90 flags a failure to bootstrap the container itself (broken distro
   # mirror, missing repository metadata, ...) so that "this OS image is broken
   # today" can be told apart from "COSItools failed to install".
-  if podman run --rm --pull=always -it "${IMAGE}" bash -c "set -e; { ${BOOTSTRAP}; } || exit 90; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && sudo -H -u tester bash -lc 'cd; ${CMD}'" > "$LOG" 2>&1; then
+  if podman run --rm --pull=always ${TTYFLAG} "${IMAGE}" bash -c "set -e; { ${BOOTSTRAP}; } || exit 90; useradd -m tester && echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester && chmod 0440 /etc/sudoers.d/tester && sudo -H -u tester bash -lc 'cd; ${CMD}'" > "$LOG" 2>&1; then
     echo "PASS: ${IMAGE}" | tee -a "${LOGDIR}/summary.txt"
     PASSED=$((PASSED + 1))
   else
@@ -277,10 +287,36 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    os)   OSLIST=$(optionvalue "${C}") ;;
-    help) confhelp; exit 0 ;;
+    os)           OSLIST=$(optionvalue "${C}") ;;
+    setup-branch) SETUPBRANCH=$(optionvalue "${C}") ;;
+    help)         confhelp; exit 0 ;;
   esac
 done
+
+# Without an explicit branch, test what this working copy is on
+if [[ ${SETUPBRANCH} == "" ]]; then
+  SETUPBRANCH=$(git -C "${SETUPPATH}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if [[ ${SETUPBRANCH} == "" ]] || [[ ${SETUPBRANCH} == "HEAD" ]]; then
+    echo "ERROR: Cannot determine which branch to test - this is not a git working copy,"
+    echo "       or it has a detached HEAD. Give the branch with --setup-branch=..."
+    exit 1
+  fi
+  echo " * Testing the branch of this working copy: ${SETUPBRANCH}"
+else
+  echo " * Testing the branch: ${SETUPBRANCH}"
+fi
+
+# The containers download the scripts from GitHub, thus only what has been pushed is
+# tested. Warn about the two ways in which the test would silently run old code.
+REMOTEHEAD=$(git -C "${SETUPPATH}" ls-remote origin "refs/heads/${SETUPBRANCH}" 2>/dev/null | awk '{ print $1 }')
+LOCALHEAD=$(git -C "${SETUPPATH}" rev-parse "${SETUPBRANCH}" 2>/dev/null || echo "")
+if [[ ${REMOTEHEAD} == "" ]]; then
+  echo " * WARNING: The branch ${SETUPBRANCH} does not exist on origin - the test will fail to download it"
+elif [[ ${LOCALHEAD} != "" ]] && [[ ${REMOTEHEAD} != "${LOCALHEAD}" ]]; then
+  echo " * WARNING: The local branch ${SETUPBRANCH} differs from origin - the test uses what is on GitHub"
+fi
+
+SETUPCMD="/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/${SETUPBRANCH}/setup.sh)\" _ --auto --setup-branch=${SETUPBRANCH} "
 
 # If the user gave a list of OSes, it replaces the built-in IMAGES array
 if [[ "${OSLIST}" != "" ]]; then
@@ -293,10 +329,8 @@ RESOLVEDIMAGES=()
 for ENTRY in "${IMAGES[@]}"; do
   ENTRY="$(ResolveImage "${ENTRY}")"
   if [[ ${ENTRY} == *:*+* ]]; then
+    # ExpandOSRange exits on error, and "set -e" carries that out of the substitution
     EXPANDED="$(ExpandOSRange "${ENTRY}")"
-    if [[ $? -ne 0 ]]; then
-      exit 1
-    fi
     while IFS= read -r IMG; do
       RESOLVEDIMAGES+=("${IMG}")
     done <<< "${EXPANDED}"
@@ -310,7 +344,8 @@ IMAGES=("${RESOLVEDIMAGES[@]}")
 ############################################################################################################
 # Run the tests
 
-LOGDIR="logs/$(date +%Y%m%d-%H%M%S)"
+# Next to this script, so that the logs land in the same place no matter where it is called from
+LOGDIR="${TESTERPATH}/logs/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$LOGDIR"
 
 for IMG in "${IMAGES[@]}"; do
