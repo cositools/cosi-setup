@@ -61,3 +61,15 @@ resolveoption() {
 absolutefilename() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
+
+# Check whether a path can be used safely in the generated source script. The path ends
+# up in shell statements there, thus anything the shell would interpret has to be kept
+# out. Only letters, digits and . _ - / + @ : are allowed.
+# ${1}: the path to check
+# Returns 0 if the path is usable, 1 otherwise
+checkpathcharacters() {
+  if printf '%s' "${1}" | LC_ALL=C grep -q '[^A-Za-z0-9._/+@:-]'; then
+    return 1
+  fi
+  return 0
+}

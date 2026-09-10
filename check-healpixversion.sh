@@ -147,16 +147,33 @@ if [ "${GOOD}" == "true" ]; then
 fi  
 
 if [ "${CHECK}" == "true" ]; then
-  if (`test -f "${HEALPIXPATH}/bin/ftversion"`); then
-    rv=$("${HEALPIXPATH}/bin/ftversion" | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
-    version=`echo ${rv} | awk -F. '{ print $1 }'`;
-    release=`echo ${rv} | awk -F. '{ print $2 }'`;
-    HealpixVersion=$((100*10#${version} + 10#${release}))
-  else
+  # Healpix does not ship a tool which reports its version, but it installs a pkg-config
+  # file which does. That is also the file MEGAlib later uses to find Healpix, thus an
+  # installation without it would be useless to us anyway.
+  PCFILE=""
+  for DIR in "${HEALPIXPATH}/lib/pkgconfig" "${HEALPIXPATH}/lib64/pkgconfig"; do
+    if [[ -f "${DIR}/healpix_cxx.pc" ]]; then
+      PCFILE="${DIR}/healpix_cxx.pc"
+      break
+    fi
+  done
+
+  if [[ ${PCFILE} == "" ]]; then
     echo " "
     echo "ERROR: The given directory ${HEALPIXPATH} does no contain a correct Healpix installation"
     exit 1;
   fi
+
+  rv=$(grep "^Version:" "${PCFILE}" | awk '{ print $2 }')
+  if [[ ${rv} == "" ]]; then
+    echo " "
+    echo "ERROR: Unable to determine the Healpix version from ${PCFILE}"
+    exit 1;
+  fi
+
+  version=`echo ${rv} | awk -F. '{ print $1 }'`;
+  release=`echo ${rv} | awk -F. '{ print $2 }'`;
+  HealpixVersion=$((100*10#${version} + 10#${release}))
 
   if ([ ${HealpixVersion} -ge ${HealpixVersionMin} ] && [ ${HealpixVersion} -le ${HealpixVersionMax} ]); then
     if [[ " ${HealpixBlackList} " == *" ${rv} "* ]] || [[ " ${HealpixBlackList} " == *" ${rv%.*} "* ]]; then

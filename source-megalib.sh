@@ -48,7 +48,7 @@ if [[ ${__TMP_PATH} != /* ]]; then
   echo ""
   echo "ERROR: The MEGAlib path must be an absolute path: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 # The directory must exist
@@ -56,7 +56,7 @@ if [[ ! -d ${__TMP_PATH} ]]; then
   echo ""
   echo "ERROR: MEGAlib directory not found: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 

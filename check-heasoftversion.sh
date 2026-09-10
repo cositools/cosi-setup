@@ -147,16 +147,35 @@ if [ "${GOOD}" == "true" ]; then
 fi  
 
 if [ "${CHECK}" == "true" ]; then
-  if (`test -f "${HEASoftPATH}/bin/ftversion"`); then
-    rv=$("${HEASoftPATH}/bin/ftversion" | awk -F"V" '{ print $2 }'  | sed 's/[^0-9.]*//g'); 
-    version=`echo ${rv} | awk -F. '{ print $1 }'`;
-    release=`echo ${rv} | awk -F. '{ print $2 }'`;
-    HEASoftVersion=$((100*10#${version} + 10#${release}))
-  else
+  # HEASoft installs its binaries into a platform specific sub-directory, e.g.
+  # x86_64-pc-linux-gnu-libc2.44, and its tools only run after headas-init.sh has been
+  # sourced. Thus accept the platform directory as well as the one above it, and require
+  # both files so that the build directory is not mistaken for the installation.
+  HEADASDIR=""
+  for DIR in "${HEASoftPATH}" "${HEASoftPATH}"/*; do
+    if [[ -f "${DIR}/headas-init.sh" ]] && [[ -x "${DIR}/bin/ftversion" ]]; then
+      HEADASDIR="${DIR}"
+      break
+    fi
+  done
+
+  if [[ ${HEADASDIR} == "" ]]; then
     echo " "
     echo "ERROR: The given directory ${HEASoftPATH} does no contain a correct HEASoft installation"
     exit 1;
   fi
+
+  # Initialize HEASoft in a subshell, otherwise ftversion refuses to run
+  rv=$(export HEADAS="${HEADASDIR}"; . "${HEADASDIR}/headas-init.sh" > /dev/null 2>&1; "${HEADASDIR}/bin/ftversion" 2>/dev/null | awk -F"V" '{ print $2 }' | sed 's/[^0-9.]*//g')
+  if [[ ${rv} == "" ]]; then
+    echo " "
+    echo "ERROR: Unable to determine the HEASoft version in ${HEADASDIR}"
+    exit 1;
+  fi
+
+  version=`echo ${rv} | awk -F. '{ print $1 }'`;
+  release=`echo ${rv} | awk -F. '{ print $2 }'`;
+  HEASoftVersion=$((100*10#${version} + 10#${release}))
 
   if ([ ${HEASoftVersion} -ge ${HEASoftVersionMin} ] && [ ${HEASoftVersion} -le ${HEASoftVersionMax} ]); then
     if [[ " ${HEASoftBlackList} " == *" ${rv} "* ]] || [[ " ${HEASoftBlackList} " == *" ${rv%.*} "* ]]; then

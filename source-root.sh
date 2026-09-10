@@ -48,7 +48,7 @@ if [[ ${__TMP_PATH} != /* ]]; then
   echo ""
   echo "ERROR: The ROOT path must be an absolute path: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 # The directory must exist
@@ -56,7 +56,7 @@ if [[ ! -d ${__TMP_PATH} ]]; then
   echo ""
   echo "ERROR: ROOT directory not found: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 # Check if the ROOT setup script exists"
@@ -64,7 +64,7 @@ if [[ ! -f ${__TMP_PATH}/bin/thisroot.sh ]]; then
   echo ""
   echo "ERROR: Root environment script not found: ${__TMP_PATH}/bin/thisroot.sh"
   echo ""
-  return
+  return 1
 fi
 
 

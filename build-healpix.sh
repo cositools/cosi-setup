@@ -127,10 +127,10 @@ else
   echo "Looking for latest healpix version on the healpix website"
 
   # Get the huighest version such as 3.83 - the tar ball looks like: Healpix_3.83_2024Nov13.tar.gz
-  VER=$(curl -s https://sourceforge.net/projects/healpix/files/ | grep -oP 'Healpix_[0-9]+\.[0-9]+' | head -1 | cut -d'_' -f2)
+  VER=$(curl -s https://sourceforge.net/projects/healpix/files/ | grep -oE 'Healpix_[0-9]+\.[0-9]+' | head -1 | cut -d'_' -f2)
   
   # Get specific tar ball, e.g., Healpix_3.83_2024Nov13.tar.gz
-  TARBALL=$(curl -s "https://sourceforge.net/projects/healpix/files/Healpix_${VER}/" | grep -oP 'Healpix_[0-9.]+_20[0-9A-Za-z]+\.tar\.gz' | head -1)
+  TARBALL=$(curl -s "https://sourceforge.net/projects/healpix/files/Healpix_${VER}/" | grep -oE 'Healpix_[0-9.]+_20[0-9A-Za-z]+\.tar\.gz' | head -1)
   if [ "${TARBALL}" == "" ]; then
     echo "ERROR: Unable to find suitable healpix tar ball at the healpix website"
     exit 1
@@ -270,7 +270,7 @@ make distclean 2>/dev/null || true
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${MAINDIR}/lib/pkgconfig
 
 if [[ "${ENVFILE}" != "" ]]; then
-  HEASOFTDIR=$(cat "${ENVFILE}" | grep HEASOFTDIR)
+  HEASOFTDIR=$(grep "^HEASOFTDIR=" "${ENVFILE}" | awk -F= '{ print $2 }')
   if [[ ${HEASOFTDIR} != "" ]]; then
     export CFITSIO_INCDIR=${HEASOFTDIR}/include
     export CFITSIO_LIBDIR=${HEASOFTDIR}/lib

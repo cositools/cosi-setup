@@ -48,7 +48,7 @@ if [[ ${__TMP_PATH} != /* ]]; then
   echo ""
   echo "ERROR: The HEASoft path must be an absolute path: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 # The directory must exist
@@ -56,7 +56,7 @@ if [[ ! -d ${__TMP_PATH} ]]; then
   echo ""
   echo "ERROR: HEASoft directory not found: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 
@@ -83,13 +83,13 @@ if [[ ${__TMP_HEADASFOUND} == false ]]; then
   echo ""
   echo "ERROR: HEADAS software not found in HEADAS directory"
   echo ""
-  return
+  return 1
 fi
 if [[ ${__TMP_CFITSIOFOUND} == false ]]; then
   echo ""
   echo "ERROR: libcfitsio not found in the HEADAS library directory"
   echo "       You should make a link such as libcfitsio_3.XY.so -> libcfitsio.so"
-  return
+  return 1
 fi
 
 

@@ -23,6 +23,9 @@ confhelp() {
   echo " "
   echo " "
   echo "Options:"
+  echo "--extras=[comma separated list of extra repositories]"
+  echo "    Also install these repositories, if they are python packages."
+  echo " "
   echo "--help or -h"
   echo "    Show this help."
   echo " "
@@ -37,7 +40,9 @@ confhelp() {
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="help"
+SETUPOPTIONS="extras help"
+
+EXTRAS=""
 
 # Store command line
 CMD=( "$@" )
@@ -59,6 +64,10 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
+    extras)
+      EXTRAS=`echo ${C} | awk -F"=" '{ print $2 }'`
+      EXTRAS=${EXTRAS//,/ }
+      ;;
     help)
       echo ""
       confhelp
@@ -183,7 +192,8 @@ if [[ $(uname -s) == *arwin ]] && [[ $(uname -m) == arm64 ]]; then
   if [[ "$?" != "0" ]]; then
     echo ""
     echo "ERROR: Unable to install tensorflow!"
-    exit 1; 
+    echo "       But not bailing out since not everybody uses it."
+    echo ""
   fi
       
 else
@@ -227,6 +237,32 @@ if [[ "$?" != "0" ]]; then
   echo "ERROR: Unable to install cosipy!"
   exit 1;
 fi
+
+
+# Install the extra repositories, but only those which are python packages
+for REPO in ${EXTRAS}; do
+  REPODIR="${COSITOOLSPATH}/${REPO}"
+  if [[ ! -d ${REPODIR} ]]; then
+    echo ""
+    echo "ERROR: Unable to find the extra repository at ${REPODIR}!"
+    exit 1
+  fi
+  if [[ ! -f "${REPODIR}/pyproject.toml" ]] && [[ ! -f "${REPODIR}/setup.py" ]]; then
+    echo ""
+    echo "The extra repository ${REPO} is not a python package - nothing to install"
+    continue
+  fi
+
+  echo ""
+  echo ""
+  echo "Installing ${REPO}"
+  pip3 install -e "${REPODIR}"
+  if [[ "$?" != "0" ]]; then
+    echo ""
+    echo "ERROR: Unable to install ${REPO}!"
+    exit 1;
+  fi
+done
 
 
 exit 0

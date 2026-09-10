@@ -175,7 +175,7 @@ for C in "${CMD[@]}"; do
     ignore-missing-packages) IGNOREMISSINGPACKAGES=true ;;
     keep-environment-as-is)  KEEPENVASIS="${VALUE}" ;;
     auto)                    AUTOPACKAGEINSTALL=true ;;
-    extras)                  EXTRAS="${VALUE}"; EXTRAS=${EXTRAS/,/ } ;;
+    extras)                  EXTRAS="${VALUE}"; EXTRAS=${EXTRAS//,/ } ;;
   esac
 done
 
@@ -242,8 +242,10 @@ fi
 if [ "${GEANT4PATH}" != "" ]; then
   GEANT4PATH=`absolutefilename "${GEANT4PATH}"`
 fi
-if [[ "${GEANT4PATH}" != "${GEANT4PATH% *}" ]]; then
-  echo "ERROR: Geant4 needs to be installed in a path without spaces,"
+if ! checkpathcharacters "${GEANT4PATH}"; then
+  echo ""
+  echo "ERROR: Geant4 needs to be installed in a path without spaces or special characters,"
+  echo "       such as \$ \` \" ' \\ ; & | < > ( ) * ? # ! ~"
   echo "       but you chose: \"${GEANT4PATH}\""
   exit 1
 fi
@@ -261,8 +263,10 @@ elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]] ; then
   echo " * Download the latest version of HEASoft"
 else
   HEASOFTPATH=`absolutefilename "${HEASOFTPATH}"`
-  if [[ "${HEASOFTPATH}" != "${HEASOFTPATH% *}" ]]; then
-    echo "ERROR: HEASoft needs to be installed in a path without spaces,"
+  if ! checkpathcharacters "${HEASOFTPATH}"; then
+    echo ""
+    echo "ERROR: HEASoft needs to be installed in a path without spaces or special characters,"
+    echo "       such as \$ \` \" ' \\ ; & | < > ( ) * ? # ! ~"
     echo "       but you chose: \"${HEASOFTPATH}\""
     exit 1
   fi
@@ -279,8 +283,10 @@ elif [[ "${HEALPIXPATH}" == "" ]] ; then
   echo " * Download the latest version of Healpix"
 else
   HEALPIXPATH=`absolutefilename "${HEALPIXPATH}"`
-  if [[ "${HEALPIXPATH}" != "${HEALPIXPATH% *}" ]]; then
-    echo "ERROR: Healpix needs to be installed in a path without spaces,"
+  if ! checkpathcharacters "${HEALPIXPATH}"; then
+    echo ""
+    echo "ERROR: Healpix needs to be installed in a path without spaces or special characters,"
+    echo "       such as \$ \` \" ' \\ ; & | < > ( ) * ? # ! ~"
     echo "       but you chose: \"${HEALPIXPATH}\""
     exit 1
   fi
@@ -599,8 +605,10 @@ if [[ ${ISPATH} == TRUE ]]; then
     echo "ERROR: Unable to resolve ROOT path. It either does not exist, or is not relative to this localtion, or is not an absolute path, or is not accessible." >&2
     exit 1
   fi  
-  if [[ "${ROOTPATH}" != "${ROOTPATH% *}" ]]; then
-    echo "ERROR: ROOT needs to be installed in a path without spaces,"
+  if ! checkpathcharacters "${ROOTPATH}"; then
+    echo ""
+    echo "ERROR: ROOT needs to be installed in a path without spaces or special characters,"
+    echo "       such as \$ \` \" ' \\ ; & | < > ( ) * ? # ! ~"
     echo "       but you chose: \"${ROOTPATH}\""
     exit 1
   fi
@@ -1408,7 +1416,7 @@ if [[ $(uname -a) != *-686-* ]]; then
     exit 1
   fi
 
-  "${SETUPPATH}/setup-python3.sh"
+  "${SETUPPATH}/setup-python3.sh" --extras="${EXTRAS}"
   if [ "$?" != "0" ]; then
     # The error message is part of the above script
     exit 1

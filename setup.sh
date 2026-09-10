@@ -165,6 +165,18 @@ resolveoption() {
   return 2
 }
 
+# Check whether a path can be used safely in the generated source script. The path ends
+# up in shell statements there, thus anything the shell would interpret has to be kept
+# out. Only letters, digits and . _ - / + @ : are allowed.
+# ${1}: the path to check
+# Returns 0 if the path is usable, 1 otherwise
+checkpathcharacters() {
+  if printf '%s' "${1}" | LC_ALL=C grep -q '[^A-Za-z0-9._/+@:-]'; then
+    return 1
+  fi
+  return 0
+}
+
 absolutefilename() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
@@ -241,12 +253,13 @@ if [[ "${COSIPATH}" == "" ]]; then
     echo " * Creating new COSItools directory at ${COSIPATH}"
   fi
 else 
-  COSIPATH=$(absolutefilename "${COSIPATH}}")
+  COSIPATH=$(absolutefilename "${COSIPATH}")
 fi
 
-if [[ "${COSIPATH}" != "${COSIPATH% *}" ]]; then
+if ! checkpathcharacters "${COSIPATH}"; then
   echo ""
-  echo "ERROR: COSItools should to be installed in a path without spaces,"
+  echo "ERROR: COSItools should to be installed in a path without spaces or special characters,"
+  echo "       such as \$ \` \" ' \\ ; & | < > ( ) * ? # ! ~"
   echo "       but you chose: \"${COSIPATH}\""
   exit 1
 fi

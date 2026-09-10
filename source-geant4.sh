@@ -48,7 +48,7 @@ if [[ ${__TMP_PATH} != /* ]]; then
   echo ""
   echo "ERROR: The Geant4 path must be an absolute path: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 # The directory must exist
@@ -56,7 +56,7 @@ if [[ ! -d ${__TMP_PATH} ]]; then
   echo ""
   echo "ERROR: GEANT4 directory not found: ${__TMP_PATH}"
   echo ""
-  return
+  return 1
 fi
 
 # Source the Geant4 environment depending on which version we have
