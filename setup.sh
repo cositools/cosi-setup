@@ -209,7 +209,20 @@ absolutefilename() {
     FULL="$(pwd)/${FULL}"
   fi
 
-  # Drop empty and "." components, and let ".." remove the component in front of it
+  # If the path exists, let the shell resolve it. "cd -P" follows symbolic links, thus a
+  # ".." behind a link lands where the link really points, and the result agrees with the
+  # "pwd -P" the scripts use to find their own location.
+  local RESOLVED=""
+  if [[ -d "${FULL}" ]]; then
+    RESOLVED=$(cd -P -- "${FULL}" >/dev/null 2>&1 && pwd -P) || RESOLVED=""
+    if [[ ${RESOLVED} != "" ]]; then echo "${RESOLVED}"; return 0; fi
+  elif [[ -d "$(dirname "${FULL}")" ]]; then
+    RESOLVED=$(cd -P -- "$(dirname "${FULL}")" >/dev/null 2>&1 && pwd -P) || RESOLVED=""
+    if [[ ${RESOLVED} != "" ]]; then echo "${RESOLVED}/$(basename "${FULL}")"; return 0; fi
+  fi
+
+  # Nothing to "cd" into - the setup creates this directory later on, thus resolve the
+  # "." and ".." components textually
   local PARTS=() PART RESULT=""
   IFS='/' read -ra PARTS <<< "${FULL}"
   for PART in "${PARTS[@]}"; do

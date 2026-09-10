@@ -44,6 +44,9 @@ confhelp() {
   echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for healpix."
   echo " "
+  echo "--max-threads=[integer >=1 - default: the number of cores in your system]"
+  echo "    The maximum number of threads to be used for compilation."
+  echo " "
   echo "--help or -h"
   echo "    Show this help."
   echo " "
@@ -58,7 +61,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball source-script help"
+SETUPOPTIONS="tarball source-script max-threads help"
 
 # Store command line
 CMD=( "$@" )
@@ -100,6 +103,14 @@ for C in "${CMD[@]}"; do
     source-script)
       ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
+      ;;
+    max-threads)
+      MAXTHREADS=$(optionvalue "${C}")
+      if [[ ! ${MAXTHREADS} =~ ^[0-9]+$ ]] || [ "${MAXTHREADS}" -le "0" ]; then
+        echo "ERROR: The maximum number of threads must be a number larger than 0 and not ${MAXTHREADS}!"
+        exit 1
+      fi
+      echo "Using at most ${MAXTHREADS} threads for compilation"
       ;;
     help)
       echo ""
@@ -408,7 +419,7 @@ echo "Building Libsharp..."
 cd src/common_libraries/libsharp
 if [ ! -f "./configure" ]; then autoreconf -i; fi
 ./configure --prefix=$COSITOOLS/healpix
-make -j$(nproc)
+make -j${MAXTHREADS}
 make install
 cd ../../..
 
@@ -427,7 +438,7 @@ export SHARP_LIBDIR=$COSITOOLS/healpix/lib
 
 ./configure --prefix=$COSITOOLS/healpix
 
-make -j$(nproc)
+make -j${MAXTHREADS}
 make install
 cd ../..
 
@@ -438,7 +449,7 @@ if [ ! -f "./configure" ]; then autoreconf -i; fi
 
 # Point C build to healpix
 ./configure --prefix=$COSITOOLS/healpix --with-healpix=$healpix_PATH
-make -j$(nproc)
+make -j${MAXTHREADS}
 make install
 cd ../../..
 

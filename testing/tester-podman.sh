@@ -316,7 +316,10 @@ elif [[ ${LOCALHEAD} != "" ]] && [[ ${REMOTEHEAD} != "${LOCALHEAD}" ]]; then
   echo " * WARNING: The local branch ${SETUPBRANCH} differs from origin - the test uses what is on GitHub"
 fi
 
-SETUPCMD="/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/${SETUPBRANCH}/setup.sh)\" _ --auto --setup-branch=${SETUPBRANCH} "
+# Download the bootstrap script to a file and run it from there. Piping it straight into
+# bash hides a failed download: curl writes nothing, bash runs an empty script and reports
+# success, and the test would pass without ever having installed anything.
+SETUPCMD="curl -fsSL https://raw.githubusercontent.com/cositools/cosi-setup/${SETUPBRANCH}/setup.sh -o setup-bootstrap.sh && test -s setup-bootstrap.sh && /bin/bash setup-bootstrap.sh --auto --setup-branch=${SETUPBRANCH} "
 
 # If the user gave a list of OSes, it replaces the built-in IMAGES array
 if [[ "${OSLIST}" != "" ]]; then
