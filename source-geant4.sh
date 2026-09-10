@@ -32,7 +32,7 @@ __TMP_HERE=$(pwd)
 
 for C in "${CMD[@]}"; do
   if [[ ${C} == *-p*=* ]]; then
-    __TMP_PATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+    __TMP_PATH="${C#*=}"
   elif [[ ${C} == *-h ]] || [[ ${C} == *-hel* ]]; then
     echo ""
     confhelp

@@ -109,11 +109,11 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     tarball)
-      TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      TARBALL=$(optionvalue "${C}")
       echo "Using this tarball: ${TARBALL}"
       ;;
     sourcescript)
-      ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
       ;;
     help)
@@ -132,7 +132,12 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given cfitsio tarball is ${TARBALL}"
 
   # Check if it has the correct version:
-  VER=`echo "${TARBALL}" | awk -Fcfitsio- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
+  # The official archive is named e.g. cfitsio-4.7.0.tar.gz
+  VER=$(basename "${TARBALL}" | sed -n 's/^cfitsio[-_]\([0-9][0-9.]*[0-9]\).*/\1/p')
+  if [[ ${VER} == "" ]]; then
+    echo "ERROR: Unable to determine the cfitsio version from the tarball name ${TARBALL}"
+    exit 1
+  fi
   echo "Version of cfitsio is: ${VER}"
 else
   # Download it

@@ -160,7 +160,7 @@ for C in "${CMD[@]}"; do
     exit 1
   fi
 
-  VALUE=`echo ${C} | awk -F"=" '{ print $2 }'`
+  VALUE=$(optionvalue "${C}")
 
   case ${OPTION} in
     branch)                  BRANCH="${VALUE}" ;;
@@ -355,7 +355,7 @@ else
 fi
 
 
-if [ ! -z "${MAXTHREADS##[0-9]*}" ] 2>/dev/null; then
+if [[ ! ${MAXTHREADS} =~ ^[0-9]+$ ]]; then
   echo "ERROR: The maximum number of threads must be a number and not ${MAXTHREADS}!"
   exit 1
 fi
@@ -1407,7 +1407,8 @@ echo "Setting up the python3 environment"
 echo " "
 
 
-if [[ $(uname -a) != *-686-* ]]; then
+# The python dependencies are not available for 32 bit systems
+if [[ $(getconf LONG_BIT 2>/dev/null) != 32 ]]; then
   cd "${SETUPPATH}"
 
   if [[ ! -f ${SETUPPATH}/setup-python3.sh ]]; then

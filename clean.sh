@@ -148,6 +148,7 @@ if [[ ${CLEANEXTERNAL} == "TRUE" ]]; then
     rm -rf geant4*
     rm -rf cfitsio*
     rm -rf heasoft*
+    rm -rf healpix*
   fi
 fi
 

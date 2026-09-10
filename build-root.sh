@@ -228,28 +228,28 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     tarball)
-      TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      TARBALL=$(optionvalue "${C}")
       ;;
     sourcescript)
-      ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ENVFILE=$(optionvalue "${C}")
       ;;
     maxthreads)
-      MAXTHREADS=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      MAXTHREADS=$(optionvalue "${C}")
       ;;
     debug)
-      DEBUG=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      DEBUG=$(optionvalue "${C}")
       ;;
     patch)
-      PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      PATCH=$(optionvalue "${C}")
       ;;
     cleanup)
-      CLEANUP=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      CLEANUP=$(optionvalue "${C}")
       ;;
     rootversion)
-      WANTEDVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      WANTEDVERSION=$(optionvalue "${C}")
       ;;
     keepenvironmentasis)
-      KEEPENVASIS=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      KEEPENVASIS=$(optionvalue "${C}")
       ;;
     help)
       echo ""
@@ -289,7 +289,7 @@ if [ "${ENVFILE}" != "" ]; then
 fi
 
 
-if [ ! -z "${MAXTHREADS##[0-9]*}" ] 2>/dev/null; then
+if [[ ! ${MAXTHREADS} =~ ^[0-9]+$ ]]; then
   echo "ERROR: The maximum number of threads must be number and not ${MAXTHREADS}!"
   exit 1
 fi
@@ -315,7 +315,7 @@ elif ( [[ ${DEBUG} == on ]] || [[ ${DEBUG} == y* ]] || [[ ${DEBUG} == nor* ]] );
 else
   echo "ERROR: Unknown debugging code selection: ${DEBUG}"
   confhelp
-  exit 0
+  exit 1
 fi
 
 

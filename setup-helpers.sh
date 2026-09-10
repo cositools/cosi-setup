@@ -73,3 +73,14 @@ checkpathcharacters() {
   fi
   return 0
 }
+
+# Return the value of a command line option, i.e. everything behind the first "=". The
+# whole remainder is returned, thus a value may contain "=" itself, e.g. a URL with a
+# query string. An option without a "=" has an empty value.
+# ${1}: the command line argument, e.g. "--root=/opt/a=b"
+optionvalue() {
+  case "${1}" in
+    *=*) printf '%s' "${1#*=}" ;;
+    *)   printf '%s' "" ;;
+  esac
+}

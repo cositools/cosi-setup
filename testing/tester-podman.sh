@@ -277,7 +277,7 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    os)   OSLIST=`echo ${C} | awk -F"=" '{ print $2 }'` ;;
+    os)   OSLIST=$(optionvalue "${C}") ;;
     help) confhelp; exit 0 ;;
   esac
 done

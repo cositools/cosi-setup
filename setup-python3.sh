@@ -65,7 +65,7 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     extras)
-      EXTRAS=`echo ${C} | awk -F"=" '{ print $2 }'`
+      EXTRAS=$(optionvalue "${C}")
       EXTRAS=${EXTRAS//,/ }
       ;;
     help)

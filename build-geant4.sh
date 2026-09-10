@@ -111,7 +111,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball sourcescript maxthreads debug patch cleanup geant keepenvironmentasis help"
+SETUPOPTIONS="tarball sourcescript maxthreads debug patch cleanup geant4version keepenvironmentasis help"
 
 # Store command line
 CMD=( "$@" )
@@ -156,29 +156,29 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     tarball)
-      TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      TARBALL=$(optionvalue "${C}")
       ;;
     sourcescript)
-      ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
       ;;
     maxthreads)
-      MAXTHREADS=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      MAXTHREADS=$(optionvalue "${C}")
       ;;
     debug)
-      DEBUG=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      DEBUG=$(optionvalue "${C}")
       ;;
     patch)
-      PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      PATCH=$(optionvalue "${C}")
       ;;
     cleanup)
-      CLEANUP=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      CLEANUP=$(optionvalue "${C}")
       ;;
-    geant)
-      WANTEDVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'`
+    geant4version)
+      WANTEDVERSION=$(optionvalue "${C}")
       ;;
     keepenvironmentasis)
-      KEEPENVASIS=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      KEEPENVASIS=$(optionvalue "${C}")
       ;;
     help)
       echo ""
@@ -218,10 +218,10 @@ if [ "${ENVFILE}" != "" ]; then
 fi
 
 
-if [ ! -z "${MAXTHREADS##[0-9]*}" ] 2>/dev/null; then
+if [[ ! ${MAXTHREADS} =~ ^[0-9]+$ ]]; then
   echo "ERROR: The maximum number of threads must be number and not ${MAXTHREADS}!"
   exit 1
-fi  
+fi
 if [ "${MAXTHREADS}" -le "0" ]; then
   echo "ERROR: The maximum number of threads must be at least 1 and not ${MAXTHREADS}!"
   exit 1
@@ -244,7 +244,7 @@ elif ( [[ ${DEBUG} == on ]] || [[ ${DEBUG} == y* ]] || [[ ${DEBUG} == nor* ]] );
 else
   echo "ERROR: Unknown debugging code selection: ${DEBUG}"
   confhelp
-  exit 0
+  exit 1
 fi
 
 
@@ -483,10 +483,10 @@ mkdir "${GEANT4DIR}"
 cd "${GEANT4DIR}"
 if ( [[ ${TARBALL} == *.tgz ]] || [[ ${TARBALL} == *.tar.gz ]] ); then
   tar xfz "../${TARBALL}" > /dev/null
-elif [[ $1 == *.tar ]] ; then
+elif [[ ${TARBALL} == *.tar ]] ; then
   tar xf "../${TARBALL}" > /dev/null
 else
-  echo "ERROR: File has unknown suffix: $1 (known: tgz, tar.gz, tar)"
+  echo "ERROR: File has unknown suffix: ${TARBALL} (known: tgz, tar.gz, tar)"
   exit 1
 fi
 if [ "$?" != "0" ]; then

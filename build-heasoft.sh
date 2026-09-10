@@ -148,15 +148,15 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     tarball)
-      TARBALL=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      TARBALL=$(optionvalue "${C}")
       echo "Using this tarball: ${TARBALL}"
       ;;
     sourcescript)
-      ENVFILE=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
       ;;
     patch)
-      PATCH=`echo "${C}" | awk -F"=" '{ print $2 }'`
+      PATCH=$(optionvalue "${C}")
       ;;
     help)
       echo ""
@@ -404,8 +404,8 @@ if [[ ${LIBDIR} != "" ]]; then
     echo "ERROR: Unable to enter the HEASoft library directory ${LIBDIR}"
     exit 1
   fi
-  CFITSIO=`find . -name "libcfitsio.[so|a|dylib|dll]"`
-  LONGCFITSIO=`find . -name "libcfitsio_*[so|a|dylib|dll]"`
+  CFITSIO=`find . \( -name "libcfitsio.so" -o -name "libcfitsio.a" -o -name "libcfitsio.dylib" -o -name "libcfitsio.dll" \)`
+  LONGCFITSIO=`find . \( -name "libcfitsio_*.so" -o -name "libcfitsio_*.a" -o -name "libcfitsio_*.dylib" -o -name "libcfitsio_*.dll" \)`
   if ( [ "${CFITSIO}" == "" ] && [ "${LONGCFITSIO}" != "" ] ); then
     NEWCFITSIO=`echo ${LONGCFITSIO} | awk -F'[/]|[.]|[_]' '{ print $3"."$6 }'`
     ln -s ${LONGCFITSIO} ${NEWCFITSIO}

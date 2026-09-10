@@ -79,11 +79,11 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    check)        GEANT4PATH=`echo ${C} | awk -F"=" '{ print $2 }'`; CHECK="true";  GET="false"; GOOD="false" ;;
+    check)        GEANT4PATH=$(optionvalue "${C}"); CHECK="true";  GET="false"; GOOD="false" ;;
     get-max)      GEANT4PATH="";                                        CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
     get-min)      GEANT4PATH="";                                        CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
     good-version) GEANT4PATH="";                                        CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                  TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'` ;;
+                  TESTVERSION=$(optionvalue "${C}") ;;
     help)         echo ""; confhelp; exit 0 ;;
   esac
 done
@@ -117,7 +117,7 @@ fi
 
 if [ "${GOOD}" == "true" ]; then
   # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)*$ ]]; then
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
     echo ""
     echo "ERROR: Geant4 version (${TESTVERSION}) is not acceptable"
     echo "       It is not a valid version string."

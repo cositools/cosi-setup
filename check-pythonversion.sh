@@ -88,12 +88,12 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     get-interpreter) PYTHONEXE="";  CHECK="false"; GET="false"; GOOD="false"; INTERPRETER="true" ;;
-    check)           PYTHONEXE=`echo "${C}" | awk -F"=" '{ print $2 }'`
+    check)           PYTHONEXE=$(optionvalue "${C}")
                      CHECK="true";  GET="false"; GOOD="false" ;;
     get-max)         PYTHONEXE="";  CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
     get-min)         PYTHONEXE="";  CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
     good-version)    PYTHONEXE="";  CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                     TESTVERSION=`echo "${C}" | awk -F"=" '{ print $2 }'` ;;
+                     TESTVERSION=$(optionvalue "${C}") ;;
     help)            echo ""; confhelp; exit 0 ;;
   esac
 done

@@ -79,11 +79,11 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    check)        HEALPIXPATH=`echo ${C} | awk -F"=" '{ print $2 }'`; CHECK="true";  GET="false"; GOOD="false" ;;
+    check)        HEALPIXPATH=$(optionvalue "${C}"); CHECK="true";  GET="false"; GOOD="false" ;;
     get-max)      HEALPIXPATH="";                                        CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
     get-min)      HEALPIXPATH="";                                        CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
     good-version) HEALPIXPATH="";                                        CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                  TESTVERSION=`echo ${C} | awk -F"=" '{ print $2 }'` ;;
+                  TESTVERSION=$(optionvalue "${C}") ;;
     help)         echo ""; confhelp; exit 0 ;;
   esac
 done
@@ -117,7 +117,7 @@ fi
 
 if [ "${GOOD}" == "true" ]; then
   # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)*$ ]]; then
+  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
     echo ""
     echo "ERROR: Healpix version (${TESTVERSION}) is not acceptable"
     echo "       It is not a valid version string."

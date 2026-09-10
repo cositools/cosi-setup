@@ -91,7 +91,7 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     output)
-      OUTPUT=`echo ${C} | awk -F"=" '{ print $2 }'`
+      OUTPUT=$(optionvalue "${C}")
       ;;
     help)
       echo ""

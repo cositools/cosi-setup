@@ -113,22 +113,22 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     cositoolspath)
-      COSIPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+      COSIPATH=$(optionvalue "${C}")
       ;;
     branch)
-      GITBRANCH=`echo ${C} | awk -F"=" '{ print $2 }'`
+      GITBRANCH=$(optionvalue "${C}")
       ;;
     repositorypath)
-      GITPATH=`echo ${C} | awk -F"=" '{ print $2 }'`
+      GITPATH=$(optionvalue "${C}")
       ;;
     pull-behavior-git)
-      GITPULLBEHAVIOR=`echo ${C} | awk -F"=" '{ print $2 }'`
+      GITPULLBEHAVIOR=$(optionvalue "${C}")
       ;;
     name)
-      NAME=`echo ${C} | awk -F"=" '{ print $2 }'`
+      NAME=$(optionvalue "${C}")
       ;;
     stashname)
-      STASHNAME=`echo ${C} | awk -F"=" '{ print $2 }'`
+      STASHNAME=$(optionvalue "${C}")
       ;;
     help)
       echo ""
@@ -204,6 +204,13 @@ fi
 
 cd "${COSIPATH}"
 
+# "no" means do not touch an existing repository at all. Leave before the branch checks
+# below, since those contact the remote and would fail without network access.
+if [[ ${GITPULLBEHAVIOR} == "no" ]] && [[ -d ${NAME} ]]; then
+  echo "Keeping existing repository ${NAME} as is"
+  exit 0
+fi
+
 # Check if the requested branch exits:
 if [ "${GITBRANCH}" == "" ]; then
   GITBRANCH="main"
@@ -258,21 +265,17 @@ else
   # Stash potential changes
   if [[ ${GITPULLBEHAVIOR} == "stash" ]]; then
     echo "Stashing any potential modifications if there are any"
-    git stash push -m ${STASHNAME}
+    git stash push --include-untracked -m ${STASHNAME}
     if [ "$?" != "0" ]; then
       echo " "
       echo "Warning: Unable to stash with \"push -m\" -- your git version might be too old. Trying just git stash"
-      git stash
+      git stash --include-untracked
       if [ "$?" != "0" ]; then
         echo " "
         echo "ERROR: Unable to stash any changes in your code"
         exit 100
       fi
     fi
-  elif [[ ${GITPULLBEHAVIOR} == "no" ]]; then
-    echo "Keeping existing repository as is"
-    cd "${COSIPATH}"
-    exit 0
   fi
 fi
 
