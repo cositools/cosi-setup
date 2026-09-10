@@ -248,8 +248,29 @@ for REPO in ${EXTRAS}; do
     exit 1
   fi
   if [[ ! -f "${REPODIR}/pyproject.toml" ]] && [[ ! -f "${REPODIR}/setup.py" ]]; then
+    # Not installable as a package, but it may still list what it needs to run
+    REQFILE=""
+    for F in "${REPODIR}/Requirements.txt" "${REPODIR}/requirements.txt"; do
+      if [[ -f "${F}" ]]; then
+        REQFILE="${F}"
+        break
+      fi
+    done
+    if [[ ${REQFILE} == "" ]]; then
+      echo ""
+      echo "The extra repository ${REPO} is not a python package - nothing to install"
+      continue
+    fi
+
     echo ""
-    echo "The extra repository ${REPO} is not a python package - nothing to install"
+    echo ""
+    echo "Installing the requirements of ${REPO}"
+    pip3 install -r "${REQFILE}"
+    if [[ "$?" != "0" ]]; then
+      echo ""
+      echo "ERROR: Unable to install the requirements of ${REPO}!"
+      exit 1;
+    fi
     continue
   fi
 

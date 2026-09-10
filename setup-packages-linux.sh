@@ -315,11 +315,13 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
         echo " "
         echo "Performing an automatic installation of the packages. I will do the following:"
-        echo "sudo zypper refresh"
-        echo "sudo zypper install -y --force-resolution ${TOBEINSTALLED}"
+        echo "sudo zypper --non-interactive --gpg-auto-import-keys refresh"
+        echo "sudo zypper --non-interactive install -y --force-resolution ${TOBEINSTALLED}"
         echo " "
+        # --non-interactive and --gpg-auto-import-keys since a repository key or license
+        # prompt has nobody to answer it and would hang the container
         # --force-resolution since zypper cannot ask us which of its solutions to pick when it hits a conflict
-        sudo zypper refresh && sudo zypper install -y --force-resolution ${TOBEINSTALLED}
+        sudo zypper --non-interactive --gpg-auto-import-keys refresh && sudo zypper --non-interactive install -y --force-resolution ${TOBEINSTALLED}
         if [[ "$?" != "0" ]]; then
           echo " "
           echo "ERROR: Something went wrong with the automatic package installation."

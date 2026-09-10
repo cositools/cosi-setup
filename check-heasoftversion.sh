@@ -147,17 +147,9 @@ if [ "${GOOD}" == "true" ]; then
 fi  
 
 if [ "${CHECK}" == "true" ]; then
-  # HEASoft installs its binaries into a platform specific sub-directory, e.g.
-  # x86_64-pc-linux-gnu-libc2.44, and its tools only run after headas-init.sh has been
-  # sourced. Thus accept the platform directory as well as the one above it, and require
-  # both files so that the build directory is not mistaken for the installation.
-  HEADASDIR=""
-  for DIR in "${HEASoftPATH}" "${HEASoftPATH}"/*; do
-    if [[ -f "${DIR}/headas-init.sh" ]] && [[ -x "${DIR}/bin/ftversion" ]]; then
-      HEADASDIR="${DIR}"
-      break
-    fi
-  done
+  # The given path may be the platform specific directory or the one above it, and the
+  # HEASoft tools only run after headas-init.sh has been sourced
+  HEADASDIR=$(heasoftdirectory "${HEASoftPATH}") || HEADASDIR=""
 
   if [[ ${HEADASDIR} == "" ]]; then
     echo " "

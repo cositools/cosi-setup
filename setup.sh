@@ -69,6 +69,11 @@ confhelp() {
   echo "--ignore-missing-packages"
   echo "    Do not check for missing packages."
   echo " "
+  # This option is not for users:
+  # echo "--auto"
+  # echo "    Install the missing packages instead of only listing them."
+  # echo "    This is only intended for automatic build tests and is ignored outside a container."
+  # echo " "
   echo "--keep-environment-as-is=[off/no, on/yes - default: off]"
   echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty"
   echo "    to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not."
@@ -171,6 +176,11 @@ resolveoption() {
 # ${1}: the path to check
 # Returns 0 if the path is usable, 1 otherwise
 checkpathcharacters() {
+  # grep works line by line, thus a newline would split the path into pieces which each
+  # look harmless on their own - reject it before grep ever sees it
+  case "${1}" in
+    *$'\n'*) return 1 ;;
+  esac
   if printf '%s' "${1}" | LC_ALL=C grep -q '[^A-Za-z0-9._/+@:-]'; then
     return 1
   fi
@@ -188,8 +198,30 @@ optionvalue() {
   esac
 }
 
+# Turn a path into an absolute one. The path does not have to exist, since the setup uses
+# this for directories it is about to create - a "cd" into a not yet existing directory
+# fails and used to leave only the last component behind. Thus "." and ".." are resolved
+# textually here.
+# ${1}: the path, absolute or relative to the current directory
 absolutefilename() {
-  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+  local FULL="${1}"
+  if [[ ${FULL} != /* ]]; then
+    FULL="$(pwd)/${FULL}"
+  fi
+
+  # Drop empty and "." components, and let ".." remove the component in front of it
+  local PARTS=() PART RESULT=""
+  IFS='/' read -ra PARTS <<< "${FULL}"
+  for PART in "${PARTS[@]}"; do
+    case "${PART}" in
+      ""|".") ;;
+      "..")   RESULT="${RESULT%/*}" ;;
+      *)      RESULT="${RESULT}/${PART}" ;;
+    esac
+  done
+
+  if [[ ${RESULT} == "" ]]; then RESULT="/"; fi
+  echo "${RESULT}"
 }
 
 

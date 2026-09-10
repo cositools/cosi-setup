@@ -947,11 +947,21 @@ else
     exit 1
   fi
   
+  # The user may point at the directory above the platform specific one, e.g. at
+  # heasoft_v6.36 instead of heasoft_v6.36/x86_64-pc-linux-gnu-libc2.44. Everything from
+  # here on - source-heasoft.sh as well as the Healpix build - needs the latter.
+  HEASOFTDIR=$(heasoftdirectory "$(absolutefilename "${HEASOFTPATH}")") || HEASOFTDIR=""
+  if [[ ${HEASOFTDIR} == "" ]]; then
+    echo " "
+    echo "ERROR: Unable to find the HEASoft installation in ${HEASOFTPATH}"
+    exit 1
+  fi
+
   # Add HEASoft to the environment file
-  echo "HEASOFTDIR=$(cd $(dirname ${HEASOFTPATH}); pwd)/$(basename ${HEASOFTPATH})" >> ${ENVFILE}
-  
+  echo "HEASOFTDIR=${HEASOFTDIR}" >> ${ENVFILE}
+
   # Source HEASoft to be available for later installs
-  . "${SETUPPATH}/source-heasoft.sh" -p=$(cd $(dirname "${HEASOFTPATH}"); pwd)/$(basename "${HEASOFTPATH}")
+  . "${SETUPPATH}/source-heasoft.sh" "-p=${HEASOFTDIR}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source HEAsoft"

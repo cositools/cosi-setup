@@ -125,14 +125,42 @@ if [ "${TARBALL}" != "" ]; then
     exit 1
   fi
   echo "Version of healpix is: ${VER}"
+
+  # A tarball handed to us still has to be within the range in allowed-versions.txt
+  if ! "${SETUPPATH}/check-healpixversion.sh" --good-version=${VER} > /dev/null; then
+    echo "ERROR: The healpix tarball does not contain an acceptable healpix version: ${VER}"
+    "${SETUPPATH}/check-healpixversion.sh" --good-version=${VER}
+    exit 1
+  fi
 else
   # Download it
 
   # The desired version is simply the highest version
   echo "Looking for latest healpix version on the healpix website"
 
-  # Get the huighest version such as 3.83 - the tar ball looks like: Healpix_3.83_2024Nov13.tar.gz
-  VER=$(curl -s https://sourceforge.net/projects/healpix/files/ | grep -oE 'Healpix_[0-9]+\.[0-9]+' | head -1 | cut -d'_' -f2)
+  # Get the versions on offer, such as 3.83 - the tar ball looks like: Healpix_3.83_2024Nov13.tar.gz
+  ALLVER=$(curl -s https://sourceforge.net/projects/healpix/files/ | grep -oE 'Healpix_[0-9]+\.[0-9]+' | cut -d'_' -f2 | sort -u -V -r)
+  if [[ ${ALLVER} == "" ]]; then
+    echo "ERROR: Unable to find any healpix version at the healpix website"
+    exit 1
+  fi
+
+  # The newest one is not automatically the one we want - it may be outside the range in
+  # allowed-versions.txt, thus walk down from the newest until one is acceptable
+  VER=""
+  for V in ${ALLVER}; do
+    if "${SETUPPATH}/check-healpixversion.sh" --good-version=${V} > /dev/null; then
+      VER=${V}
+      break
+    fi
+    echo "Skipping healpix version ${V} - it is outside the supported version range"
+  done
+  if [[ ${VER} == "" ]]; then
+    echo "ERROR: None of the healpix versions at the healpix website is within the supported version range"
+    "${SETUPPATH}/check-healpixversion.sh" --good-version=$(echo ${ALLVER} | awk '{ print $1 }')
+    exit 1
+  fi
+  echo "Using healpix version ${VER}"
   
   # Get specific tar ball, e.g., Healpix_3.83_2024Nov13.tar.gz
   TARBALL=$(curl -s "https://sourceforge.net/projects/healpix/files/Healpix_${VER}/" | grep -oE 'Healpix_[0-9.]+_20[0-9A-Za-z]+\.tar\.gz' | head -1)

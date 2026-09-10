@@ -407,8 +407,19 @@ if [[ ${LIBDIR} != "" ]]; then
   CFITSIO=`find . \( -name "libcfitsio.so" -o -name "libcfitsio.a" -o -name "libcfitsio.dylib" -o -name "libcfitsio.dll" \)`
   LONGCFITSIO=`find . \( -name "libcfitsio_*.so" -o -name "libcfitsio_*.a" -o -name "libcfitsio_*.dylib" -o -name "libcfitsio_*.dll" \)`
   if ( [ "${CFITSIO}" == "" ] && [ "${LONGCFITSIO}" != "" ] ); then
-    NEWCFITSIO=`echo ${LONGCFITSIO} | awk -F'[/]|[.]|[_]' '{ print $3"."$6 }'`
-    ln -s ${LONGCFITSIO} ${NEWCFITSIO}
+    # find can return several matches, e.g. a shared and a static library - link the first
+    LONGCFITSIO=$(echo "${LONGCFITSIO}" | head -1)
+    LONGCFITSIO=$(basename "${LONGCFITSIO}")
+
+    # The name is e.g. libcfitsio_4.6.3.dylib and HEASoft looks for libcfitsio.dylib, thus
+    # drop the version but keep the extension. The version has a varying number of parts,
+    # which is why this cannot simply count the fields between the dots.
+    NEWCFITSIO=$(echo "${LONGCFITSIO}" | sed -n 's/^\(libcfitsio\)_[0-9][0-9.]*\.\([A-Za-z]*\)$/\1.\2/p')
+    if [[ ${NEWCFITSIO} == "" ]]; then
+      echo "ERROR: Unable to derive the cfitsio link name from ${LONGCFITSIO}"
+      exit 1
+    fi
+    ln -s "${LONGCFITSIO}" "${NEWCFITSIO}"
   fi
   cd ..
 fi

@@ -58,8 +58,30 @@ resolveoption() {
 }
 
 
+# Turn a path into an absolute one. The path does not have to exist, since the setup uses
+# this for directories it is about to create - a "cd" into a not yet existing directory
+# fails and used to leave only the last component behind. Thus "." and ".." are resolved
+# textually here.
+# ${1}: the path, absolute or relative to the current directory
 absolutefilename() {
-  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+  local FULL="${1}"
+  if [[ ${FULL} != /* ]]; then
+    FULL="$(pwd)/${FULL}"
+  fi
+
+  # Drop empty and "." components, and let ".." remove the component in front of it
+  local PARTS=() PART RESULT=""
+  IFS='/' read -ra PARTS <<< "${FULL}"
+  for PART in "${PARTS[@]}"; do
+    case "${PART}" in
+      ""|".") ;;
+      "..")   RESULT="${RESULT%/*}" ;;
+      *)      RESULT="${RESULT}/${PART}" ;;
+    esac
+  done
+
+  if [[ ${RESULT} == "" ]]; then RESULT="/"; fi
+  echo "${RESULT}"
 }
 
 # Check whether a path can be used safely in the generated source script. The path ends
@@ -68,6 +90,11 @@ absolutefilename() {
 # ${1}: the path to check
 # Returns 0 if the path is usable, 1 otherwise
 checkpathcharacters() {
+  # grep works line by line, thus a newline would split the path into pieces which each
+  # look harmless on their own - reject it before grep ever sees it
+  case "${1}" in
+    *$'\n'*) return 1 ;;
+  esac
   if printf '%s' "${1}" | LC_ALL=C grep -q '[^A-Za-z0-9._/+@:-]'; then
     return 1
   fi
@@ -101,5 +128,26 @@ booleanvalue() {
     ""|t*|on|y*) echo "true";  return 0 ;;
     f*|of*|n*)   echo "false"; return 0 ;;
   esac
+  return 1
+}
+
+# Find the directory which actually holds a HEASoft installation. HEASoft installs its
+# binaries into a platform specific sub-directory, e.g. x86_64-pc-linux-gnu-libc2.44, thus
+# the path a user gives may be that directory or the one above it. Both headas-init.sh and
+# bin/ftversion have to be present, so that the build directory - which has the init script
+# but no binaries - is not mistaken for the installation.
+#
+# ${1}: a path to a HEASoft installation
+#
+# Returns 0 and echoes the directory holding headas-init.sh and bin/ftversion
+#         1 and echoes nothing if there is no HEASoft installation at or below the path
+heasoftdirectory() {
+  local DIR
+  for DIR in "${1}" "${1}"/*; do
+    if [[ -f "${DIR}/headas-init.sh" ]] && [[ -x "${DIR}/bin/ftversion" ]]; then
+      echo "${DIR}"
+      return 0
+    fi
+  done
   return 1
 }

@@ -52,6 +52,10 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 --cosi-tools-path=[path to COSItools - default: "COSItools"]
     This is the path to where the COSItools will be installed. If the path exists, we will try to update them.
  
+--setup-branch=[name of a git branch - default: main]
+    Choose a specific branch to be used for the cosi-setup setup scripts.
+    If the option is not given the main branch will be used
+ 
 --branch=[name of a git branch - default: main]
     Choose a specific branch of the COSItools git repositories.
     If the option is not given the latest release will be used.
