@@ -69,9 +69,7 @@ absolutefilename() {
     FULL="$(pwd)/${FULL}"
   fi
 
-  # If the path exists, let the shell resolve it. "cd -P" follows symbolic links, thus a
-  # ".." behind a link lands where the link really points, and the result agrees with the
-  # "pwd -P" the scripts use to find their own location.
+  # An existing path is resolved by the shell, which follows symbolic links
   local RESOLVED=""
   if [[ -d "${FULL}" ]]; then
     RESOLVED=$(cd -P -- "${FULL}" >/dev/null 2>&1 && pwd -P) || RESOLVED=""
@@ -81,8 +79,7 @@ absolutefilename() {
     if [[ ${RESOLVED} != "" ]]; then echo "${RESOLVED}/$(basename "${FULL}")"; return 0; fi
   fi
 
-  # Nothing to "cd" into - the setup creates this directory later on, thus resolve the
-  # "." and ".." components textually
+  # A path which does not exist yet is resolved textually
   local PARTS=() PART RESULT=""
   IFS='/' read -ra PARTS <<< "${FULL}"
   for PART in "${PARTS[@]}"; do
@@ -103,8 +100,7 @@ absolutefilename() {
 # ${1}: the path to check
 # Returns 0 if the path is usable, 1 otherwise
 checkpathcharacters() {
-  # grep works line by line, thus a newline would split the path into pieces which each
-  # look harmless on their own - reject it before grep ever sees it
+  # A newline has to be caught before grep, which works line by line
   case "${1}" in
     *$'\n'*) return 1 ;;
   esac
@@ -144,11 +140,10 @@ booleanvalue() {
   return 1
 }
 
-# Find the directory which actually holds a HEASoft installation. HEASoft installs its
-# binaries into a platform specific sub-directory, e.g. x86_64-pc-linux-gnu-libc2.44, thus
-# the path a user gives may be that directory or the one above it. Both headas-init.sh and
-# bin/ftversion have to be present, so that the build directory - which has the init script
-# but no binaries - is not mistaken for the installation.
+# Find the directory which holds a HEASoft installation. HEASoft puts its binaries into a
+# platform specific sub-directory, e.g. x86_64-pc-linux-gnu-libc2.44, thus the given path
+# may be that directory or the one above it. Both headas-init.sh and bin/ftversion have to
+# be there, so that the build directory is not mistaken for the installation.
 #
 # ${1}: a path to a HEASoft installation
 #
@@ -194,10 +189,7 @@ readversionrange() {
 }
 
 # Turn a version into a single number, so that two of them can be compared. Only the major
-# and the minor part decide, thus 6.38, 6.38.02 and 6.38/02 all become 638. Geant4 and ROOT
-# write their patch level behind a "." or a "/", and both forms have to give the same
-# number - doing this in one place is what keeps the two apart from crashing on the other.
-# The "10#" stops a leading zero from being read as an octal number, e.g. in 11.02.
+# and the minor part count, thus 6.38, 6.38.02 and 6.38/02 all become 638.
 #
 # ${1}: the version, e.g. "6.40", "11.02.p02", "6.38/02", "3.14.7"
 #
@@ -217,9 +209,7 @@ encodeversion() {
 
 # Bring a version into one spelling, so that two of them can be compared as text. Leading
 # zeros are dropped from every numeric part and "/" becomes ".", thus 6.40.02, 6.40.2 and
-# 6.40/02 all end up as 6.40.2. This matters for the black list: root-config reports a
-# padded patch level while the tarball header gives an unpadded one, so the same release
-# reaches the check spelled two different ways.
+# 6.40/02 all end up as 6.40.2.
 #
 # ${1}: the version, e.g. "6.40.02", "11.02.p02"
 #
@@ -239,9 +229,7 @@ normalizeversion() {
   echo "${OUT#.}"
 }
 
-# Decide whether one version may be used, and say what is wrong with it if not. Both the
-# "--check" and the "--good-version" mode of the check scripts end here, so that the two
-# can never drift apart and report different things about the same version.
+# Decide whether one version may be used, and say what is wrong with it if not.
 # readversionrange has to have been called first.
 #
 # ${1}: the version, e.g. "6.40"
@@ -265,8 +253,7 @@ checkversionrange() {
     return 1
   fi
 
-  # A version is black listed either in full, e.g. 6.38.02, or with major and minor only.
-  # Both sides are normalized first, so that 6.40.02 and 6.40.2 are the same entry.
+  # A version is black listed either in full, e.g. 6.38.02, or with major and minor only
   local NORMALIZED BLACKLIST="" ENTRY
   NORMALIZED=$(normalizeversion "${1}")
   for ENTRY in ${VERSIONBLACKLIST}; do
@@ -283,15 +270,8 @@ checkversionrange() {
   return 0
 }
 
-# Decide whether a tarball which is already on disk can be reused, or has to be fetched
-# again. The archive always has to be a complete gzip file, and when the web server reports
-# a size it has to match. The size is compared as a number: comparing it as text, which is
-# what this used to do, accepts a truncated file whenever its size happens to be a
-# substring of the real one, e.g. 1234 inside 51234.
-#
-# Not every server reports a size - GitHub sends its tarballs without one - and the network
-# may be down altogether. In both cases the gzip check is all there is, and a complete
-# archive is kept rather than fetched again, so that a rebuild also works offline.
+# Check whether a tar ball which is already there can be reused. It has to be a complete
+# gzip archive, and where the web server reports a size it has to match.
 #
 # ${1}: the local file name
 # ${2}: the URL the file comes from
@@ -310,13 +290,10 @@ tarballisgood() {
     return 1
   fi
 
-  # The headers are fetched on their own and not inside a pipe, since the exit status of a
-  # pipe is the one of its last command and a failing curl would go unnoticed there
   local HEADERS="" REMOTESIZE="" LOCALSIZE
-  HEADERS=$(curl -sSL --head "${2}" 2>/dev/null) || HEADERS=""
+  HEADERS=$(curl -sSL --fail --head "${2}" 2>/dev/null) || HEADERS=""
 
-  # A redirect answers with several headers. The ones belonging to the redirect itself
-  # carry a length of 0, thus drop those and take the last real one.
+  # A redirect answers with several headers, the ones of the redirect itself have a length of 0
   if [[ ${HEADERS} != "" ]]; then
     REMOTESIZE=$(echo "${HEADERS}" | grep -i "^content-length:" | awk '{ print $2 }' | tr -d '\r' | grep -v '^0$' | tail -1)
   fi
@@ -336,13 +313,8 @@ tarballisgood() {
   return 0
 }
 
-# How many cores this machine has, for "make -j". Never less than one: when the number
-# cannot be worked out, one thread is slow but always correct.
-#
-# This used to be written out in every builder as a pipeline whose exit status was tested
-# afterwards. That test can never fail, because the status of a pipe is the one of its last
-# command and "wc -l" always succeeds - an unreadable /proc/cpuinfo gave a count of 0 and
-# the build then died at "make -j0". Hence the result is checked here instead.
+# The number of cores of this machine, for "make -j". At least one, also when the number
+# cannot be determined.
 #
 # Echoes the number of cores, and always returns 0
 numberofcores() {
@@ -361,4 +333,59 @@ numberofcores() {
     CORES=1
   fi
   echo "${CORES}"
+}
+
+
+#
+# Description:
+# Safely download a tar ball
+# A interrupted download can be continued.
+#
+# Mandatory options (not checked):
+# ${1}: the URL
+# ${2}: the file to save it as
+#
+# Return codes:
+# 0 if the file is in place and complete
+# 1 after any error
+#
+downloadtarball() 
+{
+  local TEMPFILE="${2}.download"
+  local DOWNLOADED="false"
+
+  # Continue an incomplete download if possible.
+  local RESULT=0
+  if [[ -f "${TEMPFILE}" ]]; then
+    echo "Continuing the previous download"
+    curl -fSL -C - "${1}" -o "${TEMPFILE}" || RESULT=$?
+    if [[ ${RESULT} == 0 ]]; then
+      DOWNLOADED="true"
+    elif [[ ${RESULT} == 33 ]]; then
+      echo "The server is unable to continue downloads - starting it over"
+      rm -f "${TEMPFILE}"
+    else
+      echo "ERROR: Unable to download ${1}"
+      return 1
+    fi
+  fi
+
+  # Download
+  if [[ ${DOWNLOADED} == false ]]; then
+    if ! curl -fSL "${1}" -o "${TEMPFILE}"; then
+      echo "ERROR: Unable to download ${1}"
+      return 1
+    fi
+  fi
+
+  # Do a sanity chack that we have a *.gz file
+  if ! gunzip -t "${TEMPFILE}" >/dev/null 2>&1; then
+    echo "ERROR: What was downloaded from ${1} is not a gzip archive"
+    rm -f "${TEMPFILE}"
+    return 1
+  fi
+
+  mv "${TEMPFILE}" "${2}"
+
+  return 0
 }

@@ -389,12 +389,11 @@ else
   
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
     echo "Starting the download."
-    echo "If the download fails, you can continue it via the following command and then call this script again - it will use the download file."
+    echo "If the download fails, you can continue it via the following command and then call this script again - it will use the downloaded file."
     echo " "
-    echo "curl -O -C - ${WEBSITE}/${TARBALL}"
+    echo "curl -fOL -C - ${WEBSITE}/${TARBALL}"
     echo " "
-    curl -O "${WEBSITE}/${TARBALL}"
-    if [ "$?" != "0" ]; then
+    if ! downloadtarball "${WEBSITE}/${TARBALL}" "${TARBALL}"; then
       echo "ERROR: Unable to download the tarball from the Geant4 website!"
       exit 1
     fi

@@ -463,8 +463,7 @@ if [[ ${TARBALL} == "" ]]; then
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
     echo "Starting the download from GitHub."
     echo " "
-    curl -L "${LINK}" -o "${TARBALL}"
-    if [ "$?" != "0" ]; then
+    if ! downloadtarball "${LINK}" "${TARBALL}"; then
       echo "ERROR: Unable to download the tarball from GitHub!"
       exit 1
     fi

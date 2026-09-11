@@ -223,10 +223,9 @@ else
     echo "Starting the download."
     echo "If the download fails, you can continue it via the following command and then call this script again - it will use the downloaded file."
     echo " "
-    echo "curl -O -C - https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}"
+    echo "curl -fOL -C - https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}"
     echo " "
-    curl -O "https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}"
-    if [ "$?" != "0" ]; then
+    if ! downloadtarball "https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}" "${TARBALL}"; then
       echo "ERROR: Unable to download the tarball from the HEASoft website!"
       exit 1
     fi
