@@ -108,7 +108,6 @@ PATCH="false"
 DEBUG="off"
 DEBUGSTRING=""
 DEBUGOPTIONS=""
-PATCH="false"
 CLEANUP="false"
 KEEPENVASIS="false"
 
