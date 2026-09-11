@@ -58,7 +58,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
  
 --branch=[name of a git branch - default: main]
     Choose a specific branch of the COSItools git repositories.
-    If the option is not given the latest release will be used.
+    If the option is not given the main branch will be used.
     If the branch does not exist for all repositories use the main/master branch.
  
 --pull-behavior-git=[stash (default), merge]
@@ -74,7 +74,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 --ignore-missing-packages
     Do not check for missing packages.
  
---keep-environment-as-is=[off/no, on/yes - default: off]
+--keep-environment-as-is=[true/on/yes, false/off/no - default: false]
     By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty
     to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not.
     If you use this flag make sure the COSItools source script has not been called in the terminal you are using.

@@ -53,7 +53,7 @@ confhelp() {
   echo " "
   echo "--branch=[name of a git branch - default: main]"
   echo "    Choose a specific branch of the COSItools git repositories."
-  echo "    If the option is not given the latest release will be used."
+  echo "    If the option is not given the main branch will be used."
   echo "    If the branch does not exist for all repositories use the main/master branch."
   echo " "
   echo "--pull-behavior-git=[stash (default), merge]"

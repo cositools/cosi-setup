@@ -232,12 +232,10 @@ else
   export CPATH=""
 fi
 
-if [[ ${BRANCH} != "" ]]; then
-  echo " * Use default branch ${BRANCH}"
-else
-  BRANCH="master" # Will switch to main if non-existent
-  echo " * Use the main branch"
+if [[ ${BRANCH} == "" ]]; then
+  BRANCH="main"
 fi
+echo " * Use this branch: ${BRANCH}"
 
 
 if [ "${ROOTPATH}" == "" ]; then
