@@ -13,8 +13,9 @@
 # before the cosi-setup repository exists. It carries its own copy of the functions.
 
 
-# Resolve a command line argument to the full name of the option it names.
 #
+# Description:
+# Resolve a command line argument to the full name of the option it names.
 # An option may be abbreviated as long as the abbreviation is unique, the same way the
 # GNU tools do it. With the options "branch heasoft healpix help" for example:
 #   --branch=develop  ->  branch    the full name
@@ -22,19 +23,20 @@
 #   --heas=cfitsio    ->  heasoft   unique, --heal would give healpix
 #   --he              ->  ambiguous, it matches heasoft, healpix and help
 #   --bogus           ->  unknown
+# Only the text in front of the "=" is compared, thus the value of an option can never be
+# mistaken for another option.
 #
-# Only the text in front of the "=" is compared, thus the value of an option can never
-# be mistaken for another option: "--branch=my-auto-fix" cannot trigger "auto", and
-# "--root=/opt/gcc-auto" cannot either. This is why the comparison is done here instead
-# of matching the whole argument against a pattern.
-#
+# Mandatory options (not checked):
 # ${1}: the command line argument, e.g. "--heas=cfitsio"
 # ${2}: the known option names, separated by spaces, e.g. "branch heasoft healpix help"
 #
-# Returns 0 and echoes the resolved option name, e.g. "heasoft"
-#         1 and echoes nothing if no option starts with the given name
-#         2 and echoes all candidates if the abbreviation is not unique
-resolveoption() {
+# Return codes:
+# 0 and echoes the resolved option name, e.g. "heasoft"
+# 1 and echoes nothing if no option starts with the given name
+# 2 and echoes all candidates if the abbreviation is not unique
+#
+resolveoption()
+{
   # Everything from the "=" on is the value, and the dashes are not part of the name
   local NAME="${1%%=*}"
   NAME="${NAME#--}"
@@ -58,12 +60,19 @@ resolveoption() {
 }
 
 
-# Turn a path into an absolute one. The path does not have to exist, since the setup uses
-# this for directories it is about to create - a "cd" into a not yet existing directory
-# fails and used to leave only the last component behind. Thus "." and ".." are resolved
-# textually here.
+#
+# Description:
+# Turn a path into an absolute one.
+# The path does not have to exist, "." and ".." are then resolved textually.
+#
+# Mandatory options (not checked):
 # ${1}: the path, absolute or relative to the current directory
-absolutefilename() {
+#
+# Return codes:
+# 0 and echoes the absolute path
+#
+absolutefilename()
+{
   local FULL="${1}"
   if [[ ${FULL} != /* ]]; then
     FULL="$(pwd)/${FULL}"
@@ -94,12 +103,21 @@ absolutefilename() {
   echo "${RESULT}"
 }
 
-# Check whether a path can be used safely in the generated source script. The path ends
-# up in shell statements there, thus anything the shell would interpret has to be kept
-# out. Only letters, digits and . _ - / + @ : are allowed.
+#
+# Description:
+# Check whether a path can be used safely in the generated source script.
+# Only letters, digits and . _ - / + @ : are allowed, since the path ends up in shell
+# statements there.
+#
+# Mandatory options (not checked):
 # ${1}: the path to check
-# Returns 0 if the path is usable, 1 otherwise
-checkpathcharacters() {
+#
+# Return codes:
+# 0 if the path is usable
+# 1 if it holds any other character
+#
+checkpathcharacters()
+{
   # A newline has to be caught before grep, which works line by line
   case "${1}" in
     *$'\n'*) return 1 ;;
@@ -110,27 +128,42 @@ checkpathcharacters() {
   return 0
 }
 
-# Return the value of a command line option, i.e. everything behind the first "=". The
-# whole remainder is returned, thus a value may contain "=" itself, e.g. a URL with a
-# query string. An option without a "=" has an empty value.
+#
+# Description:
+# Return the value of a command line option, i.e. everything behind the first "=".
+# The whole remainder is returned, thus a value may contain "=" itself. An option without
+# a "=" has an empty value.
+#
+# Mandatory options (not checked):
 # ${1}: the command line argument, e.g. "--root=/opt/a=b"
-optionvalue() {
+#
+# Return codes:
+# 0 and echoes the value
+#
+optionvalue()
+{
   case "${1}" in
     *=*) printf '%s' "${1#*=}" ;;
     *)   printf '%s' "" ;;
   esac
 }
 
-# Interpret the value of a boolean command line option. Such an option may be given on its
-# own, e.g. "--auto", in which case it has no value and means "true", or with an explicit
-# value, e.g. "--auto=no". Accepted are true/on/yes and false/off/no in any capitalization,
-# abbreviated the same way as everywhere else in these scripts, e.g. "t", "n", "off".
 #
+# Description:
+# Interpret the value of a boolean command line option.
+# Accepted are true/on/yes and false/off/no in any capitalization, abbreviated the same way
+# as everywhere else in these scripts, e.g. "t", "n", "off". An option given on its own,
+# e.g. "--auto", has no value and means "true".
+#
+# Mandatory options (not checked):
 # ${1}: the value of the option, i.e. what optionvalue returned. Empty means "true".
 #
-# Returns 0 and echoes "true" or "false"
-#         1 and echoes nothing if the value does not name a boolean
-booleanvalue() {
+# Return codes:
+# 0 and echoes "true" or "false"
+# 1 and echoes nothing if the value does not name a boolean
+#
+booleanvalue()
+{
   local VALUE
   VALUE=$(echo "${1}" | tr '[:upper:]' '[:lower:]')
   case "${VALUE}" in
@@ -140,16 +173,23 @@ booleanvalue() {
   return 1
 }
 
-# Find the directory which holds a HEASoft installation. HEASoft puts its binaries into a
-# platform specific sub-directory, e.g. x86_64-pc-linux-gnu-libc2.44, thus the given path
-# may be that directory or the one above it. Both headas-init.sh and bin/ftversion have to
-# be there, so that the build directory is not mistaken for the installation.
 #
+# Description:
+# Find the directory which holds a HEASoft installation.
+# HEASoft puts its binaries into a platform specific sub-directory, e.g.
+# x86_64-pc-linux-gnu-libc2.44, thus the given path may be that directory or the one above
+# it. Both headas-init.sh and bin/ftversion have to be there, so that the build directory
+# is not mistaken for the installation.
+#
+# Mandatory options (not checked):
 # ${1}: a path to a HEASoft installation
 #
-# Returns 0 and echoes the directory holding headas-init.sh and bin/ftversion
-#         1 and echoes nothing if there is no HEASoft installation at or below the path
-heasoftdirectory() {
+# Return codes:
+# 0 and echoes the directory holding headas-init.sh and bin/ftversion
+# 1 and echoes nothing if there is no HEASoft installation at or below the path
+#
+heasoftdirectory()
+{
   local DIR
   for DIR in "${1}" "${1}"/*; do
     if [[ -f "${DIR}/headas-init.sh" ]] && [[ -x "${DIR}/bin/ftversion" ]]; then
@@ -160,19 +200,27 @@ heasoftdirectory() {
   return 1
 }
 
-# Read the allowed version range of one component out of allowed-versions.txt. That file
-# holds lines such as "ROOT-Min:6.36", "ROOT-Max:6.40" and "ROOT-Blacklist:6.38 6.39".
 #
+# Description:
+# Read the allowed version range of one component out of allowed-versions.txt.
+# That file holds lines such as "ROOT-Min:6.36", "ROOT-Max:6.40" and "ROOT-Blacklist:6.38".
+#
+# Mandatory options (not checked):
 # ${1}: the full path of allowed-versions.txt
 # ${2}: the label used inside that file, e.g. "ROOT", "Geant4", "HEASoft", "Healpix", "Python"
 # ${3}: the component name for the error message, e.g. "ROOT"
 #
-# Sets VERSIONMINSTRING and VERSIONMAXSTRING to the range as written, e.g. "6.36"
-#      VERSIONMIN and VERSIONMAX to the same encoded for comparing, see encodeversion
-#      VERSIONBLACKLIST to the black listed versions, separated by spaces
+# Sets:
+# VERSIONMINSTRING and VERSIONMAXSTRING to the range as written, e.g. "6.36"
+# VERSIONMIN and VERSIONMAX to the same encoded for comparing, see encodeversion
+# VERSIONBLACKLIST to the black listed versions, separated by spaces
 #
-# Returns 0, or 1 after an error message if the file holds no usable range
-readversionrange() {
+# Return codes:
+# 0 if the range could be read
+# 1 after an error message if the file holds no usable range
+#
+readversionrange()
+{
   VERSIONMINSTRING=$(grep "${2}-Min" "${1}" | awk -F":" '{ print $2 }')
   VERSIONMAXSTRING=$(grep "${2}-Max" "${1}" | awk -F":" '{ print $2 }')
   VERSIONBLACKLIST=$(grep "${2}-Blacklist" "${1}" | awk -F":" '{ print $2 }')
@@ -188,14 +236,20 @@ readversionrange() {
   return 0
 }
 
-# Turn a version into a single number, so that two of them can be compared. Only the major
-# and the minor part count, thus 6.38, 6.38.02 and 6.38/02 all become 638.
 #
+# Description:
+# Turn a version into a single number, so that two of them can be compared.
+# Only the major and the minor part count, thus 6.38, 6.38.02 and 6.38/02 all become 638.
+#
+# Mandatory options (not checked):
 # ${1}: the version, e.g. "6.40", "11.02.p02", "6.38/02", "3.14.7"
 #
-# Returns 0 and echoes the number
-#         1 and echoes nothing if the version does not start with major.minor
-encodeversion() {
+# Return codes:
+# 0 and echoes the number
+# 1 and echoes nothing if the version does not start with major.minor
+#
+encodeversion()
+{
   # Everything from the second separator on is the patch level and does not count
   local MAJOR MINOR
   MAJOR=$(echo "${1}" | awk -F'[./]' '{ print $1 }')
@@ -207,14 +261,20 @@ encodeversion() {
   return 0
 }
 
-# Bring a version into one spelling, so that two of them can be compared as text. Leading
-# zeros are dropped from every numeric part and "/" becomes ".", thus 6.40.02, 6.40.2 and
-# 6.40/02 all end up as 6.40.2.
 #
+# Description:
+# Bring a version into one spelling, so that two of them can be compared as text.
+# Leading zeros are dropped from every numeric part and "/" becomes ".", thus 6.40.02,
+# 6.40.2 and 6.40/02 all end up as 6.40.2.
+#
+# Mandatory options (not checked):
 # ${1}: the version, e.g. "6.40.02", "11.02.p02"
 #
-# Echoes the normalized version, and always returns 0
-normalizeversion() {
+# Return codes:
+# 0 and echoes the normalized version
+#
+normalizeversion()
+{
   local PARTS=() PART PREFIX NUM OUT=""
   IFS='./' read -ra PARTS <<< "${1}"
   for PART in "${PARTS[@]}"; do
@@ -229,15 +289,21 @@ normalizeversion() {
   echo "${OUT#.}"
 }
 
+#
+# Description:
 # Decide whether one version may be used, and say what is wrong with it if not.
 # readversionrange has to have been called first.
 #
+# Mandatory options (not checked):
 # ${1}: the version, e.g. "6.40"
 # ${2}: the component name for the messages, e.g. "ROOT"
 #
-# Returns 0 after saying that the version is good
-#         1 after saying why it is not
-checkversionrange() {
+# Return codes:
+# 0 after saying that the version is good
+# 1 after saying why it is not
+#
+checkversionrange()
+{
   local ENCODED
   if ! ENCODED=$(encodeversion "${1}"); then
     echo ""
@@ -270,15 +336,22 @@ checkversionrange() {
   return 0
 }
 
-# Check whether a tar ball which is already there can be reused. It has to be a complete
-# gzip archive, and where the web server reports a size it has to match.
 #
+# Description:
+# Check whether a tar ball which is already there can be reused.
+# It has to be a complete gzip archive, and where the web server reports a size it has to
+# match.
+#
+# Mandatory options (not checked):
 # ${1}: the local file name
 # ${2}: the URL the file comes from
 #
-# Returns 0 if the local file is complete and can be kept
-#         1 if it has to be downloaded again, after saying why
-tarballisgood() {
+# Return codes:
+# 0 if the local file is complete and can be kept
+# 1 if it has to be downloaded again, after saying why
+#
+tarballisgood()
+{
   if [[ ! -f "${1}" ]]; then
     echo "Tarball does not exist, downloading it"
     return 1
@@ -313,11 +386,16 @@ tarballisgood() {
   return 0
 }
 
-# The number of cores of this machine, for "make -j". At least one, also when the number
-# cannot be determined.
 #
-# Echoes the number of cores, and always returns 0
-numberofcores() {
+# Description:
+# The number of cores of this machine, for "make -j".
+# At least one, also when the number cannot be determined.
+#
+# Return codes:
+# 0 and echoes the number of cores
+#
+numberofcores()
+{
   # Matched loosely on purpose: some systems report a name which is not exactly "Darwin"
   # or "Linux", and those still have to be recognized
   local CORES=""
