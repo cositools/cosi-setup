@@ -237,6 +237,7 @@ fi
 
 
 echo "Creating main directory"
+TARBALL=$(absolutefilename "${TARBALL}")
 mkdir healpix_v${VER}
 cd healpix_v${VER}
 MAINDIR=$(pwd)
@@ -244,7 +245,7 @@ MAINDIR=$(pwd)
 
 
 echo "Unpacking..."
-tar xfz "../${TARBALL}" 2> /dev/null
+tar xfz "${TARBALL}" 2> /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the healpix tarball!"
   exit 1

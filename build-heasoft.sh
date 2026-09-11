@@ -338,6 +338,7 @@ fi
 
 
 echo "Unpacking..."
+TARBALL=$(absolutefilename "${TARBALL}")
 tar xfz "${TARBALL}" > /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the HEASoft tarball!"

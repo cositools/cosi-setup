@@ -98,7 +98,6 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     autoinstall)
-      # Without booleanvalue "--autoinstall=no" would switch the installation on
       if ! AUTOPACKAGEINSTALL=$(booleanvalue "$(optionvalue "${C}")"); then
         echo ""
         echo "ERROR: Unknown value for the --autoinstall option: ${C}"

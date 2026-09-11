@@ -96,7 +96,6 @@ for C in "${CMD[@]}"; do
   esac
 done
 
-# The allowed version range and the black list live in allowed-versions.txt
 if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "Python" "python"; then
   exit 1
 fi

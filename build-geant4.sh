@@ -492,12 +492,13 @@ fi
 
 
 echo "Unpacking..."
+TARBALL=$(absolutefilename "${TARBALL}")
 mkdir "${GEANT4DIR}"
 cd "${GEANT4DIR}"
 if ( [[ ${TARBALL} == *.tgz ]] || [[ ${TARBALL} == *.tar.gz ]] ); then
-  tar xfz "../${TARBALL}" > /dev/null
+  tar xfz "${TARBALL}" > /dev/null
 elif [[ ${TARBALL} == *.tar ]] ; then
-  tar xf "../${TARBALL}" > /dev/null
+  tar xf "${TARBALL}" > /dev/null
 else
   echo "ERROR: File has unknown suffix: ${TARBALL} (known: tgz, tar.gz, tar)"
   exit 1

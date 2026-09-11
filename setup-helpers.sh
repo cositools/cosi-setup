@@ -14,6 +14,8 @@
 
 
 #
+# ATTENTION: The same function appears in setup.sh: Please keep both identical
+#
 # Description:
 # Resolve a command line argument to the full name of the option it names.
 # An option may be abbreviated as long as the abbreviation is unique, the same way the
@@ -61,6 +63,8 @@ resolveoption()
 
 
 #
+# ATTENTION: The same function appears in setup.sh: Please keep both identical
+#
 # Description:
 # Turn a path into an absolute one.
 # The path does not have to exist, "." and ".." are then resolved textually.
@@ -104,6 +108,8 @@ absolutefilename()
 }
 
 #
+# ATTENTION: The same function appears in setup.sh: Please keep both identical
+#
 # Description:
 # Check whether a path can be used safely in the generated source script.
 # Only letters, digits and . _ - / + @ : are allowed, since the path ends up in shell
@@ -128,6 +134,8 @@ checkpathcharacters()
   return 0
 }
 
+#
+# ATTENTION: The same function appears in setup.sh: Please keep both identical
 #
 # Description:
 # Return the value of a command line option, i.e. everything behind the first "=".

@@ -193,8 +193,6 @@ GITPULLBEHAVIOR=`echo ${GITPULLBEHAVIOR} | tr '[:upper:]' '[:lower:]'`
 
 # Provide feed back and perform error checks:
 
-# Both flags may be given on their own, e.g. "--auto", or with a value, e.g. "--auto=no".
-# Without booleanvalue "--auto=no" would switch the automatic installation on.
 if ! BOOLEAN=$(booleanvalue "${IGNOREMISSINGPACKAGES}"); then
   echo " "
   echo "ERROR: Unknown value for the --ignore-missing-packages option: ${IGNOREMISSINGPACKAGES}"
@@ -941,9 +939,6 @@ else
     exit 1
   fi
   
-  # The user may point at the directory above the platform specific one, e.g. at
-  # heasoft_v6.36 instead of heasoft_v6.36/x86_64-pc-linux-gnu-libc2.44. Everything from
-  # here on - source-heasoft.sh as well as the Healpix build - needs the latter.
   HEASOFTDIR=$(heasoftdirectory "$(absolutefilename "${HEASOFTPATH}")") || HEASOFTDIR=""
   if [[ ${HEASOFTDIR} == "" ]]; then
     echo " "

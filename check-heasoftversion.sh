@@ -87,7 +87,6 @@ for C in "${CMD[@]}"; do
 done
 
 
-# The allowed version range and the black list live in allowed-versions.txt
 if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "HEASoft" "HEASoft"; then
   exit 1
 fi
@@ -113,8 +112,6 @@ case ${MODE} in
     ;;
 
   check)
-    # The given path may be the platform specific directory or the one above it, and the
-    # HEASoft tools only run after headas-init.sh has been sourced
     HEADASDIR=$(heasoftdirectory "${HEASoftPATH}") || HEADASDIR=""
 
     if [[ ${HEADASDIR} == "" ]]; then

@@ -126,27 +126,8 @@ confhelp() {
 # This script acts on the first three, everything else is passed on to stage 2.
 SETUPOPTIONS="cosi-tools-path setup-branch branch root geant heasoft healpix optimization debug pull-behavior-git max-threads ignore-missing-packages keep-environment-as-is auto extras help"
 
-# Resolve a command line argument to the full name of the option it names.
-#
-# An option may be abbreviated as long as the abbreviation is unique, the same way the
-# GNU tools do it. With the options "branch heasoft healpix help" for example:
-#   --branch=develop  ->  branch    the full name
-#   --b=develop       ->  branch    unique abbreviation, no other option starts with b
-#   --heas=cfitsio    ->  heasoft   unique, --heal would give healpix
-#   --he              ->  ambiguous, it matches heasoft, healpix and help
-#   --bogus           ->  unknown
-#
-# Only the text in front of the "=" is compared, thus the value of an option can never
-# be mistaken for another option: "--branch=my-auto-fix" cannot trigger "auto", and
-# "--root=/opt/gcc-auto" cannot either. This is why the comparison is done here instead
-# of matching the whole argument against a pattern.
-#
-# ${1}: the command line argument, e.g. "--heas=cfitsio"
-# ${2}: the known option names, separated by spaces, e.g. "branch heasoft healpix help"
-#
-# Returns 0 and echoes the resolved option name, e.g. "heasoft"
-#         1 and echoes nothing if no option starts with the given name
-#         2 and echoes all candidates if the abbreviation is not unique
+# ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
+# See setup-helpers.sh for the full documentation
 resolveoption() {
   # Everything from the "=" on is the value, and the dashes are not part of the name
   local NAME="${1%%=*}"
@@ -170,14 +151,10 @@ resolveoption() {
   return 2
 }
 
-# Check whether a path can be used safely in the generated source script. The path ends
-# up in shell statements there, thus anything the shell would interpret has to be kept
-# out. Only letters, digits and . _ - / + @ : are allowed.
-# ${1}: the path to check
-# Returns 0 if the path is usable, 1 otherwise
+# ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
+# See setup-helpers.sh for the full documentation
 checkpathcharacters() {
-  # grep works line by line, thus a newline would split the path into pieces which each
-  # look harmless on their own - reject it before grep ever sees it
+  # A newline has to be caught before grep, which works line by line
   case "${1}" in
     *$'\n'*) return 1 ;;
   esac
@@ -187,10 +164,8 @@ checkpathcharacters() {
   return 0
 }
 
-# Return the value of a command line option, i.e. everything behind the first "=". The
-# whole remainder is returned, thus a value may contain "=" itself, e.g. a URL with a
-# query string. An option without a "=" has an empty value.
-# ${1}: the command line argument, e.g. "--root=/opt/a=b"
+# ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
+# See setup-helpers.sh for the full documentation
 optionvalue() {
   case "${1}" in
     *=*) printf '%s' "${1#*=}" ;;
@@ -198,20 +173,15 @@ optionvalue() {
   esac
 }
 
-# Turn a path into an absolute one. The path does not have to exist, since the setup uses
-# this for directories it is about to create - a "cd" into a not yet existing directory
-# fails and used to leave only the last component behind. Thus "." and ".." are resolved
-# textually here.
-# ${1}: the path, absolute or relative to the current directory
+# ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
+# See setup-helpers.sh for the full documentation
 absolutefilename() {
   local FULL="${1}"
   if [[ ${FULL} != /* ]]; then
     FULL="$(pwd)/${FULL}"
   fi
 
-  # If the path exists, let the shell resolve it. "cd -P" follows symbolic links, thus a
-  # ".." behind a link lands where the link really points, and the result agrees with the
-  # "pwd -P" the scripts use to find their own location.
+  # An existing path is resolved by the shell, which follows symbolic links
   local RESOLVED=""
   if [[ -d "${FULL}" ]]; then
     RESOLVED=$(cd -P -- "${FULL}" >/dev/null 2>&1 && pwd -P) || RESOLVED=""
@@ -221,8 +191,7 @@ absolutefilename() {
     if [[ ${RESOLVED} != "" ]]; then echo "${RESOLVED}/$(basename "${FULL}")"; return 0; fi
   fi
 
-  # Nothing to "cd" into - the setup creates this directory later on, thus resolve the
-  # "." and ".." components textually
+  # A path which does not exist yet is resolved textually
   local PARTS=() PART RESULT=""
   IFS='/' read -ra PARTS <<< "${FULL}"
   for PART in "${PARTS[@]}"; do

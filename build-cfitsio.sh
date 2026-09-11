@@ -228,9 +228,10 @@ fi
 
 
 echo "Unpacking..."
+TARBALL=$(absolutefilename "${TARBALL}")
 mkdir cfitsio_v${VER}
 cd cfitsio_v${VER}
-tar xfz "../${TARBALL}" > /dev/null
+tar xfz "${TARBALL}" > /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the cfitsio tarball!"
   exit 1

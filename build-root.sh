@@ -614,9 +614,10 @@ fi
 
 
 echo "Unpacking..."
+TARBALL=$(absolutefilename "${TARBALL}")
 mkdir "${ROOTDIR}"
 cd "${ROOTDIR}"
-tar xfz "../${TARBALL}" > /dev/null
+tar xfz "${TARBALL}" > /dev/null
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong unpacking the ROOT tarball!"
   exit 1

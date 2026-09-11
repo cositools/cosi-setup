@@ -87,7 +87,6 @@ for C in "${CMD[@]}"; do
 done
 
 
-# The allowed version range and the black list live in allowed-versions.txt
 if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "Geant4" "Geant4"; then
   exit 1
 fi
