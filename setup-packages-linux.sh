@@ -45,7 +45,7 @@ fi
 REQUIRED=""
 EXTRATEXT=""
 TOBEINSTALLED=""
-SUPPORTEDVERSION="TRUE"
+SUPPORTEDVERSION="true"
 AUTOPACKAGEINSTALL="false"
 REPOSETUP=true
 
@@ -170,7 +170,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     else
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre2-dev libglu1-mesa-dev libglew-dev libftgl-dev libmysqlclient-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses-dev libboost-all-dev libcfitsio-dev libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libcrypt-dev libgif-dev liblz4-dev liblzma-dev libftgl-dev"
       
-      SUPPORTEDVERSION="FALSE"
+      SUPPORTEDVERSION="false"
     fi
   elif [[ ${OS} == debian ]] || [[ ${OS} == raspbian ]]; then
     if (( ${VERSIONID} <= 10 )); then
@@ -187,17 +187,17 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
     else
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
-      SUPPORTEDVERSION="FALSE"
+      SUPPORTEDVERSION="false"
     fi
   else
     REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
-    SUPPORTEDVERSION="FALSE"
+    SUPPORTEDVERSION="false"
   fi
   
   #echo "Required: ${REQUIRED}"
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
   
-  if [[ ${SUPPORTEDVERSION} == TRUE ]]; then
+  if [[ ${SUPPORTEDVERSION} == true ]]; then
     # Check if each of the packages exists:
     for PACKAGE in ${REQUIRED}; do 
       # Check if the file is installed
@@ -282,7 +282,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel libcurl-devel patch "
     else 
       REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel python xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel "
-      SUPPORTEDVERSION="FALSE"
+      SUPPORTEDVERSION="false"
     fi
 
     # OpenSUSE is frequently behind with python. Thus add the latest version:
@@ -292,12 +292,12 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
     REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ cfitsio-devel libxerces-c-devel hdf5-devel healpix_cxx-devel libcurl-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel patch "
   else
     REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel patterns-devel-python-devel_python3 patterns-devel-base-devel_basis patterns-devel-C-C++-devel_C_C++ cfitsio-devel libxerces-c-devel hdf5-devel healpix_cxx-devel libcurl-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel patch "
-    SUPPORTEDVERSION="FALSE"
+    SUPPORTEDVERSION="false"
   fi
 
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
 
-  if [[ ${SUPPORTEDVERSION} == TRUE ]]; then
+  if [[ ${SUPPORTEDVERSION} == true ]]; then
     # Check if each of the packages exists:
     for PACKAGE in ${REQUIRED}; do
       # Check if the file is installed
@@ -414,7 +414,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     else
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel autoconf automake libtool giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
-      SUPPORTEDVERSION="FALSE"
+      SUPPORTEDVERSION="false"
     fi
   elif [[ ${OS} == fedora ]]; then
     # Check the version
@@ -432,16 +432,16 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
     else 
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core"
-      SUPPORTEDVERSION="FALSE"
+      SUPPORTEDVERSION="false"
     fi
   else
     REQUIRED="openssl git git-lfs cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel "
-    SUPPORTEDVERSION="FALSE"
+    SUPPORTEDVERSION="false"
   fi
   
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
 
-  if [[ ${SUPPORTEDVERSION} == TRUE ]]; then
+  if [[ ${SUPPORTEDVERSION} == true ]]; then
     # Check if each of the packages exists:
     for PACKAGE in ${REQUIRED}; do
       # Check if the file is installed

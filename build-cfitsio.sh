@@ -21,18 +21,6 @@ CONFIGUREOPTIONS=" "
 # Comment this line in if you have trouble with readline
 # CONFIGUREOPTIONS="--enable-readline "
 
-# Check if some of the frequently used software is installed:
-type gfortran >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  type g95 >/dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    type g77 >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
-      echo "ERROR: A fortran compiler must be installed"
-      exit 1
-    fi
-  fi
-fi
 
 MAXTHREADS=1;
 if [[ ${OSTYPE} == *arwin* ]]; then
@@ -125,6 +113,21 @@ for C in "${CMD[@]}"; do
 done
 
 
+# The tools this build needs. Checked after the command line has been read, so that
+# --help still works on a machine which cannot build.
+type gfortran >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  type g95 >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    type g77 >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo "ERROR: A fortran compiler must be installed"
+      exit 1
+    fi
+  fi
+fi
+
+
 echo "Getting cfitsio..."
 VER=""
 if [ "${TARBALL}" != "" ]; then
@@ -156,23 +159,8 @@ else
 
   # Check if it already exists locally
   REQUIREDOWNLOAD="true"
-  if [ -f "${TARBALL}" ]; then
-    # ... and has the same size
-    LOCALSIZE=$(wc -c < "${TARBALL}" | tr -d ' ')
-    REMOTESIZE=$(curl -s --head "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/${TARBALL}" | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
-    if [ "$?" != "0" ]; then
-      echo "ERROR: Unable to determine remote tarball size"
-      exit 1
-    fi
-    IDENTICAL=`echo ${REMOTESIZE} | grep ${LOCALSIZE}`
-    if [ "${IDENTICAL}" != "" ]; then
-      REQUIREDOWNLOAD="false"
-      echo "File is already present and has same size, thus no download required!"
-    else
-      echo "Remote and local file sizes are different (local: ${LOCALSIZE} vs. remote: ${REMOTESIZE}). Downloading it."
-    fi
-  else
-    echo "Tarball does not exist, downloading it"
+  if tarballisgood "${TARBALL}" "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/${TARBALL}"; then
+    REQUIREDOWNLOAD="false"
   fi
 
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
@@ -261,6 +249,8 @@ fi
 
 
 echo "Compiling..."
+# cfitsio is built with a single thread, the same way HEASoft is - it comes from the
+# same source and is small enough that a parallel build would save nothing.
 make -j1 > build.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong while compiling cfitsio!"
@@ -271,8 +261,11 @@ ERRORS=$(cat build.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_
 if [ "${ERRORS}" == "" ]; then
   echo "Installing ..."
   make -j1 install > install.log 2>&1
+  INSTALLRESULT=$?
+  # The log is searched as well as the exit status checked: make does not always report a
+  # broken build, and not every failure prints a line the pattern below matches
   ERRORS=$(cat install.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
-  if [ "${ERRORS}" != "" ]; then
+  if [ "${INSTALLRESULT}" != "0" ] || [ "${ERRORS}" != "" ]; then
     echo "ERROR: Errors occured during the installation. Check your install.log"
     echo "       Check the file "`pwd`"/install.log"
     exit 1;
@@ -287,8 +280,14 @@ fi
 echo "Store our success story..."
 cd ..
 rm -f COMPILE_SUCCESSFUL
+echo "cfitsio compilation & installation successful" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Configure options:" >> COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Compile options:" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
 
 
 

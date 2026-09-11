@@ -62,10 +62,10 @@ for C in "${CMD[@]}"; do
 done
 
 
-CHECK="false"
-GET="false"
-GOOD="false"
-INTERPRETER="false"
+# What the script was asked to do: check, get-max, get-min, good-version or
+# get-interpreter. One variable rather than a flag each, so that a mode can never be
+# half set and no mode can stay on when a later option names another one.
+MODE=""
 PYTHONEXE=""
 TESTVERSION=""
 
@@ -87,135 +87,92 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    get-interpreter) PYTHONEXE="";  CHECK="false"; GET="false"; GOOD="false"; INTERPRETER="true" ;;
-    check)           PYTHONEXE=$(optionvalue "${C}")
-                     CHECK="true";  GET="false"; GOOD="false" ;;
-    get-max)         PYTHONEXE="";  CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
-    get-min)         PYTHONEXE="";  CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
-    good-version)    PYTHONEXE="";  CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                     TESTVERSION=$(optionvalue "${C}") ;;
+    get-interpreter) MODE="get-interpreter" ;;
+    check)           MODE="check";        PYTHONEXE=$(optionvalue "${C}") ;;
+    get-max)         MODE="get-max" ;;
+    get-min)         MODE="get-min" ;;
+    good-version)    MODE="good-version"; TESTVERSION=$(optionvalue "${C}") ;;
     help)            echo ""; confhelp; exit 0 ;;
   esac
 done
 
-PythonVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Python-Min" | awk -F":" '{ print $2 }')
-PythonVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Python-Max" | awk -F":" '{ print $2 }')
-PythonBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Python-Blacklist" | awk -F":" '{ print $2 }')
-
-PythonVersionMinString=${PythonVersionMin}
-PythonVersionMaxString=${PythonVersionMax}
-
-if [[ ! ${PythonVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${PythonVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
-  echo ""
-  echo "ERROR: Unable to read a valid python version range from ${SETUPPATH}/allowed-versions.txt"
+# The allowed version range and the black list live in allowed-versions.txt
+if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "Python" "python"; then
   exit 1
 fi
 
-PythonVersionMin=$(echo ${PythonVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
-PythonVersionMax=$(echo ${PythonVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
+case ${MODE} in
 
-if [ "${GET}" == "true" ]; then
-  if [ "${MAX}" == "true" ]; then
-    echo "${PythonVersionMaxString}"
-  else
-    echo "${PythonVersionMinString}"
-  fi
-  exit 0;
-fi
+  get-max) echo "${VERSIONMAXSTRING}"; exit 0 ;;
+  get-min) echo "${VERSIONMINSTRING}"; exit 0 ;;
 
-if [ "${GOOD}" == "true" ]; then
-  # Reject development versions, e.g., 3.15.0rc1
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
-    echo ""
-    echo "ERROR: python version (${TESTVERSION}) is not acceptable"
-    echo "       It is a development version."
-    exit 1
-  fi
-
-  # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-    echo ""
-    echo "ERROR: python version (${TESTVERSION}) is not acceptable"
-    echo "       It is not a valid version string."
-    exit 1
-  fi
-
-  version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-  release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  patch=`echo ${TESTVERSION} | awk -F. '{ print $3 }'`;
-
-  PythonVersion=$((100*10#${version} + 10#${release}))
-
-  if ([ ${PythonVersion} -ge ${PythonVersionMin} ] && [ ${PythonVersion} -le ${PythonVersionMax} ]); then
-    if [[ " ${PythonBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${PythonBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
+  good-version)
+    # Reject development versions, e.g., 3.15.0rc1
+    if [[ ! ${TESTVERSION} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
       echo ""
       echo "ERROR: python version (${TESTVERSION}) is not acceptable"
-      echo "       It has been black listed as not working."
+      echo "       It is a development version."
       exit 1
-    else
-      echo "Found a good python version: ${TESTVERSION}"
-      exit 0
     fi
-  else
-    echo ""
-    echo "ERROR: python version (${TESTVERSION}) is not acceptable"
-    echo "       You require a version between ${PythonVersionMinString} and ${PythonVersionMaxString}"
-    exit 1
-  fi
-fi
 
-if [ "${INTERPRETER}" == "true" ]; then
-  # Choose the python version
-  PY="python3"
+    # Reject anything which is not a version, e.g. v11.2.2 or master
+    if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+      echo ""
+      echo "ERROR: python version (${TESTVERSION}) is not acceptable"
+      echo "       It is not a valid version string."
+      exit 1
+    fi
 
-  # Everything but the name of the interpreter goes to stderr
-  "${SETUPPATH}/check-pythonversion.sh" "--check=${PY}" >&2
-  if [[ "$?" != "0" ]]; then
-    exit 1
-  fi
+    if ! checkversionrange "${TESTVERSION}" "python"; then
+      exit 1
+    fi
+    exit 0
+    ;;
 
-  echo ${PY}
-  exit 0
-fi
+  get-interpreter)
+    # Choose the python version
+    PY="python3"
 
-if [ "${CHECK}" == "true" ]; then
-  if ! type "${PYTHONEXE}" >/dev/null 2>&1; then
-    echo " "
-    echo "ERROR: The given python interpreter \"${PYTHONEXE}\" does not exist"
-    exit 1;
-  fi
+    # Everything but the name of the interpreter goes to stderr
+    "${SETUPPATH}/check-pythonversion.sh" "--check=${PY}" >&2
+    if [[ "$?" != "0" ]]; then
+      exit 1
+    fi
 
-  pv=`"${PYTHONEXE}" --version 2>&1 | awk '{ print $2 }'`
+    echo ${PY}
+    exit 0
+    ;;
 
-  # Reject development versions, e.g., 3.15.0rc1
-  if [[ ! ${pv} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
-    echo ""
-    echo "ERROR: python version (${pv}) is not acceptable"
-    echo "       It is a development version."
-    exit 1
-  fi
+  check)
+    if ! type "${PYTHONEXE}" >/dev/null 2>&1; then
+      echo " "
+      echo "ERROR: The given python interpreter \"${PYTHONEXE}\" does not exist"
+      exit 1;
+    fi
 
-  version=`echo ${pv} | awk -F. '{ print $1 }'`;
-  release=`echo ${pv} | awk -F. '{ print $2 }'`;
-  patch=`echo ${pv} | awk -F. '{ print $3 }'`;
-  PythonVersion=$((100*10#${version} + 10#${release}))
+    pv=`"${PYTHONEXE}" --version 2>&1 | awk '{ print $2 }'`
 
-  if ([ ${PythonVersion} -ge ${PythonVersionMin} ] && [ ${PythonVersion} -le ${PythonVersionMax} ]); then
-    if [[ " ${PythonBlackList} " == *" ${pv} "* ]] || [[ " ${PythonBlackList} " == *" ${pv%.*} "* ]]; then
+    # Reject development versions, e.g., 3.15.0rc1
+    if [[ ! ${pv} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
       echo ""
       echo "ERROR: python version (${pv}) is not acceptable"
-      echo "       It has been black listed as not working."
+      echo "       It is a development version."
       exit 1
-    else
-      echo "Found a good python version: ${pv}"
-      exit 0
     fi
-  else
+
+    if ! checkversionrange "${pv}" "python"; then
+      exit 1
+    fi
+    exit 0
+    ;;
+
+  *)
     echo ""
-    echo "ERROR: python version (${pv}) is not acceptable"
-    echo "       You require a version between ${PythonVersionMinString} and ${PythonVersionMaxString}"
+    echo "ERROR: No mode given - say what the script should do"
+    confhelp
     exit 1
-  fi
-fi
+    ;;
+
+esac
 
 exit 1

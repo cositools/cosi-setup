@@ -50,7 +50,7 @@ EXTRAS=""
 OSTYPE=$(uname -s)
 
 # Keep all environment variables intact or not
-KEEPENVASIS="off"
+KEEPENVASIS="false"
 
 # Ignore the stage where we look for missing packages
 IGNOREMISSINGPACKAGES=false
@@ -197,7 +197,6 @@ echo "Verifying input data"
 OSTYPE=`echo ${OSTYPE} | tr '[:upper:]' '[:lower:]'`
 CPPOPT=`echo ${CPPOPT} | tr '[:upper:]' '[:lower:]'`
 CPPDEBUG=`echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]'`
-KEEPENVASIS=`echo ${KEEPENVASIS} | tr '[:upper:]' '[:lower:]'`
 GITPULLBEHAVIOR=`echo ${GITPULLBEHAVIOR} | tr '[:upper:]' '[:lower:]'`
 
 # Provide feed back and perform error checks:
@@ -226,20 +225,21 @@ else
   echo " * Check for missing packages"
 fi
 
-if [[ ${KEEPENVASIS} == of* ]] || [[ ${KEEPENVASIS} == n* ]] || [[ ${KEEPENVASIS} == f* ]]; then
-  KEEPENVASIS="false"
+if ! BOOLEAN=$(booleanvalue "${KEEPENVASIS}"); then
+  echo " "
+  echo "ERROR: Unknown value for the --keep-environment-as-is option: ${KEEPENVASIS}"
+  echo "       Use true/on/yes or false/off/no"
+  confhelp
+  exit 1
+fi
+KEEPENVASIS="${BOOLEAN}"
+if [[ ${KEEPENVASIS} == true ]]; then
+  echo " * Keeping the existing environment paths as is."
+else
   echo " * Clearing the environment paths PATH, LD_LIBRARY_PATH, CPATH"
   # We cannot clean PATH, otherwise no programs can be found anymore
   export LD_LIBRARY_PATH=""
   export CPATH=""
-elif [[ ${KEEPENVASIS} == on ]] || [[ ${KEEPENVASIS} == y* ]] || [[ ${KEEPENVASIS} == t* ]]; then
-  KEEPENVASIS="true"
-  echo " * Keeping the existing environment paths as is."
-else
-  echo " "
-  echo "ERROR: Unknown option for keeping MEGAlib or not: ${KEEPENVASIS}"
-  confhelp
-  exit 1
 fi
 
 if [[ ${BRANCH} != "" ]]; then
@@ -601,22 +601,22 @@ echo ""
 echo "Installing ROOT"
 echo " "
 
-ISPATH="TRUE"
+ISPATH="true"
 if [[ ${ROOTPATH} == "" ]]; then
-  ISPATH="FALSE"
+  ISPATH="false"
 elif [[ ${ROOTPATH} == ?.?? ]]; then
-  ISPATH="FALSE"
+  ISPATH="false"
 elif [[ ${ROOTPATH} == master ]]; then
   echo "master"
-  ISPATH="FALSE"
+  ISPATH="false"
 elif [[ ${ROOTPATH} == v?-??-?? ]]; then
-  ISPATH="FALSE"
+  ISPATH="false"
 elif [[ ${ROOTPATH} == v?-??-??-patches ]]; then
-  ISPATH="FALSE"
+  ISPATH="false"
 fi
 
 # If we are given an existing ROOT installation, check is it is compatible
-if [[ ${ISPATH} == TRUE ]]; then
+if [[ ${ISPATH} == true ]]; then
   # Make an absolute path and check for spaces
   ROOTPATH=$(absolutefilename "${ROOTPATH}")
   if [ -z "${ROOTPATH}" ]; then
@@ -654,10 +654,10 @@ if [[ ${ISPATH} == TRUE ]]; then
   fi
   
   # Add ROOT to the environment file
-  echo "ROOTDIR=$(cd $(dirname ${ROOTPATH}); pwd)/$(basename ${ROOTPATH})" >> ${ENVFILE}
+  echo "ROOTDIR=${ROOTPATH}" >> ${ENVFILE}
   
   # Source ROOT to be available for later installs
-  . "${SETUPPATH}/source-root.sh" -p=$(cd $(dirname "${ROOTPATH}"); pwd)/$(basename "${ROOTPATH}")
+  . "${SETUPPATH}/source-root.sh" "-p=${ROOTPATH}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source ROOT"
@@ -752,10 +752,10 @@ if [ "${GEANT4PATH}" != "" ]; then
   fi
   
   # Add Geant4 to the environment file
-  echo "GEANT4DIR=$(cd $(dirname ${GEANT4PATH}); pwd)/$(basename ${GEANT4PATH})" >> ${ENVFILE}
+  echo "GEANT4DIR=${GEANT4PATH}" >> ${ENVFILE}
   
   # Source Geant4 to be available for later installs
-  . "${SETUPPATH}/source-geant4.sh" -p=$(cd $(dirname "${GEANT4PATH}"); pwd)/$(basename "${GEANT4PATH}")
+  . "${SETUPPATH}/source-geant4.sh" "-p=${GEANT4PATH}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source Geant4"
@@ -1010,10 +1010,10 @@ elif [ "${HEALPIXPATH}" != "" ]; then
   fi
   
   # Add Healpix to the environment file
-  echo "HEALPIXDIR=$(cd $(dirname ${HEALPIXPATH}); pwd)/$(basename ${HEALPIXPATH})" >> ${ENVFILE}
+  echo "HEALPIXDIR=${HEALPIXPATH}" >> ${ENVFILE}
   
   # Source Healpix to be available for later installs
-  . "${SETUPPATH}/source-healpix.sh" -p=$(cd $(dirname "${HEALPIXPATH}"); pwd)/$(basename "${HEALPIXPATH}")
+  . "${SETUPPATH}/source-healpix.sh" "-p=${HEALPIXPATH}"
   if [[ "$?" != "0" ]]; then
     echo " "
     echo "ERROR: Unable to source Healpix"
@@ -1116,7 +1116,7 @@ elif [[ "$(bin/megalib-config --geant4)" != "$(geant4-config --version)" ]]; the
   REPOSTATUS=1
 fi
 
-MEGALIBRECOMPILED="FALSE"
+MEGALIBRECOMPILED="false"
 if [ ${REPOSTATUS} -eq 1 ]; then
   echo "MEGAlib needs to be compiled"
 
@@ -1138,7 +1138,7 @@ if [ ${REPOSTATUS} -eq 1 ]; then
     exit 1
   fi
 
-  MEGALIBRECOMPILED="TRUE"
+  MEGALIBRECOMPILED="true"
 fi
 
 echo "MEGALIBDIR=${COSIPATH}/megalib" >> ${ENVFILE}
@@ -1179,7 +1179,7 @@ if [ ${REPOSTATUS} -eq 0 ]; then
 fi
 
 # Check if MEGAlib has been compiled
-if [[ ${MEGALIBRECOMPILED} == "TRUE" ]]; then
+if [[ ${MEGALIBRECOMPILED} == "true" ]]; then
   REPOSTATUS=1
 fi
 

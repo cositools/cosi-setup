@@ -12,7 +12,7 @@
 
 # The path to this script and to the COSItools
 SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-COSITOOLSPATH="$( cd -- "${SETUPPATH}/.." >/dev/null 2>&1 ; pwd -P )"
+COSIPATH="$( cd -- "${SETUPPATH}/.." >/dev/null 2>&1 ; pwd -P )"
 
 
 confhelp() {
@@ -106,21 +106,21 @@ fi
 ############################################################################################################
 # Step 3: Call the operating system specific program
 
-PENV="${COSITOOLSPATH}/python-env"
+PENV="${COSIPATH}/python-env"
 
 # If we have an existing environment, check if we can reuse it
 if [[ -d ${PENV} ]]; then
   # Currently the only requirement for re-use is the same python version
-  REUSEOK="TRUE"
+  REUSEOK="true"
   PYVERS=$("${PY}" -VV)
   . "${PENV}/bin/activate"
   if [[ "${PYVERS}" != "$(python3 -VV)" ]]; then
     echo "INFO: Existing python environment uses different python version (${PYVERS} != $(python3 -VV)) or has been compiled differently - rebuilding it"
-    REUSEOK="FALSE"
+    REUSEOK="false"
   fi
   deactivate
 
-  if [[ ${REUSEOK} == "TRUE" ]]; then
+  if [[ ${REUSEOK} == "true" ]]; then
     echo ""
     echo "Re-using existing python environment"
     echo "If something goes wrong with the python setup, try first to remove the existing local python environment, and start the setup stript again:"
@@ -221,7 +221,7 @@ pip3 install jupyter
 # Install cosipy from its git checkout.
 # It is installed in editable mode since the repository is updated by the setup script
 # on each run, and a regular install would go stale after the next update.
-COSIPY="${COSITOOLSPATH}/cosipy"
+COSIPY="${COSIPATH}/cosipy"
 if [[ ! -d ${COSIPY} ]]; then
   echo ""
   echo "ERROR: Unable to find the cosipy directory at ${COSIPY}!"
@@ -241,7 +241,7 @@ fi
 
 # Install the extra repositories, but only those which are python packages
 for REPO in ${EXTRAS}; do
-  REPODIR="${COSITOOLSPATH}/${REPO}"
+  REPODIR="${COSIPATH}/${REPO}"
   if [[ ! -d ${REPODIR} ]]; then
     echo ""
     echo "ERROR: Unable to find the extra repository at ${REPODIR}!"

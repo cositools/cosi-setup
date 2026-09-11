@@ -28,18 +28,6 @@ COMPONENTS="ftools nustar Xspec"
 
 
 
-# Check if some of the frequently used software is installed:
-type gfortran >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  type g95 >/dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    type g77 >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
-      echo "ERROR: A fortran compiler must be installed"
-      exit 1
-    fi
-  fi
-fi
 
 MAXTHREADS=1;
 if [[ ${OSTYPE} == *arwin* ]]; then
@@ -66,7 +54,7 @@ confhelp() {
   echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for HEASoft."
   echo " "
-  echo "--patch=[yes or no - default: no]"
+  echo "--patch=[true/on/yes, false/off/no - default: false]"
   echo "    Apply internal HEASoft patches, if there are any for this version."
   echo " "
   echo "--help or -h"
@@ -127,7 +115,7 @@ done
 
 TARBALL=""
 ENVFILE=""
-PATCH="off"
+PATCH="false"
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
@@ -166,16 +154,32 @@ for C in "${CMD[@]}"; do
   esac
 done
 
-PATCH=`echo ${PATCH} | tr '[:upper:]' '[:lower:]'`
-if ( [[ ${PATCH} == of* ]] || [[ ${PATCH} == n* ]] ); then
-  PATCH="off"
-  echo " * Don't apply internal HEASoft patches"
-elif ( [[ ${PATCH} == on ]] || [[ ${PATCH} == y* ]] ); then
-  PATCH="on"
+if ! BOOLEAN=$(booleanvalue "${PATCH}"); then
+  echo " "
+  echo "ERROR: Unknown value for the --patch option: ${PATCH}"
+  echo "       Use true/on/yes or false/off/no"
+  exit 1
+fi
+PATCH="${BOOLEAN}"
+if [[ ${PATCH} == true ]]; then
   echo " * Apply internal HEASoft patches"
 else
-  echo "ERROR: Unknown option for patch: ${PATCH}"
-  exit 1
+  echo " * Don't apply internal HEASoft patches"
+fi
+
+
+# The tools this build needs. Checked after the command line has been read, so that
+# --help still works on a machine which cannot build.
+type gfortran >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  type g95 >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    type g77 >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo "ERROR: A fortran compiler must be installed"
+      exit 1
+    fi
+  fi
 fi
 
 
@@ -205,23 +209,8 @@ else
 
   # Check if it already exists locally
   REQUIREDOWNLOAD="true"
-  if [ -f "${TARBALL}" ]; then
-    # ... and has the same size
-    LOCALSIZE=$(wc -c < "${TARBALL}" | tr -d ' ')
-    REMOTESIZE=$(curl -s --head "https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}" | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
-    if [ "$?" != "0" ]; then
-      echo "ERROR: Unable to determine remote tarball size"
-      exit 1
-    fi
-    IDENTICAL=`echo ${REMOTESIZE} | grep ${LOCALSIZE}`
-    if [ "${IDENTICAL}" != "" ]; then
-      REQUIREDOWNLOAD="false"
-      echo "File is already present and has same size, thus no download required!"
-    else
-      echo "Remote and local file sizes are different (local: ${LOCALSIZE} vs. remote: ${REMOTESIZE}). Downloading it."
-    fi
-  else
-    echo "Tarball does not exist, downloading it"
+  if tarballisgood "${TARBALL}" "https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/${TARBALL}"; then
+    REQUIREDOWNLOAD="false"
   fi
 
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
@@ -275,7 +264,7 @@ if [ -d heasoft_v${VER} ]; then
       PATCHMD5=`echo ${PATCHSTATUS} | awk -F" " '{ print $3 }'`
     fi
 
-    if [[ ${PATCH} == on ]]; then
+    if [[ ${PATCH} == true ]]; then
       if [[ ${PATCHPRESENT} == yes ]] && [[ ${PATCHSTATUS} == Patch\ applied* ]] && [[ ${PATCHPRESENTMD5} == ${PATCHMD5} ]]; then
         SAMEPATCH="YES";
       elif [[ ${PATCHPRESENT} == no ]] && [[ ${PATCHSTATUS} == Patch\ not\ applied* ]]; then
@@ -284,7 +273,7 @@ if [ -d heasoft_v${VER} ]; then
         echo "The old installation didn't use the same patch..."
         SAMEPATCH=""
       fi
-    elif [[ ${PATCH} == off ]]; then
+    elif [[ ${PATCH} == false ]]; then
       if [[ ${PATCHSTATUS} == Patch\ not\ applied* ]] || [[ -z ${PATCHSTATUS}  ]]; then    # last one means empty
         SAMEPATCH="YES";
       else
@@ -333,7 +322,7 @@ mv heasoft-${VER} heasoft_v${VER}
 
 
 PATCHAPPLIED="Patch not applied"
-if [[ ${PATCH} == on ]]; then
+if [[ ${PATCH} == true ]]; then
   echo "Patching..."
   if [ -f "${SETUPPATH}/patches/${HEASOFTCORE}.patch" ]; then
     cd heasoft_v${VER}
@@ -367,6 +356,9 @@ fi
 
 
 echo "Compiling..."
+# HEASoft is deliberately built with a single thread: its makefiles have shown race
+# conditions with parallel builds, which produce strange failures far from the cause.
+# Do not turn this into a --max-threads option without testing it thoroughly.
 make -j1 > build.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong while compiling HEASoft!"
@@ -377,8 +369,11 @@ ERRORS=$(cat build.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_
 if [ "${ERRORS}" == "" ]; then
   echo "Installing ..."
   make -j1 install > install.log 2>&1
+  INSTALLRESULT=$?
+  # The log is searched as well as the exit status checked: make does not always report a
+  # broken build, and not every failure prints a line the pattern below matches
   ERRORS=$(cat install.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
-  if [ "${ERRORS}" != "" ]; then
+  if [ "${INSTALLRESULT}" != "0" ] || [ "${ERRORS}" != "" ]; then
     echo "ERROR: Errors occured during the installation. Check your install.log"
     echo "       Check the file "`pwd`"/install.log"
     exit 1;
@@ -428,10 +423,20 @@ fi
 echo "Store our success story..."
 cd ..
 rm -f COMPILE_SUCCESSFUL
+echo "HEASoft compilation & installation successful" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Configure options:" >> COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Compile options:" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Components:" >> COMPILE_SUCCESSFUL
 echo "${COMPONENTS}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Patch application status:" >> COMPILE_SUCCESSFUL
 echo "${PATCHAPPLIED}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
 
 
 echo "Setting permissions..."

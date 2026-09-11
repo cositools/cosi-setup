@@ -55,9 +55,8 @@ for C in "${CMD[@]}"; do
   fi
 done
 
-CHECK="false"
-GET="false"
-GOOD="false"
+# What the script was asked to do: check, get-max, get-min or good-version
+MODE=""
 HEALPIXPATH=""
 TESTVERSION=""
 
@@ -79,117 +78,79 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    check)        HEALPIXPATH=$(optionvalue "${C}"); CHECK="true";  GET="false"; GOOD="false" ;;
-    get-max)      HEALPIXPATH="";                                        CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
-    get-min)      HEALPIXPATH="";                                        CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
-    good-version) HEALPIXPATH="";                                        CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                  TESTVERSION=$(optionvalue "${C}") ;;
+    check)        MODE="check";        HEALPIXPATH=$(optionvalue "${C}") ;;
+    get-max)      MODE="get-max" ;;
+    get-min)      MODE="get-min" ;;
+    good-version) MODE="good-version"; TESTVERSION=$(optionvalue "${C}") ;;
     help)         echo ""; confhelp; exit 0 ;;
   esac
 done
 
 
-HealpixVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Healpix-Min" | awk -F":" '{ print $2 }')
-HealpixVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Healpix-Max" | awk -F":" '{ print $2 }')
-HealpixBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Healpix-Blacklist" | awk -F":" '{ print $2 }')
-
-HealpixVersionMinString=${HealpixVersionMin}
-HealpixVersionMaxString=${HealpixVersionMax}
-
-if [[ ! ${HealpixVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${HealpixVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
-  echo ""
-  echo "ERROR: Unable to read a valid Healpix version range from ${SETUPPATH}/allowed-versions.txt"
+# The allowed version range and the black list live in allowed-versions.txt
+if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "Healpix" "Healpix"; then
   exit 1
 fi
 
-HealpixVersionMin=$(echo ${HealpixVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
-HealpixVersionMax=$(echo ${HealpixVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
+case ${MODE} in
 
-if [ "${GET}" == "true" ]; then
-  if [ "${MAX}" == "true" ]; then
-    echo "${HealpixVersionMaxString}"
-  else 
-    echo "${HealpixVersionMinString}"
-  fi
-  exit 0;
-fi
+  get-max) echo "${VERSIONMAXSTRING}"; exit 0 ;;
+  get-min) echo "${VERSIONMINSTRING}"; exit 0 ;;
 
-
-if [ "${GOOD}" == "true" ]; then
-  # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
-    echo ""
-    echo "ERROR: Healpix version (${TESTVERSION}) is not acceptable"
-    echo "       It is not a valid version string."
-    exit 1
-  fi
-
-  version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-  release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  HealpixVersion=$((100*10#${version} + 10#${release}))
-  
-  if ([ ${HealpixVersion} -ge ${HealpixVersionMin} ] && [ ${HealpixVersion} -le ${HealpixVersionMax} ]); then
-    if [[ " ${HealpixBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${HealpixBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
+  good-version)
+    # Reject anything which is not a version, e.g. v11.2.2 or master
+    if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
       echo ""
       echo "ERROR: Healpix version (${TESTVERSION}) is not acceptable"
-      echo "       It has been black listed as not working."
+      echo "       It is not a valid version string."
       exit 1
-    else
-      echo "Found a good Healpix version: ${TESTVERSION}"
-      exit 0
     fi
-  else
-    echo ""
-    echo "ERROR: Healpix version (${TESTVERSION}) is not acceptable"
-    echo "       You require a version between ${HealpixVersionMinString} and ${HealpixVersionMaxString}"
-    exit 1
-  fi
-fi  
 
-if [ "${CHECK}" == "true" ]; then
-  # Healpix does not ship a tool which reports its version, but it installs a pkg-config
-  # file which does. That is also the file MEGAlib later uses to find Healpix, thus an
-  # installation without it would be useless to us anyway.
-  PCFILE=""
-  for DIR in "${HEALPIXPATH}/lib/pkgconfig" "${HEALPIXPATH}/lib64/pkgconfig"; do
-    if [[ -f "${DIR}/healpix_cxx.pc" ]]; then
-      PCFILE="${DIR}/healpix_cxx.pc"
-      break
-    fi
-  done
-
-  if [[ ${PCFILE} == "" ]]; then
-    echo " "
-    echo "ERROR: The given directory ${HEALPIXPATH} does no contain a correct Healpix installation"
-    exit 1;
-  fi
-
-  rv=$(grep "^Version:" "${PCFILE}" | awk '{ print $2 }')
-  if [[ ${rv} == "" ]]; then
-    echo " "
-    echo "ERROR: Unable to determine the Healpix version from ${PCFILE}"
-    exit 1;
-  fi
-
-  version=`echo ${rv} | awk -F. '{ print $1 }'`;
-  release=`echo ${rv} | awk -F. '{ print $2 }'`;
-  HealpixVersion=$((100*10#${version} + 10#${release}))
-
-  if ([ ${HealpixVersion} -ge ${HealpixVersionMin} ] && [ ${HealpixVersion} -le ${HealpixVersionMax} ]); then
-    if [[ " ${HealpixBlackList} " == *" ${rv} "* ]] || [[ " ${HealpixBlackList} " == *" ${rv%.*} "* ]]; then
-      echo ""
-      echo "ERROR: Healpix version (${rv}) is not acceptable"
-      echo "       It has been black listed as not working."
+    if ! checkversionrange "${TESTVERSION}" "Healpix"; then
       exit 1
-    else
-      echo "The given Healpix version ${rv} is acceptable"
-      exit 0;
     fi
-  else
+    exit 0
+    ;;
+
+  check)
+    # Healpix does not ship a tool which reports its version, but it installs a pkg-config
+    # file which does. That is also the file MEGAlib later uses to find Healpix, thus an
+    # installation without it would be useless to us anyway.
+    PCFILE=""
+    for DIR in "${HEALPIXPATH}/lib/pkgconfig" "${HEALPIXPATH}/lib64/pkgconfig"; do
+      if [[ -f "${DIR}/healpix_cxx.pc" ]]; then
+        PCFILE="${DIR}/healpix_cxx.pc"
+        break
+      fi
+    done
+
+    if [[ ${PCFILE} == "" ]]; then
+      echo " "
+      echo "ERROR: The given directory ${HEALPIXPATH} does no contain a correct Healpix installation"
+      exit 1;
+    fi
+
+    rv=$(grep "^Version:" "${PCFILE}" | awk '{ print $2 }')
+    if [[ ${rv} == "" ]]; then
+      echo " "
+      echo "ERROR: Unable to determine the Healpix version from ${PCFILE}"
+      exit 1;
+    fi
+
+
+    if ! checkversionrange "${rv}" "Healpix"; then
+      exit 1
+    fi
+    exit 0
+    ;;
+
+  *)
     echo ""
-    echo "ERROR: No acceptable Healpix version found: ${HealpixVersion} (min: ${HealpixVersionMinString}, max: ${HealpixVersionMaxString})"
+    echo "ERROR: No mode given - say what the script should do"
+    confhelp
     exit 1
-  fi
-fi
+    ;;
+
+esac
 
 exit 1

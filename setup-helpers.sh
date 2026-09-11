@@ -164,3 +164,145 @@ heasoftdirectory() {
   done
   return 1
 }
+
+# Read the allowed version range of one component out of allowed-versions.txt. That file
+# holds lines such as "ROOT-Min:6.36", "ROOT-Max:6.40" and "ROOT-Blacklist:6.38 6.39".
+#
+# ${1}: the full path of allowed-versions.txt
+# ${2}: the label used inside that file, e.g. "ROOT", "Geant4", "HEASoft", "Healpix", "Python"
+# ${3}: the component name for the error message, e.g. "ROOT"
+#
+# Sets VERSIONMINSTRING and VERSIONMAXSTRING to the range as written, e.g. "6.36"
+#      VERSIONMIN and VERSIONMAX to the same encoded for comparing, see encodeversion
+#      VERSIONBLACKLIST to the black listed versions, separated by spaces
+#
+# Returns 0, or 1 after an error message if the file holds no usable range
+readversionrange() {
+  VERSIONMINSTRING=$(grep "${2}-Min" "${1}" | awk -F":" '{ print $2 }')
+  VERSIONMAXSTRING=$(grep "${2}-Max" "${1}" | awk -F":" '{ print $2 }')
+  VERSIONBLACKLIST=$(grep "${2}-Blacklist" "${1}" | awk -F":" '{ print $2 }')
+
+  if [[ ! ${VERSIONMINSTRING} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${VERSIONMAXSTRING} =~ ^[0-9]+\.[0-9]+$ ]]; then
+    echo ""
+    echo "ERROR: Unable to read a valid ${3} version range from ${1}"
+    return 1
+  fi
+
+  VERSIONMIN=$(encodeversion "${VERSIONMINSTRING}")
+  VERSIONMAX=$(encodeversion "${VERSIONMAXSTRING}")
+  return 0
+}
+
+# Turn a version into a single number, so that two of them can be compared. Only the major
+# and the minor part decide, thus 6.38, 6.38.02 and 6.38/02 all become 638. Geant4 and ROOT
+# write their patch level behind a "." or a "/", and both forms have to give the same
+# number - doing this in one place is what keeps the two apart from crashing on the other.
+# The "10#" stops a leading zero from being read as an octal number, e.g. in 11.02.
+#
+# ${1}: the version, e.g. "6.40", "11.02.p02", "6.38/02", "3.14.7"
+#
+# Returns 0 and echoes the number
+#         1 and echoes nothing if the version does not start with major.minor
+encodeversion() {
+  # Everything from the second separator on is the patch level and does not count
+  local MAJOR MINOR
+  MAJOR=$(echo "${1}" | awk -F'[./]' '{ print $1 }')
+  MINOR=$(echo "${1}" | awk -F'[./]' '{ print $2 }')
+  if [[ ! ${MAJOR} =~ ^[0-9]+$ ]] || [[ ! ${MINOR} =~ ^[0-9]+$ ]]; then
+    return 1
+  fi
+  echo $((100*10#${MAJOR} + 10#${MINOR}))
+  return 0
+}
+
+# Decide whether one version may be used, and say what is wrong with it if not. Both the
+# "--check" and the "--good-version" mode of the check scripts end here, so that the two
+# can never drift apart and report different things about the same version.
+# readversionrange has to have been called first.
+#
+# ${1}: the version, e.g. "6.40"
+# ${2}: the component name for the messages, e.g. "ROOT"
+#
+# Returns 0 after saying that the version is good
+#         1 after saying why it is not
+checkversionrange() {
+  local ENCODED
+  if ! ENCODED=$(encodeversion "${1}"); then
+    echo ""
+    echo "ERROR: ${2} version (${1}) is not acceptable"
+    echo "       It is not a valid version string."
+    return 1
+  fi
+
+  if [[ ${ENCODED} -lt ${VERSIONMIN} ]] || [[ ${ENCODED} -gt ${VERSIONMAX} ]]; then
+    echo ""
+    echo "ERROR: ${2} version (${1}) is not acceptable"
+    echo "       You require a version between ${VERSIONMINSTRING} and ${VERSIONMAXSTRING}"
+    return 1
+  fi
+
+  # A version is black listed either in full, e.g. 6.38.02, or with major and minor only
+  local NORMALIZED="${1//\//.}"
+  if [[ " ${VERSIONBLACKLIST} " == *" ${NORMALIZED} "* ]] || [[ " ${VERSIONBLACKLIST} " == *" ${NORMALIZED%.*} "* ]]; then
+    echo ""
+    echo "ERROR: ${2} version (${1}) is not acceptable"
+    echo "       It has been black listed as not working."
+    return 1
+  fi
+
+  echo "Found a good ${2} version: ${1}"
+  return 0
+}
+
+# Decide whether a tarball which is already on disk can be reused, or has to be fetched
+# again. The archive always has to be a complete gzip file, and when the web server reports
+# a size it has to match. The size is compared as a number: comparing it as text, which is
+# what this used to do, accepts a truncated file whenever its size happens to be a
+# substring of the real one, e.g. 1234 inside 51234.
+#
+# Not every server reports a size - GitHub sends its tarballs without one - and the network
+# may be down altogether. In both cases the gzip check is all there is, and a complete
+# archive is kept rather than fetched again, so that a rebuild also works offline.
+#
+# ${1}: the local file name
+# ${2}: the URL the file comes from
+#
+# Returns 0 if the local file is complete and can be kept
+#         1 if it has to be downloaded again, after saying why
+tarballisgood() {
+  if [[ ! -f "${1}" ]]; then
+    echo "Tarball does not exist, downloading it"
+    return 1
+  fi
+
+  # A truncated or corrupted archive fails here, whatever its size says
+  if ! gunzip -t "${1}" >/dev/null 2>&1; then
+    echo "Tarball already exists, but is corrupted. Requiring re-download."
+    return 1
+  fi
+
+  # The headers are fetched on their own and not inside a pipe, since the exit status of a
+  # pipe is the one of its last command and a failing curl would go unnoticed there
+  local HEADERS="" REMOTESIZE="" LOCALSIZE
+  HEADERS=$(curl -sSL --head "${2}" 2>/dev/null) || HEADERS=""
+
+  # A redirect answers with several headers. The ones belonging to the redirect itself
+  # carry a length of 0, thus drop those and take the last real one.
+  if [[ ${HEADERS} != "" ]]; then
+    REMOTESIZE=$(echo "${HEADERS}" | grep -i "^content-length:" | awk '{ print $2 }' | tr -d '\r' | grep -v '^0$' | tail -1)
+  fi
+
+  if [[ ! ${REMOTESIZE} =~ ^[0-9]+$ ]]; then
+    echo "Tarball already exists and is a complete archive - the server reports no size to compare. No download required."
+    return 0
+  fi
+
+  LOCALSIZE=$(wc -c < "${1}" | tr -d ' ')
+  if [[ ${LOCALSIZE} -ne ${REMOTESIZE} ]]; then
+    echo "Remote and local file sizes are different (local: ${LOCALSIZE} vs. remote: ${REMOTESIZE}). Downloading it."
+    return 1
+  fi
+
+  echo "Tarball already exists and is complete. No download required."
+  return 0
+}

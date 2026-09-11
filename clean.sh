@@ -27,9 +27,9 @@ SETUPOPTIONS="all c++-code external python-env help"
 # The command line
 CMD=( "$@" )
 
-CLEANCPP=FALSE
-CLEANEXTERNAL=FALSE
-CLEANPYTHON=FALSE
+CLEANCPP=false
+CLEANEXTERNAL=false
+CLEANPYTHON=false
 
 
 
@@ -84,18 +84,18 @@ for C in "${CMD[@]}"; do
 
   case ${OPTION} in
     all)
-      CLEANCPP=TRUE
-      CLEANEXTERNAL=TRUE
-      CLEANPYTHON=TRUE
+      CLEANCPP=true
+      CLEANEXTERNAL=true
+      CLEANPYTHON=true
       ;;
     c++-code)
-      CLEANCPP=TRUE
+      CLEANCPP=true
       ;;
     external)
-      CLEANEXTERNAL=TRUE
+      CLEANEXTERNAL=true
       ;;
     python-env)
-      CLEANPYTHON=TRUE
+      CLEANPYTHON=true
       ;;
     help)
       echo ""
@@ -105,7 +105,7 @@ for C in "${CMD[@]}"; do
   esac
 done
 
-if [[ ${CLEANCPP} != "TRUE" ]] && [[ ${CLEANEXTERNAL} != "TRUE" ]] && [[ ${CLEANPYTHON} != "TRUE" ]]; then
+if [[ ${CLEANCPP} != "true" ]] && [[ ${CLEANEXTERNAL} != "true" ]] && [[ ${CLEANPYTHON} != "true" ]]; then
   echo ""
   echo "Nothing to be done. Please see \"./clean.sh --help\" for a list of options."
   echo ""
@@ -126,7 +126,7 @@ if [[ ${COSITOOLSDIR} == "" ]] || [[ ! -d ${COSITOOLSDIR} ]]; then
   exit 1
 fi
 
-if [[ ${CLEANCPP} == "TRUE" ]]; then
+if [[ ${CLEANCPP} == "true" ]]; then
   if [[ -d ${COSITOOLSDIR}/nuclearizer ]]; then
     echo "Cleaning nuclearizer"
     cd "${COSITOOLSDIR}/nuclearizer"
@@ -140,7 +140,7 @@ if [[ ${CLEANCPP} == "TRUE" ]]; then
   fi
 fi
 
-if [[ ${CLEANEXTERNAL} == "TRUE" ]]; then
+if [[ ${CLEANEXTERNAL} == "true" ]]; then
   if [[ -d ${COSITOOLSDIR}/external ]]; then
     echo "Removing external libraries/programs"
     cd "${COSITOOLSDIR}/external"
@@ -152,7 +152,7 @@ if [[ ${CLEANEXTERNAL} == "TRUE" ]]; then
   fi
 fi
 
-if [[ ${CLEANPYTHON} == "TRUE" ]]; then
+if [[ ${CLEANPYTHON} == "true" ]]; then
   if [[ -d ${COSITOOLSDIR}/python-env ]]; then
     echo "Removing python environment"
     rm -rf "${COSITOOLSDIR}/python-env"

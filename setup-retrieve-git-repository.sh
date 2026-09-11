@@ -99,16 +99,18 @@ for C in "${CMD[@]}"; do
   # "|| RESULT=$?" so that a non-zero return does not trip a "set -e"
   RESULT=0
   OPTION=$(resolveoption "${C}" "${SETUPOPTIONS}") || RESULT=$?
+  # 100 and not 1: this script returns 0 for "unchanged" and 1 for "updated, recompile it",
+  # thus a 1 here would tell the caller that everything went fine
   if [[ ${RESULT} == 2 ]]; then
     echo ""
     echo "ERROR: The command line option \"${C}\" is ambiguous - it matches: ${OPTION}"
     echo "       See \"./setup-retrieve-git-repository.sh --help\" for a list of options"
-    exit 1
+    exit 100
   elif [[ ${RESULT} != 0 ]]; then
     echo ""
     echo "ERROR: Unknown command line option: ${C}"
     echo "       See \"./setup-retrieve-git-repository.sh --help\" for a list of options"
-    exit 1
+    exit 100
   fi
 
   case ${OPTION} in

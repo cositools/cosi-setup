@@ -38,32 +38,6 @@ COMPILEROPTIONS=`gcc --version | head -n 1`
 # The Geant4 website from which to download the tarball
 WEBSITE="https://geant4-data.web.cern.ch/releases"
 
-# Check if some of the frequently used software is installed:
-type cmake >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo "ERROR: cmake must be installed"
-  exit 1
-else 
-  VER=`cmake --version | grep ^cmake`
-  VER=${VER#cmake version }; 
-  OLDIFS=${IFS}; IFS='.'; Tokens=( ${VER} ); IFS=${OLDIFS}; 
-  VERSION=$(( 10000*${Tokens[0]} + 100*${Tokens[1]} + ${Tokens[2]} )); 
-  if (( ${VERSION} < 30300 )); then 
-    echo "ERROR: the version of cmake needs to be at least 3.3 and not ${VER}"
-    exit 1
-  fi
-fi
-type curl >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo "ERROR: curl must be installed"
-  exit 1
-fi 
-type openssl >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo "ERROR: openssl must be installed"
-  exit 1
-fi 
-
 
 confhelp() {
   echo ""
@@ -82,20 +56,21 @@ confhelp() {
   echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for Geant4." 
   echo " "
-  echo "--debug=[off/no, on/yes - default: off]"
+  echo "--debug=[off/no, on/yes, strong/hard - default: off]"
   echo "    Compile with degugging options."
+  echo "    The strong level is the same as on here - it only differs for MEGAlib itself."
   echo " "
-  echo "--keep-environment-as-is=[false/off/no, true/on/yes - default: false]"
+  echo "--keep-environment-as-is=[true/on/yes, false/off/no - default: false]"
   echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty to avoid most libray conflicts."
   echo "    This flag toggles this behaviour and lets you decide to keep your environment or not."
   echo " "
-  echo "--max-threads=[integer >=1 - default: off]"
+  echo "--max-threads=[integer >=1 - default: the number of cores in your system]"
   echo "    The maximum number of threads to be used for compilation. Default is the number of cores in your system."
   echo " "
-  echo "--patch=[yes or no - default no]"
+  echo "--patch=[true/on/yes, false/off/no - default: false]"
   echo "    Apply Geant4 patches, if there are any."
   echo " "
-  echo "--cleanup=[off/no, on/yes - default: off]"
+  echo "--cleanup=[true/on/yes, false/off/no - default: false]"
   echo "    Remove intermediate build files"
   echo " "
   echo "--help or -h"
@@ -129,12 +104,12 @@ TARBALL=""
 ENVFILE=""
 MAXTHREADS=1024
 WANTEDVERSION=""
-PATCH="off"
+PATCH="false"
 DEBUG="off"
 DEBUGSTRING=""
 DEBUGOPTIONS=""
-PATCH="off"
-CLEANUP="off"
+PATCH="false"
+CLEANUP="false"
 KEEPENVASIS="false"
 
 # Overwrite default options with user options:
@@ -241,6 +216,14 @@ elif ( [[ ${DEBUG} == on ]] || [[ ${DEBUG} == y* ]] || [[ ${DEBUG} == nor* ]] );
   DEBUGSTRING="_debug"
   DEBUGOPTIONS="-DCMAKE_BUILD_TYPE=Debug"
   echo " * Using debugging code"
+elif ( [[ ${DEBUG} == st* ]] || [[ ${DEBUG} == h* ]] ); then
+  # MEGAlib knows a third level which turns on the address sanitizer for its own sources.
+  # There is no equivalent for a cmake build of Geant4, thus treat it like the normal level
+  # instead of refusing a value the setup script accepts and passes on.
+  DEBUG="normal"
+  DEBUGSTRING="_debug"
+  DEBUGOPTIONS="-DCMAKE_BUILD_TYPE=Debug"
+  echo " * Using debugging code - the strong level only applies to MEGAlib itself"
 else
   echo "ERROR: Unknown debugging code selection: ${DEBUG}"
   confhelp
@@ -248,56 +231,88 @@ else
 fi
 
 
-PATCH=`echo ${PATCH} | tr '[:upper:]' '[:lower:]'`
-if ( [[ ${PATCH} == of* ]] || [[ ${PATCH} == n* ]] ); then
-  PATCH="off"
-  echo " * Don't apply internal ROOT and Geant4 patches"
-elif ( [[ ${PATCH} == on ]] || [[ ${PATCH} == y* ]] ); then
-  PATCH="on"
+if ! BOOLEAN=$(booleanvalue "${PATCH}"); then
+  echo " "
+  echo "ERROR: Unknown value for the --patch option: ${PATCH}"
+  echo "       Use true/on/yes or false/off/no"
+  confhelp
+  exit 1
+fi
+PATCH="${BOOLEAN}"
+if [[ ${PATCH} == true ]]; then
   echo " * Apply internal ROOT and Geant4 patches"
 else
-  echo " "
-  echo "ERROR: Unknown option for updates: ${PATCH}"
-  confhelp
-  exit 1
+  echo " * Don't apply internal ROOT and Geant4 patches"
 fi
 
 
-CLEANUP=`echo ${CLEANUP} | tr '[:upper:]' '[:lower:]'`
-if ( [[ ${CLEANUP} == of* ]] || [[ ${CLEANUP} == n* ]] ); then
-  CLEANUP="off"
-  echo " * Don't clean up intermediate build files"
-elif ( [[ ${CLEANUP} == on ]] || [[ ${CLEANUP} == y* ]] ); then
-  CLEANUP="on"
+if ! BOOLEAN=$(booleanvalue "${CLEANUP}"); then
+  echo " "
+  echo "ERROR: Unknown value for the --cleanup option: ${CLEANUP}"
+  echo "       Use true/on/yes or false/off/no"
+  confhelp
+  exit 1
+fi
+CLEANUP="${BOOLEAN}"
+if [[ ${CLEANUP} == true ]]; then
   echo " * Clean up intermediate build files"
 else
-  echo " "
-  echo "ERROR: Unknown option for clean up: ${CLEANUP}"
-  confhelp
-  exit 1
+  echo " * Don't clean up intermediate build files"
 fi
 
 
-KEEPENVASIS=`echo ${KEEPENVASIS} | tr '[:upper:]' '[:lower:]'`
-if [[ ${KEEPENVASIS} == f* ]] || [[ ${KEEPENVASIS} == of* ]] || [[ ${KEEPENVASIS} == n* ]]; then
-  KEEPENVASIS="false"
-  echo " * Clearing the environment paths LD_LIBRARY_PATH, CPATH"
-  # We cannot clean PATH, otherwise no programs can be found anymore 
-  export LD_LIBRARY_PATH=""
-  export CPATH=""
-elif [[ ${KEEPENVASIS} == t* ]] || [[ ${KEEPENVASIS} == on ]] || [[ ${KEEPENVASIS} == y* ]]; then
-  KEEPENVASIS="true"
-  echo " * Keeping the existing environment paths as is."
-else
+if ! BOOLEAN=$(booleanvalue "${KEEPENVASIS}"); then
   echo " "
-  echo "ERROR: Unknown option for keeping the environment or not: ${KEEPENVASIS}"
+  echo "ERROR: Unknown value for the --keep-environment-as-is option: ${KEEPENVASIS}"
+  echo "       Use true/on/yes or false/off/no"
   confhelp
   exit 1
+fi
+KEEPENVASIS="${BOOLEAN}"
+if [[ ${KEEPENVASIS} == true ]]; then
+  echo " * Keeping the existing environment paths as is."
+else
+  echo " * Clearing the environment paths LD_LIBRARY_PATH, CPATH, CMAKE_PREFIX_PATH, DYLD_LIBRARY_PATH"
+  # We cannot clean PATH, otherwise no programs can be found anymore.
+  # CMAKE_PREFIX_PATH and DYLD_LIBRARY_PATH matter because this is a cmake build: a stale
+  # value there sends cmake to the wrong version of a dependency without saying so.
+  export LD_LIBRARY_PATH=""
+  export CPATH=""
+  export CMAKE_PREFIX_PATH=""
+  export DYLD_LIBRARY_PATH=""
 fi
 
 
 echo " "
 echo " " 
+# The tools this build needs. Checked after the command line has been read, so that
+# --help still works on a machine which cannot build.
+type cmake >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "ERROR: cmake must be installed"
+  exit 1
+else 
+  VER=`cmake --version | grep ^cmake`
+  VER=${VER#cmake version }; 
+  OLDIFS=${IFS}; IFS='.'; Tokens=( ${VER} ); IFS=${OLDIFS}; 
+  VERSION=$(( 10000*${Tokens[0]} + 100*${Tokens[1]} + ${Tokens[2]} )); 
+  if (( ${VERSION} < 30300 )); then 
+    echo "ERROR: the version of cmake needs to be at least 3.3 and not ${VER}"
+    exit 1
+  fi
+fi
+type curl >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "ERROR: curl must be installed"
+  exit 1
+fi 
+type openssl >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "ERROR: openssl must be installed"
+  exit 1
+fi 
+
+
 echo "Getting Geant4..."
 VER=""
 
@@ -368,19 +383,8 @@ else
   
   # Check if it already exists locally
   REQUIREDOWNLOAD="true"
-  if [ -f "${TARBALL}" ]; then
-    # ... and has the same size
-    LOCALSIZE=`wc -c < "${TARBALL}" | tr -d ' '`
-    SAMESIZE=`curl -s --head "${WEBSITE}/${TARBALL}"`
-    if [ "$?" != "0" ]; then
-      echo "ERROR: Unable to determine remote tarball size"
-      exit 1
-    fi
-    SAMESIZE=`echo ${SAMESIZE} | grep ${LOCALSIZE}`
-    if [ "${SAMESIZE}" != "" ]; then
-      REQUIREDOWNLOAD="false"
-      echo "File is already present and has same size, thus no download required!"
-    fi
+  if tarballisgood "${TARBALL}" "${WEBSITE}/${TARBALL}"; then
+    REQUIREDOWNLOAD="false"
   fi
   
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
@@ -415,11 +419,11 @@ GEANT4BUILDDIR=geant4_${VER}-build     # Attention: the cleanup checks this name
 # Hardcoding default patch conditions
 # Needs to be done after the Geant4 version is known and before we check the exiting installation
 if [[ ${GEANT4CORE} == "geant4_v10.02.p03" ]]; then
-  PATCH="on"
+  PATCH="true"
   echo "This version of Geant4 version requires a mandatory patch"
 fi
 if [[ ${GEANT4CORE} == "geant4_v11.02.p02" ]]; then
-  PATCH="on"
+  PATCH="true"
   echo "This version of Geant4 requires a mandatory patch"
 fi
 
@@ -449,7 +453,7 @@ if [ -d "${GEANT4DIR}" ]; then
       PATCHMD5=`echo ${PATCHSTATUS} | awk -F" " '{ print $3 }'`
     fi
     
-    if [[ ${PATCH} == on ]]; then
+    if [[ ${PATCH} == true ]]; then
       if [[ ${PATCHPRESENT} == yes ]] && [[ ${PATCHSTATUS} == Patch\ applied* ]] && [[ ${PATCHPRESENTMD5} == ${PATCHMD5} ]]; then
         SAMEPATCH="YES"; 
       elif [[ ${PATCHPRESENT} == no ]] && [[ ${PATCHSTATUS} == Patch\ not\ applied* ]]; then
@@ -458,7 +462,7 @@ if [ -d "${GEANT4DIR}" ]; then
         echo "The old installation didn't use the same patch..."  
         SAMEPATCH=""
       fi
-    elif [[ ${PATCH} == off ]]; then
+    elif [[ ${PATCH} == false ]]; then
       if [[ ${PATCHSTATUS} == Patch\ not\ applied* ]] || [[ -z ${PATCHSTATUS}  ]]; then    # last one means empty
         SAMEPATCH="YES"; 
       else
@@ -511,7 +515,7 @@ mkdir "${GEANT4BUILDDIR}"
 
 
 PATCHAPPLIED="Patch not applied"
-if [[ ${PATCH} == on ]]; then
+if [[ ${PATCH} == true ]]; then
   echo "Patching... "
   if [[ -f "${SETUPPATH}/patches/${GEANT4CORE}.patch" ]]; then
     patch -p1 < "${SETUPPATH}/patches/${GEANT4CORE}.patch"
@@ -579,7 +583,7 @@ cd ..
 
 
 
-if [[ ${CLEANUP} == on ]]; then
+if [[ ${CLEANUP} == true ]]; then
   echo "Cleaning up ..."
   # Just a sanity check before our remove...
   if [[ ${GEANT4BUILDDIR} == geant4_v*-build ]]; then 

@@ -55,9 +55,8 @@ for C in "${CMD[@]}"; do
   fi
 done
 
-CHECK="false"
-GET="false"
-GOOD="false"
+# What the script was asked to do: check, get-max, get-min or good-version
+MODE=""
 HEASoftPATH=""
 TESTVERSION=""
 
@@ -79,111 +78,73 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    check)        HEASoftPATH=$(optionvalue "${C}"); CHECK="true";  GET="false"; GOOD="false" ;;
-    get-max)      HEASoftPATH="";                                        CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
-    get-min)      HEASoftPATH="";                                        CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
-    good-version) HEASoftPATH="";                                        CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                  TESTVERSION=$(optionvalue "${C}") ;;
+    check)        MODE="check";        HEASoftPATH=$(optionvalue "${C}") ;;
+    get-max)      MODE="get-max" ;;
+    get-min)      MODE="get-min" ;;
+    good-version) MODE="good-version"; TESTVERSION=$(optionvalue "${C}") ;;
     help)         echo ""; confhelp; exit 0 ;;
   esac
 done
 
 
-HEASoftVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "HEASoft-Min" | awk -F":" '{ print $2 }')
-HEASoftVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "HEASoft-Max" | awk -F":" '{ print $2 }')
-HEASoftBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "HEASoft-Blacklist" | awk -F":" '{ print $2 }')
-
-HEASoftVersionMinString=${HEASoftVersionMin}
-HEASoftVersionMaxString=${HEASoftVersionMax}
-
-if [[ ! ${HEASoftVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${HEASoftVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
-  echo ""
-  echo "ERROR: Unable to read a valid HEASoft version range from ${SETUPPATH}/allowed-versions.txt"
+# The allowed version range and the black list live in allowed-versions.txt
+if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "HEASoft" "HEASoft"; then
   exit 1
 fi
 
-HEASoftVersionMin=$(echo ${HEASoftVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
-HEASoftVersionMax=$(echo ${HEASoftVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
+case ${MODE} in
 
-if [ "${GET}" == "true" ]; then
-  if [ "${MAX}" == "true" ]; then
-    echo "${HEASoftVersionMaxString}"
-  else 
-    echo "${HEASoftVersionMinString}"
-  fi
-  exit 0;
-fi
+  get-max) echo "${VERSIONMAXSTRING}"; exit 0 ;;
+  get-min) echo "${VERSIONMINSTRING}"; exit 0 ;;
 
-
-if [ "${GOOD}" == "true" ]; then
-  # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
-    echo ""
-    echo "ERROR: HEASoft version (${TESTVERSION}) is not acceptable"
-    echo "       It is not a valid version string."
-    exit 1
-  fi
-
-  version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-  release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  HEASoftVersion=$((100*10#${version} + 10#${release}))
-  
-  if ([ ${HEASoftVersion} -ge ${HEASoftVersionMin} ] && [ ${HEASoftVersion} -le ${HEASoftVersionMax} ]); then
-    if [[ " ${HEASoftBlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${HEASoftBlackList} " == *" ${TESTVERSION%.*} "* ]]; then
+  good-version)
+    # Reject anything which is not a version, e.g. v11.2.2 or master
+    if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
       echo ""
       echo "ERROR: HEASoft version (${TESTVERSION}) is not acceptable"
-      echo "       It has been black listed as not working."
+      echo "       It is not a valid version string."
       exit 1
-    else
-      echo "Found a good HEASoft version: ${TESTVERSION}"
-      exit 0
     fi
-  else
-    echo ""
-    echo "ERROR: HEASoft version (${TESTVERSION}) is not acceptable"
-    echo "       You require a version between ${HEASoftVersionMinString} and ${HEASoftVersionMaxString}"
-    exit 1
-  fi
-fi  
 
-if [ "${CHECK}" == "true" ]; then
-  # The given path may be the platform specific directory or the one above it, and the
-  # HEASoft tools only run after headas-init.sh has been sourced
-  HEADASDIR=$(heasoftdirectory "${HEASoftPATH}") || HEADASDIR=""
-
-  if [[ ${HEADASDIR} == "" ]]; then
-    echo " "
-    echo "ERROR: The given directory ${HEASoftPATH} does no contain a correct HEASoft installation"
-    exit 1;
-  fi
-
-  # Initialize HEASoft in a subshell, otherwise ftversion refuses to run
-  rv=$(export HEADAS="${HEADASDIR}"; . "${HEADASDIR}/headas-init.sh" > /dev/null 2>&1; "${HEADASDIR}/bin/ftversion" 2>/dev/null | awk -F"V" '{ print $2 }' | sed 's/[^0-9.]*//g')
-  if [[ ${rv} == "" ]]; then
-    echo " "
-    echo "ERROR: Unable to determine the HEASoft version in ${HEADASDIR}"
-    exit 1;
-  fi
-
-  version=`echo ${rv} | awk -F. '{ print $1 }'`;
-  release=`echo ${rv} | awk -F. '{ print $2 }'`;
-  HEASoftVersion=$((100*10#${version} + 10#${release}))
-
-  if ([ ${HEASoftVersion} -ge ${HEASoftVersionMin} ] && [ ${HEASoftVersion} -le ${HEASoftVersionMax} ]); then
-    if [[ " ${HEASoftBlackList} " == *" ${rv} "* ]] || [[ " ${HEASoftBlackList} " == *" ${rv%.*} "* ]]; then
-      echo ""
-      echo "ERROR: HEASoft version (${rv}) is not acceptable"
-      echo "       It has been black listed as not working."
+    if ! checkversionrange "${TESTVERSION}" "HEASoft"; then
       exit 1
-    else
-      echo "The given HEASoft version ${rv} is acceptable"
-      exit 0;
     fi
-  else
+    exit 0
+    ;;
+
+  check)
+    # The given path may be the platform specific directory or the one above it, and the
+    # HEASoft tools only run after headas-init.sh has been sourced
+    HEADASDIR=$(heasoftdirectory "${HEASoftPATH}") || HEADASDIR=""
+
+    if [[ ${HEADASDIR} == "" ]]; then
+      echo " "
+      echo "ERROR: The given directory ${HEASoftPATH} does no contain a correct HEASoft installation"
+      exit 1;
+    fi
+
+    # Initialize HEASoft in a subshell, otherwise ftversion refuses to run
+    rv=$(export HEADAS="${HEADASDIR}"; . "${HEADASDIR}/headas-init.sh" > /dev/null 2>&1; "${HEADASDIR}/bin/ftversion" 2>/dev/null | awk -F"V" '{ print $2 }' | sed 's/[^0-9.]*//g')
+    if [[ ${rv} == "" ]]; then
+      echo " "
+      echo "ERROR: Unable to determine the HEASoft version in ${HEADASDIR}"
+      exit 1;
+    fi
+
+
+    if ! checkversionrange "${rv}" "HEASoft"; then
+      exit 1
+    fi
+    exit 0
+    ;;
+
+  *)
     echo ""
-    echo "ERROR: No acceptable HEASoft version found: ${HEASoftVersion} (min: ${HEASoftVersionMinString}, max: ${HEASoftVersionMaxString})"
+    echo "ERROR: No mode given - say what the script should do"
+    confhelp
     exit 1
-  fi
-fi
+    ;;
+
+esac
 
 exit 1

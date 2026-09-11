@@ -19,15 +19,8 @@ COMPILEROPTIONS=`gcc --version | head -n 1`
 CONFIGUREOPTIONS=" "
 
 
-MAXTHREADS=1;
-if [[ ${OSTYPE} == *arwin* ]]; then
-  MAXTHREADS=`sysctl -n hw.logicalcpu_max`
-elif [[ ${OSTYPE} == *inux* ]]; then
-  MAXTHREADS=`grep processor /proc/cpuinfo | wc -l`
-fi
-if [ "$?" != "0" ]; then
-  MAXTHREADS=1
-fi
+# An upper limit only - the number of cores is determined further below and capped by this
+MAXTHREADS=1024
 
 
 confhelp() {
@@ -184,23 +177,8 @@ else
 
   # Check if it already exists locally
   REQUIREDOWNLOAD="true"
-  if [ -f "${TARBALL}" ]; then
-    # ... and has the same size
-    LOCALSIZE=$(wc -c < "${TARBALL}" | tr -d ' ')
-    REMOTESIZE=$(curl -L -I ${LINK} | grep -i "Content-Length" | awk '{print $2}' | sed 's/[^0-9]*//g') 
-    if [ "$?" != "0" ]; then
-      echo "ERROR: Unable to determine remote tarball size"
-      exit 1
-    fi
-    IDENTICAL=`echo ${REMOTESIZE} | grep ${LOCALSIZE}`
-    if [ "${IDENTICAL}" != "" ]; then
-      REQUIREDOWNLOAD="false"
-      echo "File is already present and has same size, thus no download required!"
-    else
-      echo "Remote and local file sizes are different (local: ${LOCALSIZE} vs. remote: ${REMOTESIZE}). Downloading it."
-    fi
-  else
-    echo "Tarball does not exist, downloading it"
+  if tarballisgood "${TARBALL}" "${LINK}"; then
+    REQUIREDOWNLOAD="false"
   fi
 
   if [ "${REQUIREDOWNLOAD}" == "true" ]; then
@@ -286,8 +264,22 @@ if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring libsharp!"
   echo "       Check the file "$(pwd)"/config_libsharp.log"
   exit 1
+CORES=1;
+if [[ ${OSTYPE} == *arwin* ]]; then
+  CORES=`sysctl -n hw.logicalcpu_max`
+elif [[ ${OSTYPE} == *inux* ]]; then
+  CORES=`grep processor /proc/cpuinfo | wc -l`
 fi
-make -j${MAXTHREADS} > build_libsharp.log 2>&1
+if [ "$?" != "0" ]; then
+  CORES=1
+fi
+if [ "${CORES}" -gt "${MAXTHREADS}" ]; then
+  CORES=${MAXTHREADS}
+fi
+echo "Using this number of cores for compilation: ${CORES}"
+
+fi
+make -j${CORES} > build_libsharp.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong compiling libsharp!"
   echo "       Check the file "$(pwd)"/build_libsharp.log"
@@ -331,7 +323,7 @@ fi
 
 
 echo "Compiling..."
-make -j${MAXTHREADS} > build.log 2>&1
+make -j${CORES} > build.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong while compiling healpix!"
   echo "       Check the file "$(pwd)"/build.log"
@@ -353,8 +345,14 @@ fi
 echo "Store our success story..."
 cd "${MAINDIR}"
 rm -f COMPILE_SUCCESSFUL
+echo "Healpix compilation & installation successful" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Configure options:" >> COMPILE_SUCCESSFUL
 echo "${CONFIGUREOPTIONS}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
+echo "* Compile options:" >> COMPILE_SUCCESSFUL
 echo "${COMPILEROPTIONS}" >> COMPILE_SUCCESSFUL
+echo " " >> COMPILE_SUCCESSFUL
 
 
 
@@ -371,88 +369,3 @@ fi
 
 echo "Done!"
 exit 0
-
-
-
-
-
-
-exit
-
-
-# --- Step 1: Versioning and Paths ---
-# We use 3.83 as the stable release for COSI integration
-HPX_VER="3.83"
-HPX_DATE="2024Nov13"
-TARBALL="Healpix_${HPX_VER}_${HPX_DATE}.tar.gz"
-INSTALL_DIR="Healpix_${HPX_VER}"
-
-# Ensure COSITOOLS is defined
-if [ -z "$COSITOOLS" ]; then
-  echo "Error: The COSITOOLS environment variable is not set."
-  echo "Please source your cosi-setup environment first."
-  exit 1
-fi
-
-# Path for healpix (standard COSI setup puts it here)
-healpix_PATH=$COSITOOLS/healpix
-
-# --- Step 2: Download and Extract ---
-cd $COSITOOLS
-
-if [ ! -f $TARBALL ]; then
-  echo "Downloading HEALPix ${HPX_VER}..."
-  wget "https://downloads.sourceforge.net/project/healpix/Healpix_${HPX_VER}/${TARBALL}"
-fi
-
-if [ ! -d $INSTALL_DIR ]; then
-  echo "Extracting HEALPix..."
-  # Silence metadata noise common in SourceForge tarballs
-  tar -xzf $TARBALL 2>/dev/null || tar -xzf $TARBALL
-fi
-
-cd $INSTALL_DIR
-
-# --- Step 3: Build Libsharp ---
-# Required for C++ components
-echo "Building Libsharp..."
-cd src/common_libraries/libsharp
-if [ ! -f "./configure" ]; then autoreconf -i; fi
-./configure --prefix=$COSITOOLS/healpix
-make -j${MAXTHREADS}
-make install
-cd ../../..
-
-# --- Step 4: Build C++ Components ---
-echo "Building HEALPix C++..."
-cd src/cxx
-
-# Cleaning for fresh build
-make distclean 2>/dev/null || true
-
-# Point to COSI-specific healpix and our new libsharp
-export healpix_INCDIR=$healpix_PATH/include
-export healpix_LIBDIR=$healpix_PATH/lib
-export SHARP_INCDIR=$COSITOOLS/healpix/include
-export SHARP_LIBDIR=$COSITOOLS/healpix/lib
-
-./configure --prefix=$COSITOOLS/healpix
-
-make -j${MAXTHREADS}
-make install
-cd ../..
-
-# --- Step 5: Build C Components ---
-echo "Building HEALPix C..."
-cd src/C/autotools
-if [ ! -f "./configure" ]; then autoreconf -i; fi
-
-# Point C build to healpix
-./configure --prefix=$COSITOOLS/healpix --with-healpix=$healpix_PATH
-make -j${MAXTHREADS}
-make install
-cd ../../..
-
-echo "--------------------------------------------------"
-echo "HEALPix build complete and installed in $COSITOOLS/healpix"
-echo "--------------------------------------------------"

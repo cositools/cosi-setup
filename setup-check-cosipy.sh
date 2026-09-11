@@ -12,9 +12,9 @@
 
 # Path to where this file is located and to the COSItools above it
 SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-COSITOOLSPATH="$( cd -- "${SETUPPATH}/.." >/dev/null 2>&1 ; pwd -P )"
+COSIPATH="$( cd -- "${SETUPPATH}/.." >/dev/null 2>&1 ; pwd -P )"
 
-PENV="${COSITOOLSPATH}/python-env"
+PENV="${COSIPATH}/python-env"
 
 if [[ ! -f ${PENV}/bin/activate ]]; then
   echo ""

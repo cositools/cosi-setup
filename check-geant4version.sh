@@ -55,9 +55,8 @@ for C in "${CMD[@]}"; do
   fi
 done
 
-CHECK="false"
-GET="false"
-GOOD="false"
+# What the script was asked to do: check, get-max, get-min or good-version
+MODE=""
 GEANT4PATH=""
 TESTVERSION=""
 
@@ -79,104 +78,68 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    check)        GEANT4PATH=$(optionvalue "${C}"); CHECK="true";  GET="false"; GOOD="false" ;;
-    get-max)      GEANT4PATH="";                                        CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
-    get-min)      GEANT4PATH="";                                        CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
-    good-version) GEANT4PATH="";                                        CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                  TESTVERSION=$(optionvalue "${C}") ;;
+    check)        MODE="check";        GEANT4PATH=$(optionvalue "${C}") ;;
+    get-max)      MODE="get-max" ;;
+    get-min)      MODE="get-min" ;;
+    good-version) MODE="good-version"; TESTVERSION=$(optionvalue "${C}") ;;
     help)         echo ""; confhelp; exit 0 ;;
   esac
 done
 
 
-Geant4VersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Geant4-Min" | awk -F":" '{ print $2 }')
-Geant4VersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Geant4-Max" | awk -F":" '{ print $2 }')
-Geant4BlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "Geant4-Blacklist" | awk -F":" '{ print $2 }')
-
-Geant4VersionMinString=${Geant4VersionMin}
-Geant4VersionMaxString=${Geant4VersionMax}
-
-if [[ ! ${Geant4VersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${Geant4VersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
-  echo ""
-  echo "ERROR: Unable to read a valid Geant4 version range from ${SETUPPATH}/allowed-versions.txt"
+# The allowed version range and the black list live in allowed-versions.txt
+if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "Geant4" "Geant4"; then
   exit 1
 fi
 
-Geant4VersionMin=$(echo ${Geant4VersionMinString} | awk -F. '{ print 100*$1 + $2 }')
-Geant4VersionMax=$(echo ${Geant4VersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
+case ${MODE} in
 
-if [ "${GET}" == "true" ]; then
-  if [ "${MAX}" == "true" ]; then
-    echo "${Geant4VersionMaxString}"
-  else 
-    echo "${Geant4VersionMinString}"
-  fi
-  exit 0;
-fi
+  get-max) echo "${VERSIONMAXSTRING}"; exit 0 ;;
+  get-min) echo "${VERSIONMINSTRING}"; exit 0 ;;
 
-
-if [ "${GOOD}" == "true" ]; then
-  # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
-    echo ""
-    echo "ERROR: Geant4 version (${TESTVERSION}) is not acceptable"
-    echo "       It is not a valid version string."
-    exit 1
-  fi
-
-  version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-  release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-  Geant4Version=$((100*10#${version} + 10#${release}))
-  
-  if ([ ${Geant4Version} -ge ${Geant4VersionMin} ] && [ ${Geant4Version} -le ${Geant4VersionMax} ]); then
-    if [[ " ${Geant4BlackList} " == *" ${TESTVERSION} "* ]] || [[ " ${Geant4BlackList} " == *" ${TESTVERSION%.*} "* ]]; then
+  good-version)
+    # Reject anything which is not a version, e.g. v11.2.2 or master
+    if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
       echo ""
       echo "ERROR: Geant4 version (${TESTVERSION}) is not acceptable"
-      echo "       It has been black listed as not working."
+      echo "       It is not a valid version string."
       exit 1
-    else
-      echo "Found a good Geant4 version: ${TESTVERSION}"
-      exit 0
     fi
-  else
-    echo ""
-    echo "ERROR: Geant4 version (${TESTVERSION}) is not acceptable"
-    echo "       You require a version between ${Geant4VersionMinString} and ${Geant4VersionMaxString}"
-    exit 1
-  fi
-fi  
 
-
-if [ "${CHECK}" == "true" ]; then
-  if (`test -f "${GEANT4PATH}/source/global/management/include/G4Version.hh"`); then
-    rv=`grep "#define G4VERSION_NUMBER" "${GEANT4PATH}/source/global/management/include/G4Version.hh"`; 
-    version=`echo $rv | awk -F" " '{ print $3 }'`;
-    Geant4VersionString="$((${version} / 100)).$(( (${version} / 10) % 10 )).$((${version} % 10))"
-  elif [ -f "${GEANT4PATH}/bin/geant4-config" ]; then
-    Geant4VersionString=`"${GEANT4PATH}/bin/geant4-config" --version`
-  else
-    echo " "
-    echo "ERROR: The given directory ${GEANT4PATH} does no contain a correct Geant4 installation"
-    exit 1;
-  fi
-
-  Geant4Version=$(echo ${Geant4VersionString} | awk -F. '{ print 100*$1 + $2 }')
-
-  if ([ ${Geant4Version} -ge ${Geant4VersionMin} ] && [ ${Geant4Version} -le ${Geant4VersionMax} ]); then
-    if [[ " ${Geant4BlackList} " == *" ${Geant4VersionString} "* ]] || [[ " ${Geant4BlackList} " == *" ${Geant4VersionString%.*} "* ]]; then
-      echo ""
-      echo "ERROR: Geant4 version (${Geant4VersionString}) is not acceptable"
-      echo "       It has been black listed as not working."
+    if ! checkversionrange "${TESTVERSION}" "Geant4"; then
       exit 1
-    else
-      echo "The given Geant4 version ${Geant4VersionString} is acceptable"
-      exit 0;
     fi
-  else
+    exit 0
+    ;;
+
+
+  check)
+    if (`test -f "${GEANT4PATH}/source/global/management/include/G4Version.hh"`); then
+      LINE=`grep "#define G4VERSION_NUMBER" "${GEANT4PATH}/source/global/management/include/G4Version.hh"`; 
+      version=`echo ${LINE} | awk -F" " '{ print $3 }'`;
+      rv="$((${version} / 100)).$(( (${version} / 10) % 10 )).$((${version} % 10))"
+    elif [ -f "${GEANT4PATH}/bin/geant4-config" ]; then
+      rv=`"${GEANT4PATH}/bin/geant4-config" --version`
+    else
+      echo " "
+      echo "ERROR: The given directory ${GEANT4PATH} does no contain a correct Geant4 installation"
+      exit 1;
+    fi
+
+
+    if ! checkversionrange "${rv}" "Geant4"; then
+      exit 1
+    fi
+    exit 0
+    ;;
+
+  *)
     echo ""
-    echo "ERROR: No acceptable Geant4 version found: ${Geant4VersionString} (min: ${Geant4VersionMinString}, max: ${Geant4VersionMaxString})"
+    echo "ERROR: No mode given - say what the script should do"
+    confhelp
     exit 1
-  fi
-fi
+    ;;
+
+esac
 
 exit 1

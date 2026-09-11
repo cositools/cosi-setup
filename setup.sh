@@ -74,7 +74,7 @@ confhelp() {
   # echo "    Install the missing packages instead of only listing them."
   # echo "    This is only intended for automatic build tests and is ignored outside a container."
   # echo " "
-  echo "--keep-environment-as-is=[off/no, on/yes - default: off]"
+  echo "--keep-environment-as-is=[true/on/yes, false/off/no - default: false]"
   echo "    By default all relevant environment paths (such as LD_LIBRRAY_PATH, CPATH) are reset to empty"
   echo "    to avoid most libray conflicts. This flag toggles this behaviour and lets you decide to keep your environment or not."
   echo "    If you use this flag make sure the COSItools source script has not been called in the terminal you are using."

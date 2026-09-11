@@ -57,9 +57,8 @@ for C in "${CMD[@]}"; do
   fi
 done
 
-CHECK="false"
-GET="false"
-GOOD="false"
+# What the script was asked to do: check, get-max, get-min or good-version
+MODE=""
 ROOTPATH=""
 TESTVERSION=""
 
@@ -81,109 +80,61 @@ for C in "${CMD[@]}"; do
   fi
 
   case ${OPTION} in
-    check)        ROOTPATH=$(optionvalue "${C}"); CHECK="true";  GET="false"; GOOD="false" ;;
-    get-max)      ROOTPATH="";                                        CHECK="false"; GET="true";  MAX="true";  GOOD="false" ;;
-    get-min)      ROOTPATH="";                                        CHECK="false"; GET="true";  MAX="false"; GOOD="false" ;;
-    good-version) ROOTPATH="";                                        CHECK="false"; GET="false"; MAX="false"; GOOD="true"
-                  TESTVERSION=$(optionvalue "${C}") ;;
+    check)        MODE="check";        ROOTPATH=$(optionvalue "${C}") ;;
+    get-max)      MODE="get-max" ;;
+    get-min)      MODE="get-min" ;;
+    good-version) MODE="good-version"; TESTVERSION=$(optionvalue "${C}") ;;
     help)         echo ""; confhelp; exit 0 ;;
   esac
 done
 
-RootVersionMin=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "ROOT-Min" | awk -F":" '{ print $2 }')
-RootVersionMax=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "ROOT-Max" | awk -F":" '{ print $2 }')
-RootBlackList=$(cat "${SETUPPATH}/allowed-versions.txt" | grep "ROOT-Blacklist" | awk -F":" '{ print $2 }')
-
-RootVersionMinString=${RootVersionMin}
-RootVersionMaxString=${RootVersionMax}
-
-if [[ ! ${RootVersionMinString} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${RootVersionMaxString} =~ ^[0-9]+\.[0-9]+$ ]]; then
-  echo ""
-  echo "ERROR: Unable to read a valid ROOT version range from ${SETUPPATH}/allowed-versions.txt"
+# The allowed version range and the black list live in allowed-versions.txt
+if ! readversionrange "${SETUPPATH}/allowed-versions.txt" "ROOT" "ROOT"; then
   exit 1
 fi
 
-RootVersionMin=$(echo ${RootVersionMinString} | awk -F. '{ print 100*$1 + $2 }')
-RootVersionMax=$(echo ${RootVersionMaxString} | awk -F. '{ print 100*$1 + $2 }')
+case ${MODE} in
 
-if [ "${GET}" == "true" ]; then
-  if [ "${MAX}" == "true" ]; then
-    echo "${RootVersionMaxString}"
-  else 
-    echo "${RootVersionMinString}"
-  fi
-  exit 0;
-fi
+  get-max) echo "${VERSIONMAXSTRING}"; exit 0 ;;
+  get-min) echo "${VERSIONMINSTRING}"; exit 0 ;;
 
-if [ "${GOOD}" == "true" ]; then
-  # Reject anything which is not a version, e.g. v11.2.2 or master
-  if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
-    echo ""
-    echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
-    echo "       It is not a valid version string."
-    exit 1
-  fi
-
-  if [[ ${TESTVERSION} == */* ]]; then
-    version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-    release=`echo ${TESTVERSION} | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'`;
-    patch=`echo ${TESTVERSION} | awk -F/ '{ print $2 }'`;
-  else
-    version=`echo ${TESTVERSION} | awk -F. '{ print $1 }'`;
-    release=`echo ${TESTVERSION} | awk -F. '{ print $2 }'`;
-    patch=`echo ${TESTVERSION} | awk -F. '{ print $3 }'`;
-  fi
-  
-  RootVersion=$((100*10#${version} + 10#${release}))
-  RootVersionString=${TESTVERSION//\//.}
-  
-  if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then
-    if [[ " ${RootBlackList} " == *" ${RootVersionString} "* ]] || [[ " ${RootBlackList} " == *" ${RootVersionString%.*} "* ]]; then
+  good-version)
+    # Reject anything which is not a version, e.g. v11.2.2 or master
+    if [[ ! ${TESTVERSION} =~ ^[0-9]+\.[0-9]+([./]p?[0-9]+)?$ ]]; then
       echo ""
       echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
-      echo "       It has been black listed as not working."
+      echo "       It is not a valid version string."
       exit 1
-    else 
-      echo "Found a good ROOT version: ${TESTVERSION}"
-      exit 0
     fi
-  else
-    echo ""
-    echo "ERROR: ROOT version (${TESTVERSION}) is not acceptable"
-    echo "       You require a version between ${RootVersionMinString} and ${RootVersionMaxString}"
-    exit 1
-  fi
-fi  
 
-if [ "${CHECK}" == "true" ]; then
-  if [ ! -f "${ROOTPATH}/bin/root-config" ]; then
-    echo " "
-    echo "ERROR: The given directory ${ROOTPATH} does no contain a correct ROOT installation"
-    exit 1;
-  fi
-
-  rv=`"${ROOTPATH}/bin/root-config" --version`
-  version=`echo $rv | awk -F. '{ print $1 }'`;
-  release=`echo $rv | awk -F/ '{ print $1 }' | awk -F. '{ print $2 }'`;
-  patch=`echo $rv | awk -F/ '{ print $2 }'| sed 's/0*//'`;
-  RootVersion=$((100*10#${version} + 10#${release}))
-  RootVersionString=${rv//\//.}
-
-  if ([ ${RootVersion} -ge ${RootVersionMin} ] && [ ${RootVersion} -le ${RootVersionMax} ]); then
-    if [[ " ${RootBlackList} " == *" ${RootVersionString} "* ]] || [[ " ${RootBlackList} " == *" ${RootVersionString%.*} "* ]]; then
-      echo ""
-      echo "ERROR: ROOT version (${rv}) is not acceptable"
-      echo "       It has been black listed as not working."
+    if ! checkversionrange "${TESTVERSION}" "ROOT"; then
       exit 1
-    else 
-      echo "Found a good ROOT version: ${rv}"
-      exit 0
-    fi 
-  else
+    fi
+    exit 0
+    ;;
+
+  check)
+    if [ ! -f "${ROOTPATH}/bin/root-config" ]; then
+      echo " "
+      echo "ERROR: The given directory ${ROOTPATH} does no contain a correct ROOT installation"
+      exit 1;
+    fi
+
+    rv=`"${ROOTPATH}/bin/root-config" --version`
+
+    if ! checkversionrange "${rv}" "ROOT"; then
+      exit 1
+    fi
+    exit 0
+    ;;
+
+  *)
     echo ""
-    echo "ERROR: No acceptable ROOT version found: ${RootVersion}"
+    echo "ERROR: No mode given - say what the script should do"
+    confhelp
     exit 1
-  fi
-fi
+    ;;
+
+esac
 
 exit 1
