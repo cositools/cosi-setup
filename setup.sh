@@ -162,7 +162,7 @@ resolveoption() {
     if [[ ${O} == ${NAME}* ]]; then MATCHES+="${O} "; fi
   done
 
-  # Turn the matches into positional parameters, since that is how we count them
+  # Turn the matches into positional parameters, since that is how they are counted
   set -- ${MATCHES}
   if [[ $# == 1 ]]; then echo "${1}"; return 0; fi
   if [[ $# == 0 ]]; then return 1; fi

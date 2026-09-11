@@ -352,8 +352,7 @@ else
   fi
   echo "Looking for Geant4 version ${WANTEDVERSION} with latest patch on the Geant4 website --- sometimes this takes a few minutes..."
   
-  # Now check Geant4 repository for the given version, and collect the patch levels which
-  # are on offer - newest first, since that is the order we want to try them in
+  # Now check the Geant4 repository for the given version, and choose the highest patch level
   PATCHES=""
   for s in `seq 0 10`; do
     TESTTARBALL="geant4-v${WANTEDVERSION}.${s}.tar.gz"
@@ -362,18 +361,17 @@ else
     if [ "${EXISTS}" == "" ]; then
       break
     fi
-    PATCHES="${s} ${PATCHES}"
+    PATCHES="${s} ${PATCHES}" # Stored inverse! 
   done
 
-  # The newest patch is not automatically a usable one - it may be black listed in
-  # allowed-versions.txt, thus walk down until one is acceptable
+  # Now check that we have a non-blacklisted patch
   TARBALL=""
   for s in ${PATCHES}; do
     if "${SETUPPATH}/check-geant4version.sh" --good-version=${WANTEDVERSION}.${s} > /dev/null; then
       TARBALL="geant4-v${WANTEDVERSION}.${s}.tar.gz"
       break
     fi
-    echo "Skipping Geant4 version ${WANTEDVERSION}.${s} - it is black listed or outside the supported version range"
+    echo "Skipping Geant4 version ${WANTEDVERSION}.${s} - it is black listed"
   done
   if [ "${TARBALL}" == "" ]; then
     echo "ERROR: Unable to find an acceptable Geant4 tar ball at the Geant4 website"

@@ -130,7 +130,7 @@ if [ "${TARBALL}" != "" ]; then
   fi
   echo "Version of healpix is: ${VER}"
 
-  # A tarball handed to us still has to be within the range in allowed-versions.txt
+  # Check if the tarball-provided version is within the range given in allowed-versions.txt
   if ! "${SETUPPATH}/check-healpixversion.sh" --good-version=${VER} > /dev/null; then
     echo "ERROR: The healpix tarball does not contain an acceptable healpix version: ${VER}"
     "${SETUPPATH}/check-healpixversion.sh" --good-version=${VER}
@@ -149,8 +149,8 @@ else
     exit 1
   fi
 
-  # The newest one is not automatically the one we want - it may be outside the range in
-  # allowed-versions.txt, thus walk down from the newest until one is acceptable
+  # The newest version may be outside the range given in allowed-versions.txt, thus walk
+  # down from the newest until one is acceptable
   VER=""
   for V in ${ALLVER}; do
     if "${SETUPPATH}/check-healpixversion.sh" --good-version=${V} > /dev/null; then

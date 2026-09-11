@@ -51,7 +51,7 @@ resolveoption()
     if [[ ${O} == ${NAME}* ]]; then MATCHES+="${O} "; fi
   done
 
-  # Turn the matches into positional parameters, since that is how we count them
+  # Turn the matches into positional parameters, since that is how they are counted
   set -- ${MATCHES}
   if [[ $# == 1 ]]; then echo "${1}"; return 0; fi
   if [[ $# == 0 ]]; then return 1; fi
@@ -456,7 +456,7 @@ downloadtarball()
     fi
   fi
 
-  # Do a sanity chack that we have a *.gz file
+  # Do a sanity check that the file is a *.gz file
   if ! gunzip -t "${TEMPFILE}" >/dev/null 2>&1; then
     echo "ERROR: What was downloaded from ${1} is not a gzip archive"
     rm -f "${TEMPFILE}"

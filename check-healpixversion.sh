@@ -114,8 +114,8 @@ case ${MODE} in
 
   check)
     # Healpix does not ship a tool which reports its version, but it installs a pkg-config
-    # file which does. That is also the file MEGAlib later uses to find Healpix, thus an
-    # installation without it would be useless to us anyway.
+    # file which does. MEGAlib uses the same file to find Healpix, thus an installation
+    # without it is unusable anyway.
     PCFILE=""
     for DIR in "${HEALPIXPATH}/lib/pkgconfig" "${HEALPIXPATH}/lib64/pkgconfig"; do
       if [[ -f "${DIR}/healpix_cxx.pc" ]]; then

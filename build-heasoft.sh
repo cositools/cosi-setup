@@ -198,17 +198,38 @@ if [ "${TARBALL}" != "" ]; then
   # Check if it has the correct version:
   VER=`echo "${TARBALL}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
   echo "Version of HEASoft is: ${VER}"
+
+  # Check if the tarball-provided version is within the range given in allowed-versions.txt
+  if ! "${SETUPPATH}/check-heasoftversion.sh" --good-version=${VER} > /dev/null; then
+    echo "ERROR: The HEASoft tarball does not contain an acceptable HEASoft version: ${VER}"
+    "${SETUPPATH}/check-heasoftversion.sh" --good-version=${VER}
+    exit 1
+  fi
 else
   # Download it
 
-  # The desired version is simply the highest version
   echo "Looking for latest HEASoft version on the HEASoft website"
 
-  # Now check root repository for the given version:
-  #TARBALL=`curl ftp://legacy.gsfc.nasa.gov/software/lheasoft/release/ -sl | grep "^heasoft\-" | grep "[0-9]src.tar.gz$"`
-  TARBALL=$(curl https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/ -sl | grep ">heasoft-" | grep "[0-9]src.tar.gz<" | awk -F">" '{ print $3 }' | awk -F"<" '{print $1 }' | sort | head -n 1)
-  if [ "${TARBALL}" == "" ]; then
+  # The tar balls are named heasoft-6.37.1src.tar.gz - newest first
+  ALLTARBALLS=$(curl https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/ -sl | grep ">heasoft-" | grep "[0-9]src.tar.gz<" | awk -F">" '{ print $3 }' | awk -F"<" '{print $1 }' | sort -u -V -r)
+  if [ "${ALLTARBALLS}" == "" ]; then
     echo "ERROR: Unable to find suitable HEASoft tar ball at the HEASoft website"
+    exit 1
+  fi
+
+  # The newest version may be outside the range given in allowed-versions.txt, thus walk
+  # down from the newest until one is acceptable
+  TARBALL=""
+  for T in ${ALLTARBALLS}; do
+    V=`echo "${T}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`
+    if "${SETUPPATH}/check-heasoftversion.sh" --good-version=${V} > /dev/null; then
+      TARBALL=${T}
+      break
+    fi
+    echo "Skipping HEASoft version ${V} - it is outside the supported version range"
+  done
+  if [ "${TARBALL}" == "" ]; then
+    echo "ERROR: None of the HEASoft versions at the HEASoft website is within the supported version range"
     exit 1
   fi
   echo "Using HEASoft tar ball ${TARBALL}"
