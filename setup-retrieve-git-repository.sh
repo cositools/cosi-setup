@@ -256,10 +256,13 @@ else
   echo "The repository ${NAME} already exists"
   cd ${NAME}
 
-  # Check if we are already on the requested branch with the latest commit
+  # Check if we are already on the requested branch with the latest commit.
+  # In addition, check the branch name, since another branch can point at the same commit.
+  # Local modifications are intentionally not checked to keep local development changes intact
   REMOTEBRANCHHASH=$(git ls-remote "${GITPATH}" ${GITBRANCH} | awk -F" " '{ print $1 }' | xargs)
   LOCALBRANCHHASH=$(git rev-parse HEAD | xargs)
-  if [[ ${REMOTEBRANCHHASH} == ${LOCALBRANCHHASH} ]]; then
+  LOCALBRANCH=$(git rev-parse --abbrev-ref HEAD | xargs)
+  if [[ ${REMOTEBRANCHHASH} != "" ]] && [[ ${REMOTEBRANCHHASH} == ${LOCALBRANCHHASH} ]] && [[ ${LOCALBRANCH} == ${GITBRANCH} ]]; then
     echo "We are already on the requested branch with the latest commit"
     exit 0
   fi
