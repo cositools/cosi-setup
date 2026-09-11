@@ -509,7 +509,14 @@ fi
 echo "Version of ROOT is: ${VER}"
 
 if [[ ${WANTEDVERSION} != "" ]]; then
-  if [[ ${WANTEDVERSION} != master ]] && [[ ${WANTEDVERSION} != *patches* ]] && [[ ${VER} != ${WANTEDVERSION}* ]]; then
+  WANTEDVERSIONNUMBER=${WANTEDVERSION}
+  # Handle current GitHub tag format
+  if [[ ${WANTEDVERSIONNUMBER} == v* ]]; then
+    WANTEDVERSIONNUMBER=${WANTEDVERSIONNUMBER//v/}
+    WANTEDVERSIONNUMBER=${WANTEDVERSIONNUMBER//-/.}
+  fi
+
+  if [[ ${WANTEDVERSION} != master ]] && [[ ${WANTEDVERSION} != *patches* ]] && [[ ${VER} != ${WANTEDVERSIONNUMBER}* ]]; then
     echo "ERROR: The ROOT tarball has not the same version (${VER}) you wanted on the command line (${WANTEDVERSION})!"
     exit 1
   fi
