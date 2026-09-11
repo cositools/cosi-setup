@@ -185,7 +185,7 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
    elif (( ${VERSIONID} >= 13 )); then
       REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
     else
-      REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libpcre3-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libbz2-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
+      REQUIRED="git git-lfs gawk dpkg-dev make g++ gcc gfortran gdb valgrind binutils libx11-dev libxpm-dev libxft-dev libxext-dev libssl-dev libglu1-mesa-dev libglew-dev libftgl-dev libmariadb-dev libfftw3-dev libgraphviz-dev libavahi-compat-libdnssd-dev libldap2-dev python3 python3-dev python3-tk python3-venv python3-matplotlib libxml2-dev libkrb5-dev libgsl-dev cmake libxmu-dev curl doxygen libblas-dev liblapack-dev expect dos2unix libncurses5-dev bc libxerces-c-dev libhealpix-cxx-dev bc libhdf5-dev libtbb-dev libccfits-dev libgif-dev liblz4-dev liblzma-dev libzstd-dev libbz2-dev "
       SUPPORTEDVERSION="false"
     fi
   else
@@ -278,9 +278,9 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
       echo "ERROR: opensuse Leap 15 or earlier is no longer supported."
       exit 255
     elif (( ${VERSIONID} == 16 )); then
-      REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel libcurl-devel patch "
+      REQUIRED="git-core git-lfs bash binutils make cmake gcc gcc-c++ gcc-fortran git libXext-devel libXft-devel libXpm-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel libcurl-devel patch "
     else 
-      REQUIRED="git-core git-lfs bash binutils cmake gcc gcc-c++ git libXext-devel libXft-devel libXpm-devel python xrootd-client-devel xrootd-libs-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel "
+      REQUIRED="git-core git-lfs bash binutils make cmake gcc gcc-c++ gcc-fortran git libXext-devel libXft-devel libXpm-devel fftw3-devel gsl-devel graphviz-devel Mesa glew-devel ncurses-devel python3-devel cfitsio-devel libxerces-c-devel hdf5-devel giflib-devel libjpeg8-devel liblz4-devel xz-devel libzstd-devel libpng16-devel libcurl-devel patch "
       SUPPORTEDVERSION="false"
     fi
 
@@ -411,7 +411,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
     else
-      REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel autoconf automake libtool giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
+      REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-connector-c-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel cfitsio-devel xerces-c-devel hdf5-devel libcurl-devel autoconf automake libtool giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core && sudo dnf config-manager --set-enabled crb && sudo dnf install -y epel-release"
       SUPPORTEDVERSION="false"
     fi
@@ -429,7 +429,7 @@ if [[ ${IsRedhatClone} -eq 1 ]]; then
       REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre2-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core"
     else 
-      REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
+      REQUIRED="openssl patch git git-lfs make cmake gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel libXt-devel gcc-gfortran openssl-devel pcre2-devel mesa-libGL-devel mesa-libGLU-devel glew-devel mariadb-devel fftw-devel graphviz-devel avahi-compat-libdns_sd-devel python3-devel libxml2-devel curl dos2unix ncurses-devel perl-devel boost-devel readline-devel cfitsio-devel xerces-c-devel healpix-c++-devel hdf5-devel libcurl-devel giflib-devel libjpeg-turbo-devel lz4-devel libzstd-devel "
       REPOSETUP="sudo dnf install -y dnf-plugins-core"
       SUPPORTEDVERSION="false"
     fi
