@@ -183,8 +183,8 @@ readversionrange() {
   VERSIONBLACKLIST=$(grep "${2}-Blacklist" "${1}" | awk -F":" '{ print $2 }')
 
   if [[ ! ${VERSIONMINSTRING} =~ ^[0-9]+\.[0-9]+$ ]] || [[ ! ${VERSIONMAXSTRING} =~ ^[0-9]+\.[0-9]+$ ]]; then
-    echo ""
-    echo "ERROR: Unable to read a valid ${3} version range from ${1}"
+    echo "" >&2
+    echo "ERROR: Unable to read a valid ${3} version range from ${1}" >&2
     return 1
   fi
 
@@ -215,6 +215,30 @@ encodeversion() {
   return 0
 }
 
+# Bring a version into one spelling, so that two of them can be compared as text. Leading
+# zeros are dropped from every numeric part and "/" becomes ".", thus 6.40.02, 6.40.2 and
+# 6.40/02 all end up as 6.40.2. This matters for the black list: root-config reports a
+# padded patch level while the tarball header gives an unpadded one, so the same release
+# reaches the check spelled two different ways.
+#
+# ${1}: the version, e.g. "6.40.02", "11.02.p02"
+#
+# Echoes the normalized version, and always returns 0
+normalizeversion() {
+  local PARTS=() PART PREFIX NUM OUT=""
+  IFS='./' read -ra PARTS <<< "${1}"
+  for PART in "${PARTS[@]}"; do
+    # keep a prefix such as the "p" of "p02", and unpad the number behind it
+    PREFIX="${PART%%[0-9]*}"
+    NUM="${PART#"${PREFIX}"}"
+    if [[ ${NUM} =~ ^[0-9]+$ ]]; then
+      PART="${PREFIX}$((10#${NUM}))"
+    fi
+    OUT="${OUT}.${PART}"
+  done
+  echo "${OUT#.}"
+}
+
 # Decide whether one version may be used, and say what is wrong with it if not. Both the
 # "--check" and the "--good-version" mode of the check scripts end here, so that the two
 # can never drift apart and report different things about the same version.
@@ -241,9 +265,14 @@ checkversionrange() {
     return 1
   fi
 
-  # A version is black listed either in full, e.g. 6.38.02, or with major and minor only
-  local NORMALIZED="${1//\//.}"
-  if [[ " ${VERSIONBLACKLIST} " == *" ${NORMALIZED} "* ]] || [[ " ${VERSIONBLACKLIST} " == *" ${NORMALIZED%.*} "* ]]; then
+  # A version is black listed either in full, e.g. 6.38.02, or with major and minor only.
+  # Both sides are normalized first, so that 6.40.02 and 6.40.2 are the same entry.
+  local NORMALIZED BLACKLIST="" ENTRY
+  NORMALIZED=$(normalizeversion "${1}")
+  for ENTRY in ${VERSIONBLACKLIST}; do
+    BLACKLIST+="$(normalizeversion "${ENTRY}") "
+  done
+  if [[ " ${BLACKLIST} " == *" ${NORMALIZED} "* ]] || [[ " ${BLACKLIST} " == *" ${NORMALIZED%.*} "* ]]; then
     echo ""
     echo "ERROR: ${2} version (${1}) is not acceptable"
     echo "       It has been black listed as not working."
@@ -305,4 +334,31 @@ tarballisgood() {
 
   echo "Tarball already exists and is complete. No download required."
   return 0
+}
+
+# How many cores this machine has, for "make -j". Never less than one: when the number
+# cannot be worked out, one thread is slow but always correct.
+#
+# This used to be written out in every builder as a pipeline whose exit status was tested
+# afterwards. That test can never fail, because the status of a pipe is the one of its last
+# command and "wc -l" always succeeds - an unreadable /proc/cpuinfo gave a count of 0 and
+# the build then died at "make -j0". Hence the result is checked here instead.
+#
+# Echoes the number of cores, and always returns 0
+numberofcores() {
+  # Matched loosely on purpose: some systems report a name which is not exactly "Darwin"
+  # or "Linux", and those still have to be recognized
+  local CORES=""
+  local SYSTEM
+  SYSTEM=$(uname -s)
+  if [[ ${SYSTEM} == *arwin* ]]; then
+    CORES=$(sysctl -n hw.logicalcpu_max 2>/dev/null)
+  elif [[ ${SYSTEM} == *inux* ]]; then
+    CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null)
+  fi
+
+  if [[ ! ${CORES} =~ ^[0-9]+$ ]] || [[ ${CORES} -lt 1 ]]; then
+    CORES=1
+  fi
+  echo "${CORES}"
 }

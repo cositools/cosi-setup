@@ -78,15 +78,7 @@ fi
 STASHNAME="BackupDuringCositoolsSetup:`date +'%y%m%d.%H%M%S'`"
   
 # Maximum compile threads we are allwoed to use
-MAXTHREADS=1;
-if [[ ${OSTYPE} == *arwin* ]]; then
-  MAXTHREADS=`sysctl -n hw.logicalcpu_max`
-elif [[ ${OSTYPE} == *inux* ]]; then
-  MAXTHREADS=`grep processor /proc/cpuinfo | wc -l`
-fi
-if [ "$?" != "0" ]; then
-  MAXTHREADS=1
-fi
+MAXTHREADS=$(numberofcores)
 
 # Automatically install additional packages
 AUTOPACKAGEINSTALL=false
@@ -843,7 +835,8 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
     echo "Switching to build-cfitsio.sh script..."
     cd "${EXTERNALPATH}"
 
-    "${SETUPPATH}/build-cfitsio.sh" "-source=${ENVFILE}" 2>&1 | tee BuildLogCFitsIO.txt
+    # One thread due to parallel compile issues, thus not the user's --max-threads
+    "${SETUPPATH}/build-cfitsio.sh" "-source=${ENVFILE}" --max-threads=1 2>&1 | tee BuildLogCFitsIO.txt
     RESULT=${PIPESTATUS[0]}
   
   
@@ -894,7 +887,8 @@ elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]]; then
   echo "Switching to build-heasoft.sh script..."
   cd "${EXTERNALPATH}"
 
-  "${SETUPPATH}/build-heasoft.sh" "-source=${ENVFILE}" -patch=yes 2>&1 | tee BuildLogHEASoft.txt
+  # One thread due to parallel compile issues, thus not the user's --max-threads
+  "${SETUPPATH}/build-heasoft.sh" "-source=${ENVFILE}" -patch=yes --max-threads=1 2>&1 | tee BuildLogHEASoft.txt
   RESULT=${PIPESTATUS[0]}
 
 

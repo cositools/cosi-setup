@@ -22,15 +22,6 @@ CONFIGUREOPTIONS=" "
 # CONFIGUREOPTIONS="--enable-readline "
 
 
-MAXTHREADS=1;
-if [[ ${OSTYPE} == *arwin* ]]; then
-  MAXTHREADS=`sysctl -n hw.logicalcpu_max`
-elif [[ ${OSTYPE} == *inux* ]]; then
-  MAXTHREADS=`grep processor /proc/cpuinfo | wc -l`
-fi
-if [ "$?" != "0" ]; then
-  MAXTHREADS=1
-fi
 
 
 confhelp() {
@@ -47,6 +38,10 @@ confhelp() {
   echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for cfitsio."
   echo " "
+  echo "--max-threads=[integer >=1 - default: 1]"
+  echo "    The maximum number of threads to be used for compilation."
+  echo "    The default is one thread due to parallel compile issues - raise it at your own risk."
+  echo " "
   echo "--help or -h"
   echo "    Show this help."
   echo " "
@@ -61,7 +56,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball source-script help"
+SETUPOPTIONS="tarball source-script max-threads help"
 
 # Store command line
 CMD=( "$@" )
@@ -77,6 +72,9 @@ done
 
 TARBALL=""
 ENVFILE=""
+
+# One thread due to parallel compile issues - see further below
+MAXTHREADS=1
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
@@ -103,6 +101,14 @@ for C in "${CMD[@]}"; do
     source-script)
       ENVFILE=$(optionvalue "${C}")
       echo "Using this environment file: ${ENVFILE}"
+      ;;
+    max-threads)
+      MAXTHREADS=$(optionvalue "${C}")
+      if [[ ! ${MAXTHREADS} =~ ^[0-9]+$ ]] || [ "${MAXTHREADS}" -le "0" ]; then
+        echo "ERROR: The maximum number of threads must be a number larger than 0 and not ${MAXTHREADS}!"
+        exit 1
+      fi
+      echo "Using at most ${MAXTHREADS} threads for compilation"
       ;;
     help)
       echo ""
@@ -184,7 +190,7 @@ fi
 
 
 echo "Checking for old installation..."
-if [ -d cfitsio_v${VER} ]; then
+if [ -d "cfitsio_v${VER}" ]; then
   cd cfitsio_v${VER}
   if [ -f COMPILE_SUCCESSFUL ]; then
     SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
@@ -248,10 +254,15 @@ fi
 
 
 
+# One thread by default due to parallel compile issues - raise it with --max-threads
+CORES=$(numberofcores)
+if [ "${CORES}" -gt "${MAXTHREADS}" ]; then
+  CORES=${MAXTHREADS}
+fi
+echo "Using this number of cores for compilation: ${CORES}"
+
 echo "Compiling..."
-# cfitsio is built with a single thread, the same way HEASoft is - it comes from the
-# same source and is small enough that a parallel build would save nothing.
-make -j1 > build.log 2>&1
+make -j${CORES} > build.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong while compiling cfitsio!"
   echo "       Check the file "`pwd`"/build.log"
@@ -260,7 +271,7 @@ fi
 ERRORS=$(cat build.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
 if [ "${ERRORS}" == "" ]; then
   echo "Installing ..."
-  make -j1 install > install.log 2>&1
+  make -j${CORES} install > install.log 2>&1
   INSTALLRESULT=$?
   # The log is searched as well as the exit status checked: make does not always report a
   # broken build, and not every failure prints a line the pattern below matches

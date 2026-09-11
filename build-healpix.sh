@@ -198,7 +198,7 @@ fi
 
 
 echo "Checking for old installation..."
-if [ -d healpix_v${VER} ]; then
+if [ -d "healpix_v${VER}" ]; then
   cd healpix_v${VER}
   if [ -f COMPILE_SUCCESSFUL ]; then
     SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
@@ -264,21 +264,14 @@ if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring libsharp!"
   echo "       Check the file "$(pwd)"/config_libsharp.log"
   exit 1
-CORES=1;
-if [[ ${OSTYPE} == *arwin* ]]; then
-  CORES=`sysctl -n hw.logicalcpu_max`
-elif [[ ${OSTYPE} == *inux* ]]; then
-  CORES=`grep processor /proc/cpuinfo | wc -l`
 fi
-if [ "$?" != "0" ]; then
-  CORES=1
-fi
+
+CORES=$(numberofcores)
 if [ "${CORES}" -gt "${MAXTHREADS}" ]; then
   CORES=${MAXTHREADS}
 fi
 echo "Using this number of cores for compilation: ${CORES}"
 
-fi
 make -j${CORES} > build_libsharp.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong compiling libsharp!"

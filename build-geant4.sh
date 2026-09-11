@@ -544,15 +544,7 @@ fi
 
 
 
-CORES=1;
-if [[ ${OSTYPE} == *arwin* ]]; then
-  CORES=`sysctl -n hw.logicalcpu_max`
-elif [[ ${OSTYPE} == linux* ]]; then 
-  CORES=`grep processor /proc/cpuinfo | wc -l`
-fi
-if [ "$?" != "0" ]; then
-  CORES=1
-fi
+CORES=$(numberofcores)
 if [ "${CORES}" -gt "${MAXTHREADS}" ]; then
   CORES=${MAXTHREADS}
 fi

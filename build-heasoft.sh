@@ -29,15 +29,6 @@ COMPONENTS="ftools nustar Xspec"
 
 
 
-MAXTHREADS=1;
-if [[ ${OSTYPE} == *arwin* ]]; then
-  MAXTHREADS=`sysctl -n hw.logicalcpu_max`
-elif [[ ${OSTYPE} == *inux* ]]; then
-  MAXTHREADS=`grep processor /proc/cpuinfo | wc -l`
-fi
-if [ "$?" != "0" ]; then
-  MAXTHREADS=1
-fi
 
 
 confhelp() {
@@ -53,6 +44,10 @@ confhelp() {
   echo " "
   echo "--source-script=[file name of new environment script]"
   echo "    The source script which sets all environment variables for HEASoft."
+  echo " "
+  echo "--max-threads=[integer >=1 - default: 1]"
+  echo "    The maximum number of threads to be used for compilation."
+  echo "    The default is one thread due to parallel compile issues - raise it at your own risk."
   echo " "
   echo "--patch=[true/on/yes, false/off/no - default: false]"
   echo "    Apply internal HEASoft patches, if there are any for this version."
@@ -99,7 +94,7 @@ SETUPPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . "${SETUPPATH}/setup-helpers.sh"
 
 # Every option this script accepts. Abbreviations are resolved against this list.
-SETUPOPTIONS="tarball source-script patch help"
+SETUPOPTIONS="tarball source-script patch max-threads help"
 
 # Store command line
 CMD=( "$@" )
@@ -116,6 +111,9 @@ done
 TARBALL=""
 ENVFILE=""
 PATCH="false"
+
+# One thread due to parallel compile issues - see further below
+MAXTHREADS=1
 
 # Overwrite default options with user options:
 for C in "${CMD[@]}"; do
@@ -145,6 +143,14 @@ for C in "${CMD[@]}"; do
       ;;
     patch)
       PATCH=$(optionvalue "${C}")
+      ;;
+    max-threads)
+      MAXTHREADS=$(optionvalue "${C}")
+      if [[ ! ${MAXTHREADS} =~ ^[0-9]+$ ]] || [ "${MAXTHREADS}" -le "0" ]; then
+        echo "ERROR: The maximum number of threads must be a number larger than 0 and not ${MAXTHREADS}!"
+        exit 1
+      fi
+      echo "Using at most ${MAXTHREADS} threads for compilation"
       ;;
     help)
       echo ""
@@ -237,7 +243,7 @@ HEASOFTCORE=heasoft_v${VER}
 
 
 echo "Checking for old installation..."
-if [ -d heasoft_v${VER} ]; then
+if [ -d "heasoft_v${VER}" ]; then
   cd heasoft_v${VER}
   if [ -f COMPILE_SUCCESSFUL ]; then
     SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
@@ -355,11 +361,15 @@ fi
 
 
 
+# One thread by default due to parallel compile issues - raise it with --max-threads
+CORES=$(numberofcores)
+if [ "${CORES}" -gt "${MAXTHREADS}" ]; then
+  CORES=${MAXTHREADS}
+fi
+echo "Using this number of cores for compilation: ${CORES}"
+
 echo "Compiling..."
-# HEASoft is deliberately built with a single thread: its makefiles have shown race
-# conditions with parallel builds, which produce strange failures far from the cause.
-# Do not turn this into a --max-threads option without testing it thoroughly.
-make -j1 > build.log 2>&1
+make -j${CORES} > build.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong while compiling HEASoft!"
   echo "       Check the file "`pwd`"/build.log"
@@ -368,7 +378,7 @@ fi
 ERRORS=$(cat build.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
 if [ "${ERRORS}" == "" ]; then
   echo "Installing ..."
-  make -j1 install > install.log 2>&1
+  make -j${CORES} install > install.log 2>&1
   INSTALLRESULT=$?
   # The log is searched as well as the exit status checked: make does not always report a
   # broken build, and not every failure prints a line the pattern below matches
