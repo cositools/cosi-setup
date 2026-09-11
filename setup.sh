@@ -128,7 +128,8 @@ SETUPOPTIONS="cosi-tools-path setup-branch branch root geant heasoft healpix opt
 
 # ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
 # See setup-helpers.sh for the full documentation
-resolveoption() {
+resolveoption()
+{
   # Everything from the "=" on is the value, and the dashes are not part of the name
   local NAME="${1%%=*}"
   NAME="${NAME#--}"
@@ -153,7 +154,8 @@ resolveoption() {
 
 # ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
 # See setup-helpers.sh for the full documentation
-checkpathcharacters() {
+checkpathcharacters()
+{
   # A newline has to be caught before grep, which works line by line
   case "${1}" in
     *$'\n'*) return 1 ;;
@@ -166,7 +168,8 @@ checkpathcharacters() {
 
 # ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
 # See setup-helpers.sh for the full documentation
-optionvalue() {
+optionvalue()
+{
   case "${1}" in
     *=*) printf '%s' "${1#*=}" ;;
     *)   printf '%s' "" ;;
@@ -175,7 +178,8 @@ optionvalue() {
 
 # ATTENTION: The same function appears in setup-helpers.sh: Please keep both identical
 # See setup-helpers.sh for the full documentation
-absolutefilename() {
+absolutefilename()
+{
   local FULL="${1}"
   if [[ ${FULL} != /* ]]; then
     FULL="$(pwd)/${FULL}"
