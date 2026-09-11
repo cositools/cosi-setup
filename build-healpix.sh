@@ -214,8 +214,6 @@ if [ -d "healpix_v${VER}" ]; then
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the healpix directory in the source script..."
         echo "HEALPIXDIR=$(pwd)/healpix_v${VER}" >> ${ENVFILE}
-      else
-        setuphelp
       fi
       exit 0
     fi

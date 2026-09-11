@@ -206,8 +206,6 @@ if [ -d "cfitsio_v${VER}" ]; then
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the cfitsio directory in the source script..."
         echo "CFITSIODIR=$(pwd)/cfitsio_v${VER}" >> ${ENVFILE}
-      else
-        setuphelp
       fi
       exit 0
     fi
