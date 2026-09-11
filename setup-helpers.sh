@@ -496,7 +496,10 @@ downloadtarball()
     return 1
   fi
 
-  mv "${TEMPFILE}" "${2}"
+  if ! mv "${TEMPFILE}" "${2}"; then
+    echo "ERROR: Unable to move the downloaded file to ${2}"
+    return 1
+  fi
 
   return 0
 }
