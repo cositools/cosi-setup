@@ -1512,7 +1512,7 @@ echo "Linking it at the default MEGAlib location"
 if [ -f "${COSIPATH}/megalib/bin/source-megalib.sh" ]; then
   rm "${COSIPATH}/megalib/bin/source-megalib.sh"
 fi
-ln -s "${COSIPATH}/source.sh" "${COSIPATH}/megalib/bin/source-megalib.sh"  
+ln -s "${COSIPATH}/source.sh" "${COSIPATH}/megalib/bin/source-megalib.sh"
 
 echo " "
 echo " "

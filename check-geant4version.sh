@@ -114,7 +114,7 @@ case ${MODE} in
 
   check)
     if (`test -f "${GEANT4PATH}/source/global/management/include/G4Version.hh"`); then
-      LINE=`grep "#define G4VERSION_NUMBER" "${GEANT4PATH}/source/global/management/include/G4Version.hh"`; 
+      LINE=`grep "#define G4VERSION_NUMBER" "${GEANT4PATH}/source/global/management/include/G4Version.hh"`;
       version=`echo ${LINE} | awk -F" " '{ print $3 }'`;
       rv="$((${version} / 100)).$(( (${version} / 10) % 10 )).$((${version} % 10))"
     elif [ -f "${GEANT4PATH}/bin/geant4-config" ]; then

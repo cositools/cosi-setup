@@ -160,7 +160,7 @@ optionvalue()
 # Description:
 # Interpret the value of a boolean command line value.
 # Accepted are true/on/yes and false/off/no in any capitalization, abbreviated the same way
-# as everywhere else in these scripts, e.g. "t", "n", "off". 
+# as everywhere else in these scripts, e.g. "t", "n", "off".
 # An option given on its own, e.g. "--auto", means "true".
 #
 # Mandatory options (not checked):
@@ -194,11 +194,11 @@ booleanvalue()
     fi
   done
 
-  if [[ ${TRUEMATCH} == true ]] && [[ ${FALSEMATCH} == false ]]; then 
-    echo "true" 
+  if [[ ${TRUEMATCH} == true ]] && [[ ${FALSEMATCH} == false ]]; then
+    echo "true"
     return 0
   fi
-  if [[ ${FALSEMATCH} == true ]] && [[ ${TRUEMATCH} == false ]]; then 
+  if [[ ${FALSEMATCH} == true ]] && [[ ${TRUEMATCH} == false ]]; then
     echo "false"
     return 0
   fi
@@ -460,7 +460,7 @@ numberofcores()
 # 0 if the file is in place and complete
 # 1 after any error
 #
-downloadtarball() 
+downloadtarball()
 {
   local TEMPFILE="${2}.download"
   local DOWNLOADED="false"

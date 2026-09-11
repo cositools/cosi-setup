@@ -195,10 +195,10 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
   
   #echo "Required: ${REQUIRED}"
   if [[ "${REQUIRED}" == "" ]]; then exit 0; fi
-  
+
   if [[ ${SUPPORTEDVERSION} == true ]]; then
     # Check if each of the packages exists:
-    for PACKAGE in ${REQUIRED}; do 
+    for PACKAGE in ${REQUIRED}; do
       # Check if the file is installed
       STATUS=`dpkg-query -Wf'${db:Status-abbrev}' ${PACKAGE} 2>/dev/null | grep '^i'`
       #echo "${PACKAGE}: >${STATUS}<"
@@ -231,14 +231,14 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
           echo "All required packages seem to be installed now!"
           exit 0
         fi
-      else 
+      else
         echo " "
         echo "Do the following to install all required packages:"
         echo "sudo apt update; sudo apt install ${TOBEINSTALLED}"
         echo " "
         exit 255
       fi
-    else 
+    else
       echo " "
       echo "All required packages seem to be already installed!"
       exit 0
@@ -351,7 +351,7 @@ if [[ ${IsOpenSuseClone} -eq 1 ]]; then
         echo " "
         exit 255
       fi
-    else 
+    else
       echo " "
       echo "All required packages seem to be already installed!"
       exit 0

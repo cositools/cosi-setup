@@ -55,7 +55,7 @@ The following options are a copy-and-paste from ```bash setup.sh --help```:
 --setup-branch=[name of a git branch - default: main]
     Choose a specific branch to be used for the cosi-setup setup scripts.
     If the option is not given the main branch will be used
- 
+
 --branch=[name of a git branch - default: main]
     Choose a specific branch of the COSItools git repositories.
     If the option is not given the main branch will be used.

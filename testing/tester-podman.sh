@@ -124,9 +124,9 @@ ExpandOSRange() {
     STEP=1                       # e.g. "1", "2"
   fi
 
-  local PREFIX=""                
-  local MAJOR=""                 
-  local SUFFIX=""                
+  local PREFIX=""
+  local MAJOR=""
+  local SUFFIX=""
   if [[ ${START} =~ ^([A-Za-z]*)([0-9]+)\.([0-9]+)$ ]]; then   # "stream9" -> no match, "22.04" -> matches
     PREFIX="${BASH_REMATCH[1]}"  # e.g. n/a, ""
     MAJOR="${BASH_REMATCH[2]}"   # e.g. n/a, "22"

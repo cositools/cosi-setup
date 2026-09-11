@@ -291,12 +291,12 @@ type cmake >/dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo "ERROR: cmake must be installed"
   exit 1
-else 
+else
   VER=`cmake --version | grep ^cmake`
-  VER=${VER#cmake version }; 
-  OLDIFS=${IFS}; IFS='.'; Tokens=( ${VER} ); IFS=${OLDIFS}; 
-  VERSION=$(( 10000*${Tokens[0]} + 100*${Tokens[1]} + ${Tokens[2]} )); 
-  if (( ${VERSION} < 30300 )); then 
+  VER=${VER#cmake version };
+  OLDIFS=${IFS}; IFS='.'; Tokens=( ${VER} ); IFS=${OLDIFS};
+  VERSION=$(( 10000*${Tokens[0]} + 100*${Tokens[1]} + ${Tokens[2]} ));
+  if (( ${VERSION} < 30300 )); then
     echo "ERROR: the version of cmake needs to be at least 3.3 and not ${VER}"
     exit 1
   fi
@@ -305,12 +305,12 @@ type curl >/dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo "ERROR: curl must be installed"
   exit 1
-fi 
+fi
 type openssl >/dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo "ERROR: openssl must be installed"
   exit 1
-fi 
+fi
 
 
 echo "Getting Geant4..."
@@ -361,7 +361,7 @@ else
     if [ "${EXISTS}" == "" ]; then
       break
     fi
-    PATCHES="${s} ${PATCHES}" # Stored inverse! 
+    PATCHES="${s} ${PATCHES}" # Stored inverse!
   done
 
   # Now check that we have a non-blacklisted patch
