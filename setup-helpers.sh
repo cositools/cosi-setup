@@ -158,13 +158,13 @@ optionvalue()
 
 #
 # Description:
-# Interpret the value of a boolean command line option.
+# Interpret the value of a boolean command line value.
 # Accepted are true/on/yes and false/off/no in any capitalization, abbreviated the same way
-# as everywhere else in these scripts, e.g. "t", "n", "off". An option given on its own,
-# e.g. "--auto", has no value and means "true".
+# as everywhere else in these scripts, e.g. "t", "n", "off". 
+# An option given on its own, e.g. "--auto", means "true".
 #
 # Mandatory options (not checked):
-# ${1}: the value of the option, i.e. what optionvalue returned. Empty means "true".
+# ${1}: the value of the option, empty means "true".
 #
 # Return codes:
 # 0 and echoes "true" or "false"
@@ -174,10 +174,35 @@ booleanvalue()
 {
   local VALUE
   VALUE=$(echo "${1}" | tr '[:upper:]' '[:lower:]')
-  case "${VALUE}" in
-    ""|t*|on|y*) echo "true";  return 0 ;;
-    f*|of*|n*)   echo "false"; return 0 ;;
-  esac
+
+  # An option without value means true
+  if [[ ${VALUE} == "" ]]; then
+    echo "true"
+    return 0
+  fi
+
+  # Only the beginning of the word needs to match
+  local W TRUEMATCH="false" FALSEMATCH="false"
+  for W in true yes on; do
+    if [[ ${W} == ${VALUE}* ]]; then
+      TRUEMATCH="true"
+    fi
+  done
+  for W in false no off; do
+    if [[ ${W} == ${VALUE}* ]]; then
+      FALSEMATCH="true"
+    fi
+  done
+
+  if [[ ${TRUEMATCH} == true ]] && [[ ${FALSEMATCH} == false ]]; then 
+    echo "true" 
+    return 0
+  fi
+  if [[ ${FALSEMATCH} == true ]] && [[ ${TRUEMATCH} == false ]]; then 
+    echo "false"
+    return 0
+  fi
+
   return 1
 }
 
