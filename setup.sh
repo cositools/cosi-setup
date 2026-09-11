@@ -342,10 +342,10 @@ echo "Updating/cloning the cosi-setup repository to branch ${GITSETUPBRANCH}"
 # If the cosi-setup directory exists, update it if not clone it
 if [[ -d cosi-setup ]]; then
   cd cosi-setup
-  git pull
+  git fetch
   if [ "$?" != "0" ]; then
     echo ""
-    echo "ERROR: Unable to pull cosi-setup!"
+    echo "ERROR: Unable to fetch cosi-setup!"
     exit 1
   fi
 else 
@@ -377,6 +377,19 @@ if [ "$?" != "0" ]; then
     exit 1
   fi
 fi
+# Check for and if necessary perfrom a fast-forward if we are behind
+GITCURRENTBRANCH=$(git rev-parse --abbrev-ref HEAD)
+if git show-ref --verify --quiet "refs/remotes/origin/${GITCURRENTBRANCH}"; then
+  git merge --ff-only "origin/${GITCURRENTBRANCH}"
+  if [ "$?" != "0" ]; then
+    echo ""
+    echo "ERROR: Unable to update the cosi-setup branch ${GITCURRENTBRANCH} to the version on the server due to local commits or changes."
+    exit 1
+  fi
+else
+  echo "INFO: Using the local branch ${GITCURRENTBRANCH}."
+fi
+
 git status
 
 
