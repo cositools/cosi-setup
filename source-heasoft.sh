@@ -87,6 +87,13 @@ if [[ -f ${__TMP_PATH}/headas-init.sh ]]; then
   source ${HEADAS}/headas-init.sh
   __TMP_HEADASFOUND=true
 fi
+
+# Register cfitsio with pkg-config, so that it is findable
+if [[ -f ${__TMP_PATH}/lib/pkgconfig/cfitsio.pc ]]; then
+  export PKG_CONFIG_PATH=${__TMP_PATH}/lib/pkgconfig:${PKG_CONFIG_PATH}
+elif [[ -f ${__TMP_PATH}/lib64/pkgconfig/cfitsio.pc ]]; then
+  export PKG_CONFIG_PATH=${__TMP_PATH}/lib64/pkgconfig:${PKG_CONFIG_PATH}
+fi
 if [[ `uname -a` == *Linux* ]]; then
   if [[ -f ${__TMP_PATH}/lib/libcfitsio.so ]]; then 
     __TMP_CFITSIOFOUND=true

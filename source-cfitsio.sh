@@ -82,5 +82,12 @@ export CFITSIO=${__TMP_PATH}
 export LHEASOFT=${__TMP_PATH} # For easy compatibility with MEGAlib
 export LD_LIBRARY_PATH=${CFITSIO}/lib:${LD_LIBRARY_PATH}
 
+# Register cfitsio with pkg-config, so that it is findable
+if [[ -f ${CFITSIO}/lib/pkgconfig/cfitsio.pc ]]; then
+  export PKG_CONFIG_PATH=${CFITSIO}/lib/pkgconfig:${PKG_CONFIG_PATH}
+elif [[ -f ${CFITSIO}/lib64/pkgconfig/cfitsio.pc ]]; then
+  export PKG_CONFIG_PATH=${CFITSIO}/lib64/pkgconfig:${PKG_CONFIG_PATH}
+fi
+
 
 return

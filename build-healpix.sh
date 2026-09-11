@@ -289,23 +289,9 @@ cd "${MAINDIR}"
 
 
 echo "Configuring..."
-# Minimze the LD_LIBRARY_PATH to prevent problems with multiple readline's
 cd "${MAINDIR}/healpix_v${VER}-source/src/cxx"
-
 make distclean 2>/dev/null || true
-
-#export SHARP_INCDIR=${MAINDIR}/include
-#export SHARP_LIBDIR=${MAINDIR}/lib
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${MAINDIR}/lib/pkgconfig
-
-if [[ "${ENVFILE}" != "" ]]; then
-  HEASOFTDIR=$(grep "^HEASOFTDIR=" "${ENVFILE}" | awk -F= '{ print $2 }')
-  if [[ ${HEASOFTDIR} != "" ]]; then
-    export CFITSIO_INCDIR=${HEASOFTDIR}/include
-    export CFITSIO_LIBDIR=${HEASOFTDIR}/lib
-  fi
-fi 
-
 sh configure ${CONFIGUREOPTIONS} "--prefix=${MAINDIR}" > config.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring healpix!"
