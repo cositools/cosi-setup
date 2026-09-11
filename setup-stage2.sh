@@ -595,7 +595,6 @@ if [[ ${ROOTPATH} == "" ]]; then
 elif [[ ${ROOTPATH} == ?.?? ]]; then
   ISPATH="false"
 elif [[ ${ROOTPATH} == master ]]; then
-  echo "master"
   ISPATH="false"
 elif [[ ${ROOTPATH} == v?-??-?? ]]; then
   ISPATH="false"
@@ -973,7 +972,6 @@ echo "Installing Healpix"
 echo " "
 
 # If we are given an existing Healpix installation, check is it is compatible
-echo "HEALPIXPATH::${HEALPIXPATH}::"
 if [[ "${HEALPIXPATH}" == "off" ]]; then
 
   echo " "
