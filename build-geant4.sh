@@ -418,7 +418,7 @@ if [[ ${GEANT4CORE} == "geant4_v10.02.p03" ]]; then
   PATCH="true"
   echo "This version of Geant4 version requires a mandatory patch"
 fi
-if [[ ${GEANT4CORE} == "geant4_v11.02.p02" ]]; then
+if [[ ${GEANT4CORE} == "geant4_v11.2.2" ]]; then
   PATCH="true"
   echo "This version of Geant4 requires a mandatory patch"
 fi
