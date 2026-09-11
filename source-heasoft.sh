@@ -94,7 +94,7 @@ if [[ -f ${__TMP_PATH}/lib/pkgconfig/cfitsio.pc ]]; then
 elif [[ -f ${__TMP_PATH}/lib64/pkgconfig/cfitsio.pc ]]; then
   export PKG_CONFIG_PATH=${__TMP_PATH}/lib64/pkgconfig:${PKG_CONFIG_PATH}
 fi
-if [[ `uname -a` == *Linux* ]]; then
+if [[ $(uname -a) == *Linux* ]]; then
   if [[ -f ${__TMP_PATH}/lib/libcfitsio.so ]]; then 
     __TMP_CFITSIOFOUND=true
   fi

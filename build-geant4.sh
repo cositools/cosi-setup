@@ -33,7 +33,7 @@ CONFIGUREOPTIONS+=" -Wno-dev -DCMAKE_WARN_DEPRECATED=OFF"
 # Reduce the warning messages:
 WARNINGS="-Wno-shadow -Wno-implicit-fallthrough -Wno-overloaded-virtual -Wno-deprecated-copy -Wno-unused-result -Wno-format-overflow="
 
-COMPILEROPTIONS=`gcc --version | head -n 1`
+COMPILEROPTIONS=$(gcc --version | head -n 1)
 
 # The Geant4 website from which to download the tarball
 WEBSITE="https://geant4-data.web.cern.ch/releases"
@@ -205,7 +205,7 @@ else
 fi
 
 
-DEBUG=`echo ${DEBUG} | tr '[:upper:]' '[:lower:]'`
+DEBUG=$(echo ${DEBUG} | tr '[:upper:]' '[:lower:]')
 if ( [[ ${DEBUG} == of* ]] || [[ ${DEBUG} == no ]] ); then
   DEBUG="off"
   DEBUGSTRING=""
@@ -292,7 +292,7 @@ if [ $? -ne 0 ]; then
   echo "ERROR: cmake must be installed"
   exit 1
 else
-  VER=`cmake --version | grep ^cmake`
+  VER=$(cmake --version | grep ^cmake)
   VER=${VER#cmake version };
   OLDIFS=${IFS}; IFS='.'; Tokens=( ${VER} ); IFS=${OLDIFS};
   VERSION=$(( 10000*${Tokens[0]} + 100*${Tokens[1]} + ${Tokens[2]} ));
@@ -321,14 +321,14 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given Geant4 tarball is ${TARBALL}"
   
   # Check if it has the correct version:
-  NUMVER=`echo "${TARBALL}" | awk -F'geant4[-.]v?' '{ print $NF }' | awk -F.t '{ print $1 }'`;
+  NUMVER=$(echo "${TARBALL}" | awk -F'geant4[-.]v?' '{ print $NF }' | awk -F.t '{ print $1 }');
   VER="v${NUMVER}"
   # Old versions use a zero-padded minor, i.e. 10.02 is the same version as 10.2
-  SHORTVER=`echo ${NUMVER} | awk -F. '{ printf "%d.%d", $1, $2 }'`;
+  SHORTVER=$(echo ${NUMVER} | awk -F. '{ printf "%d.%d", $1, $2 }');
   echo "Version of Geant4 is: ${VER}"
   
   if [[ ${WANTEDVERSION} != "" ]]; then
-    if [[ ${SHORTVER} != `echo ${WANTEDVERSION} | awk -F. '{ printf "%d.%d", $1, $2 }'` ]]; then
+    if [[ ${SHORTVER} != $(echo ${WANTEDVERSION} | awk -F. '{ printf "%d.%d", $1, $2 }') ]]; then
       echo "ERROR: You stated you want version ${WANTEDVERSION} but the tar ball has version ${SHORTVER}!"
       exit 1
     fi
@@ -344,7 +344,7 @@ else
   
   if [[ ${WANTEDVERSION} == "" ]]; then
     # Get desired version:
-    WANTEDVERSION=`"${SETUPPATH}/check-geant4version.sh" --get-max`
+    WANTEDVERSION=$("${SETUPPATH}/check-geant4version.sh" --get-max)
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine required Geant4 version!"
       exit 1
@@ -354,10 +354,10 @@ else
   
   # Now check the Geant4 repository for the given version, and choose the highest patch level
   PATCHES=""
-  for s in `seq 0 10`; do
+  for s in $(seq 0 10); do
     TESTTARBALL="geant4-v${WANTEDVERSION}.${s}.tar.gz"
     echo "Trying to find ${TESTTARBALL}..."
-    EXISTS=`curl -s --head ${WEBSITE}/${TESTTARBALL} | grep gzip`
+    EXISTS=$(curl -s --head ${WEBSITE}/${TESTTARBALL} | grep gzip)
     if [ "${EXISTS}" == "" ]; then
       break
     fi
@@ -397,7 +397,7 @@ else
     fi
   fi
   
-  VER=`echo "${TARBALL}" | awk -Fgeant4. '{ print $2 }' | awk -F.t '{ print $1 }'`;
+  VER=$(echo "${TARBALL}" | awk -Fgeant4. '{ print $2 }' | awk -F.t '{ print $1 }');
   if [ "$?" != "0" ]; then
     echo "ERROR: Something went wrong during determining the Geant4 version"
     exit 1
@@ -429,12 +429,12 @@ if [ -d "${GEANT4DIR}" ]; then
   cd "${GEANT4DIR}"
   if [ -f COMPILE_SUCCESSFUL ]; then
   
-    SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
+    SAMEOPTIONS=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}")
     if [ "${SAMEOPTIONS}" == "" ]; then
       echo "The old installation used different compilation options..."
     fi
 
-    SAMECOMPILER=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}"`
+    SAMECOMPILER=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}")
     if [ "${SAMECOMPILER}" == "" ]; then
       echo "The old installation used a different compiler..."
     fi
@@ -443,11 +443,11 @@ if [ -d "${GEANT4DIR}" ]; then
     PATCHPRESENT="no"
     if [ -f "${SETUPPATH}/patches/${GEANT4CORE}.patch" ]; then
       PATCHPRESENT="yes"
-      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
+      PATCHPRESENTMD5=$(openssl md5 "${SETUPPATH}/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }')
     fi
-    PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
+    PATCHSTATUS=$(cat COMPILE_SUCCESSFUL | grep -- "^Patch")
     if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
-      PATCHMD5=`echo ${PATCHSTATUS} | awk -F" " '{ print $3 }'`
+      PATCHMD5=$(echo ${PATCHSTATUS} | awk -F" " '{ print $3 }')
     fi
     
     if [[ ${PATCH} == true ]]; then
@@ -473,7 +473,7 @@ if [ -d "${GEANT4DIR}" ]; then
       echo "You already have a usable Geant4 version installed!"
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the Geant4 directory in the source script..."
-        echo "GEANT4DIR=`pwd`" >> ${ENVFILE}
+        echo "GEANT4DIR=$(pwd)" >> ${ENVFILE}
       fi
       exit 0
     fi
@@ -521,7 +521,7 @@ if [[ ${PATCH} == true ]]; then
       echo "ERROR: Something went wrong applying the Geant4 patch!"
       exit 1
     fi
-    PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }'`
+    PATCHMD5=$(openssl md5 "${SETUPPATH}/patches/${GEANT4CORE}.patch" | awk -F" " '{ print $2 }')
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
     echo "Applied patch: ${SETUPPATH}/patches/${GEANT4CORE}.patch"
   else
@@ -622,7 +622,7 @@ chmod -R go+rX "${GEANT4DIR}"
 
 if [ "${ENVFILE}" != "" ]; then
   echo "Storing the Geant4 directory in the source script..."
-  echo "GEANT4DIR=`pwd`/${GEANT4DIR}" >> ${ENVFILE}
+  echo "GEANT4DIR=$(pwd)/${GEANT4DIR}" >> ${ENVFILE}
 fi
 
 

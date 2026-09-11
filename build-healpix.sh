@@ -13,7 +13,7 @@
 OSTYPE=$(uname -s | awk '{print tolower($0)}')
 
 # The basic compiler options
-COMPILEROPTIONS=`gcc --version | head -n 1`
+COMPILEROPTIONS=$(gcc --version | head -n 1)
 
 # Additional configure options 
 CONFIGUREOPTIONS=" "
@@ -200,11 +200,11 @@ echo "Checking for old installation..."
 if [ -d "healpix_v${VER}" ]; then
   cd healpix_v${VER}
   if [ -f COMPILE_SUCCESSFUL ]; then
-    SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
+    SAMEOPTIONS=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}")
     if [ "${SAMEOPTIONS}" == "" ]; then
       echo "The old installation used different compilation options..."
     fi
-    SAMECOMPILER=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}"`
+    SAMECOMPILER=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}")
     if [ "${SAMECOMPILER}" == "" ]; then
       echo "The old installation used a different compiler..."
     fi

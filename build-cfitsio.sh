@@ -13,7 +13,7 @@
 OSTYPE=$(uname -s | awk '{print tolower($0)}')
 
 # The basic compiler options
-COMPILEROPTIONS=`gcc --version | head -n 1`
+COMPILEROPTIONS=$(gcc --version | head -n 1)
 
 # Additional configure options 
 CONFIGUREOPTIONS=" "
@@ -155,7 +155,7 @@ else
   echo "Looking for latest cfitsio version on the cfitsio website"
 
   # Now check root repository for the given version:
-  #TARBALL=`curl ftp://legacy.gsfc.nasa.gov/software/lcfitsio/release/ -sl | grep "^cfitsio\-" | grep "[0-9]src.tar.gz$"`
+  #TARBALL=$(curl ftp://legacy.gsfc.nasa.gov/software/lcfitsio/release/ -sl | grep "^cfitsio\-" | grep "[0-9]src.tar.gz$")
   TARBALL=$(curl https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/ -sl | grep ">cfitsio-" | grep "[0-9].tar.gz<" | awk -F">" '{ print $3 }' | awk -F"<" '{print $1 }' | sort | tail -n 1)
   if [ "${TARBALL}" == "" ]; then
     echo "ERROR: Unable to find suitable cfitsio tar ball at the cfitsio website"
@@ -182,7 +182,7 @@ else
   fi
 
   # Check for the version number:
-  VER=`echo "${TARBALL}" | awk -Fcfitsio- '{ print $2 }' | awk -F.tar '{ print $1 }'`;
+  VER=$(echo "${TARBALL}" | awk -Fcfitsio- '{ print $2 }' | awk -F.tar '{ print $1 }');
   echo "Version of cfitsio is: ${VER}"
 fi
 
@@ -192,11 +192,11 @@ echo "Checking for old installation..."
 if [ -d "cfitsio_v${VER}" ]; then
   cd cfitsio_v${VER}
   if [ -f COMPILE_SUCCESSFUL ]; then
-    SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
+    SAMEOPTIONS=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}")
     if [ "${SAMEOPTIONS}" == "" ]; then
       echo "The old installation used different compilation options..."
     fi
-    SAMECOMPILER=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}"`
+    SAMECOMPILER=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}")
     if [ "${SAMECOMPILER}" == "" ]; then
       echo "The old installation used a different compiler..."
     fi
@@ -248,7 +248,7 @@ cd cfitsio_v${VER}-source
 sh configure ${CONFIGUREOPTIONS} --prefix=$(pwd)/.. > config.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring cfitsio!"
-  echo "       Check the file "`pwd`"/config.log"
+  echo "       Check the file "$(pwd)"/config.log"
   exit 1
 fi
 
@@ -265,7 +265,7 @@ echo "Compiling..."
 make -j${CORES} > build.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong while compiling cfitsio!"
-  echo "       Check the file "`pwd`"/build.log"
+  echo "       Check the file "$(pwd)"/build.log"
   exit 1
 fi
 ERRORS=$(cat build.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
@@ -278,12 +278,12 @@ if [ "${ERRORS}" == "" ]; then
   ERRORS=$(cat install.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
   if [ "${INSTALLRESULT}" != "0" ] || [ "${ERRORS}" != "" ]; then
     echo "ERROR: Errors occured during the installation. Check your install.log"
-    echo "       Check the file "`pwd`"/install.log"
+    echo "       Check the file "$(pwd)"/install.log"
     exit 1;
   fi
 else
   echo "ERROR: Errors occured during the compilation. Check your build.log"
-  echo "       Check the file "`pwd`"/build.log"
+  echo "       Check the file "$(pwd)"/build.log"
   exit 1;
 fi
 

@@ -295,7 +295,7 @@ if [ "$?" != "0" ]; then
 fi
 
 # Getting the current brnach
-CURRENTBRANCH=`git rev-parse --abbrev-ref HEAD`
+CURRENTBRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo "Current branch: ${CURRENTBRANCH}"
 
 

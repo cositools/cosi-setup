@@ -119,7 +119,7 @@ case ${MODE} in
       exit 1;
     fi
 
-    rv=`"${ROOTPATH}/bin/root-config" --version`
+    rv=$("${ROOTPATH}/bin/root-config" --version)
 
     if ! checkversionrange "${rv}" "ROOT"; then
       exit 1

@@ -108,7 +108,7 @@ if [[ ${OSTYPE} == *arwin* ]]; then
 fi
 
 # The compiler
-COMPILEROPTIONS=`gcc --version | head -n 1`
+COMPILEROPTIONS=$(gcc --version | head -n 1)
 
 
 
@@ -276,7 +276,7 @@ else
 fi
 
 
-DEBUG=`echo ${DEBUG} | tr '[:upper:]' '[:lower:]'`
+DEBUG=$(echo ${DEBUG} | tr '[:upper:]' '[:lower:]')
 if ( [[ ${DEBUG} == of* ]] || [[ ${DEBUG} == no ]] ); then
   DEBUG="off"
   DEBUGSTRING=""
@@ -364,7 +364,7 @@ if [ $? -ne 0 ]; then
   echo "ERROR: cmake must be installed"
   exit 1
 else
-  VER=`cmake --version | grep ^cmake`
+  VER=$(cmake --version | grep ^cmake)
   VER=${VER#cmake version };
   OLDIFS=${IFS}; IFS='.'; Tokens=( ${VER} ); IFS=${OLDIFS};
   VERSION=$(( 10000*${Tokens[0]} + 100*${Tokens[1]} + ${Tokens[2]} ));
@@ -393,7 +393,7 @@ ROOTTOPDIR=""
 if [[ ${TARBALL} == "" ]]; then
   # Get desired version:
   if [[ ${WANTEDVERSION} == "" ]]; then
-    WANTEDVERSION=`"${SETUPPATH}/check-rootversion.sh" --get-max`
+    WANTEDVERSION=$("${SETUPPATH}/check-rootversion.sh" --get-max)
     if [ "$?" != "0" ]; then
       echo "ERROR: Unable to determine required ROOT version!"
       exit 1
@@ -481,7 +481,7 @@ fi
 echo "Name of the used ROOT tarball: ${TARBALL}"
 
 # Determine the name of the top level directory in the tar ball
-ROOTTOPDIR=`tar tzf "${TARBALL}" | sed -e 's@/.*@@' | uniq`
+ROOTTOPDIR=$(tar tzf "${TARBALL}" | sed -e 's@/.*@@' | uniq)
 RESULT=$?
 if [ "${RESULT}" != "0" ]; then
   echo "ERROR: Cannot find top level directory in the tar ball!"
@@ -491,7 +491,7 @@ fi
 # Check if it has the correct version:
 VER=""
 if tar -tf "${TARBALL}" | grep -q "${ROOTTOPDIR}/build/version_number"; then
-  VER=`tar xfzO "${TARBALL}" "${ROOTTOPDIR}/build/version_number" | sed 's|/|.|g'`
+  VER=$(tar xfzO "${TARBALL}" "${ROOTTOPDIR}/build/version_number" | sed 's|/|.|g')
 elif tar -tf "${TARBALL}" | grep -q "${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx"; then
   VER+=$(tar xfzO "${TARBALL}" "${ROOTTOPDIR}/core/foundation/inc/ROOT/RVersion.hxx" | grep "ROOT_VERSION_MAJOR" | head -n 1 | awk '{ print $3 }')
   VER+="."
@@ -550,12 +550,12 @@ if [ -d "${ROOTDIR}" ]; then
   cd "${ROOTDIR}"
   if [ -f COMPILE_SUCCESSFUL ]; then
 
-    SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
+    SAMEOPTIONS=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}")
     if [ "${SAMEOPTIONS}" == "" ]; then
       echo "The old installation used different compilation options..."
     fi
 
-    SAMECOMPILER=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}"`
+    SAMECOMPILER=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}")
     if [ "${SAMECOMPILER}" == "" ]; then
       echo "The old installation used a different compiler..."
     fi
@@ -564,11 +564,11 @@ if [ -d "${ROOTDIR}" ]; then
     PATCHPRESENT="no"
     if [ -f "${SETUPPATH}/patches/${ROOTCORE}.patch" ]; then
       PATCHPRESENT="yes"
-      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
+      PATCHPRESENTMD5=$(openssl md5 "${SETUPPATH}/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }')
     fi
-    PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
+    PATCHSTATUS=$(cat COMPILE_SUCCESSFUL | grep -- "^Patch")
     if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
-      PATCHMD5=`echo ${PATCHSTATUS} | awk -F" " '{ print $3 }'`
+      PATCHMD5=$(echo ${PATCHSTATUS} | awk -F" " '{ print $3 }')
     fi
 
     if [[ ${PATCH} == true ]]; then
@@ -594,7 +594,7 @@ if [ -d "${ROOTDIR}" ]; then
       echo "Your already have a usable ROOT version installed!"
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the ROOT directory in the source script..."
-        echo "ROOTDIR=`pwd`" >> ${ENVFILE}
+        echo "ROOTDIR=$(pwd)" >> ${ENVFILE}
       fi
       exit 0
     fi
@@ -636,7 +636,7 @@ if [[ ${PATCH} == true ]]; then
       echo "ERROR: Something went wrong applying the ROOT patch!"
       exit 1
     fi
-    PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }'`
+    PATCHMD5=$(openssl md5 "${SETUPPATH}/patches/${ROOTCORE}.patch" | awk -F" " '{ print $2 }')
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
     echo "Applied patch: ${SETUPPATH}/patches/${ROOTCORE}.patch"
   else
@@ -650,8 +650,8 @@ echo "Configuring..."
 cd "${ROOTBUILDDIR}"
 export ROOTSYS=${ROOTDIR}
 #if [[ ${OSTYPE} == *arwin* ]]; then
-#  export CPLUS_INCLUDE_PATH=`xcrun --show-sdk-path`/usr/include
-#  export LIBRARY_PATH=$LIBRARY_PATH:`xcrun --show-sdk-path`/usr/lib
+#  export CPLUS_INCLUDE_PATH=$(xcrun --show-sdk-path)/usr/include
+#  export LIBRARY_PATH=$LIBRARY_PATH:$(xcrun --show-sdk-path)/usr/lib
 #fi
 echo "Configure command: cmake ${CONFIGUREOPTIONS} ${DEBUGOPTIONS} ../${ROOTSOURCEDIR}"
 cmake ${CONFIGUREOPTIONS} ${DEBUGOPTIONS} "../${ROOTSOURCEDIR}"
@@ -737,7 +737,7 @@ chmod -R go+rX "${ROOTDIR}"
 
 if [ "${ENVFILE}" != "" ]; then
   echo "Storing the ROOT directory in the source script..."
-  echo "ROOTDIR=`pwd`/${ROOTDIR}" >> ${ENVFILE}
+  echo "ROOTDIR=$(pwd)/${ROOTDIR}" >> ${ENVFILE}
 fi
 
 

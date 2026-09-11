@@ -15,7 +15,7 @@
 OSTYPE=$(uname -s | awk '{print tolower($0)}')
 
 # The basic compiler options
-COMPILEROPTIONS=`gcc --version | head -n 1`
+COMPILEROPTIONS=$(gcc --version | head -n 1)
 
 # Additional configure options 
 CONFIGUREOPTIONS=" "
@@ -65,11 +65,11 @@ setuphelp() {
     echo "then you can use the following lines to setup HEASoft: "
     echo " "
 
-    HEASOFTPATH=`ls -d heasoft_v${VER}/*86*`
+    HEASOFTPATH=$(ls -d heasoft_v${VER}/*86*)
     if [[ ${SHELL} == *csh ]]; then
       echo "You seem to use a C shell variant so, in your \$HOME/.cshrc or \$HOME/.tcshrc do:"
       echo " "
-      echo "setenv HEADAS "`pwd`"/${HEASOFTPATH}"
+      echo "setenv HEADAS "$(pwd)"/${HEASOFTPATH}"
       echo "alias heainit \"source \$HEADAS/headas-init.csh\""
       echo " "
       echo "And then also add \"heainit\" to your setup script or call it each time before you use this software package."
@@ -77,7 +77,7 @@ setuphelp() {
     elif [[ ${SHELL} == *ash ]]; then
       echo "You seem to use a bourne shell variant so, in your \$HOME/.bashrc or \$HOME/.login or \$HOME/.profile do:"
       echo " "
-      echo "export HEADAS="`pwd`"/${HEASOFTPATH}"
+      echo "export HEADAS="$(pwd)"/${HEASOFTPATH}"
       echo "alias heainit=\"source \$HEADAS/headas-init.sh\""
       echo " "
       echo "And then also add \"heainit\" to your setup script or call it each time before you use this software package."
@@ -196,7 +196,7 @@ if [ "${TARBALL}" != "" ]; then
   echo "The given HEASoft tarball is ${TARBALL}"
 
   # Check if it has the correct version:
-  VER=`echo "${TARBALL}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
+  VER=$(echo "${TARBALL}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }');
   echo "Version of HEASoft is: ${VER}"
 
   # Check if the tarball-provided version is within the range given in allowed-versions.txt
@@ -221,7 +221,7 @@ else
   # down from the newest until one is acceptable
   TARBALL=""
   for T in ${ALLTARBALLS}; do
-    V=`echo "${T}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`
+    V=$(echo "${T}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }')
     if "${SETUPPATH}/check-heasoftversion.sh" --good-version=${V} > /dev/null; then
       TARBALL=${T}
       break
@@ -253,7 +253,7 @@ else
   fi
 
   # Check for the version number:
-  VER=`echo "${TARBALL}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }'`;
+  VER=$(echo "${TARBALL}" | awk -Fheasoft- '{ print $2 }' | awk -Fsrc '{ print $1 }');
   echo "Version of HEASoft is: ${VER}"
 fi
 
@@ -266,15 +266,15 @@ echo "Checking for old installation..."
 if [ -d "heasoft_v${VER}" ]; then
   cd heasoft_v${VER}
   if [ -f COMPILE_SUCCESSFUL ]; then
-    SAMEOPTIONS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}"`
+    SAMEOPTIONS=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${CONFIGUREOPTIONS}")
     if [ "${SAMEOPTIONS}" == "" ]; then
       echo "The old installation used different compilation options..."
     fi
-    SAMECOMPILER=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}"`
+    SAMECOMPILER=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPILEROPTIONS}")
     if [ "${SAMECOMPILER}" == "" ]; then
       echo "The old installation used a different compiler..."
     fi
-    SAMECOMPONENTS=`cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPONENTS}"`
+    SAMECOMPONENTS=$(cat COMPILE_SUCCESSFUL | grep -F -x -- "${COMPONENTS}")
     if [ "${SAMECOMPONENTS}" == "" ]; then
       echo "The old installation used different components..."
     fi
@@ -283,11 +283,11 @@ if [ -d "heasoft_v${VER}" ]; then
     PATCHPRESENT="no"
     if [ -f "${SETUPPATH}/patches/${HEASOFTCORE}.patch" ]; then
       PATCHPRESENT="yes"
-      PATCHPRESENTMD5=`openssl md5 "${SETUPPATH}/patches/${HEASOFTCORE}.patch" | awk -F" " '{ print $2 }'`
+      PATCHPRESENTMD5=$(openssl md5 "${SETUPPATH}/patches/${HEASOFTCORE}.patch" | awk -F" " '{ print $2 }')
     fi
-    PATCHSTATUS=`cat COMPILE_SUCCESSFUL | grep -- "^Patch"`
+    PATCHSTATUS=$(cat COMPILE_SUCCESSFUL | grep -- "^Patch")
     if [[ ${PATCHSTATUS} == Patch\ applied* ]]; then
-      PATCHMD5=`echo ${PATCHSTATUS} | awk -F" " '{ print $3 }'`
+      PATCHMD5=$(echo ${PATCHSTATUS} | awk -F" " '{ print $3 }')
     fi
 
     if [[ ${PATCH} == true ]]; then
@@ -312,7 +312,7 @@ if [ -d "heasoft_v${VER}" ]; then
       echo "Your already have a usable HEASoft version installed!"
       if [ "${ENVFILE}" != "" ]; then
         echo "Storing the HEASoft directory in the source script..."
-        DIR=$(find `pwd` -name "ftversion" | grep -v "heatools" | awk '{ print substr( $0, 1, length($0)-14) }')
+        DIR=$(find $(pwd) -name "ftversion" | grep -v "heatools" | awk '{ print substr( $0, 1, length($0)-14) }')
         echo "HEASOFTDIR=${DIR}" >> ${ENVFILE}
       else
         cd ..
@@ -359,7 +359,7 @@ if [[ ${PATCH} == true ]]; then
       exit 1
     fi
     cd ..
-    PATCHMD5=`openssl md5 "${SETUPPATH}/patches/${HEASOFTCORE}.patch" | awk -F" " '{ print $2 }'`
+    PATCHMD5=$(openssl md5 "${SETUPPATH}/patches/${HEASOFTCORE}.patch" | awk -F" " '{ print $2 }')
     PATCHAPPLIED="Patch applied ${PATCHMD5}"
     echo "Applied patch: ${SETUPPATH}/patches/${HEASOFTCORE}.patch"
   else
@@ -376,7 +376,7 @@ cd heasoft_v${VER}/BUILD_DIR
 sh configure ${CONFIGUREOPTIONS} --with-components="${COMPONENTS}" > config.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong configuring HEASoft!"
-  echo "       Check the file "`pwd`"/config.log"
+  echo "       Check the file "$(pwd)"/config.log"
   exit 1
 fi
 
@@ -393,7 +393,7 @@ echo "Compiling..."
 make -j${CORES} > build.log 2>&1
 if [ "$?" != "0" ]; then
   echo "ERROR: Something went wrong while compiling HEASoft!"
-  echo "       Check the file "`pwd`"/build.log"
+  echo "       Check the file "$(pwd)"/build.log"
   exit 1
 fi
 ERRORS=$(cat build.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
@@ -406,12 +406,12 @@ if [ "${ERRORS}" == "" ]; then
   ERRORS=$(cat install.log | grep -v "char \*\*\*" | grep -v "\_\_PRETTY\_FUNCTION\_\_\,\" \*\*\*" | grep "\ \*\*\*\ ")
   if [ "${INSTALLRESULT}" != "0" ] || [ "${ERRORS}" != "" ]; then
     echo "ERROR: Errors occured during the installation. Check your install.log"
-    echo "       Check the file "`pwd`"/install.log"
+    echo "       Check the file "$(pwd)"/install.log"
     exit 1;
   fi
 else
   echo "ERROR: Errors occured during the compilation. Check your build.log"
-  echo "       Check the file "`pwd`"/build.log"
+  echo "       Check the file "$(pwd)"/build.log"
   exit 1;
 fi
 
@@ -430,8 +430,8 @@ if [[ ${LIBDIR} != "" ]]; then
     echo "ERROR: Unable to enter the HEASoft library directory ${LIBDIR}"
     exit 1
   fi
-  CFITSIO=`find . \( -name "libcfitsio.so" -o -name "libcfitsio.a" -o -name "libcfitsio.dylib" -o -name "libcfitsio.dll" \)`
-  LONGCFITSIO=`find . \( -name "libcfitsio_*.so" -o -name "libcfitsio_*.a" -o -name "libcfitsio_*.dylib" -o -name "libcfitsio_*.dll" \)`
+  CFITSIO=$(find . \( -name "libcfitsio.so" -o -name "libcfitsio.a" -o -name "libcfitsio.dylib" -o -name "libcfitsio.dll" \))
+  LONGCFITSIO=$(find . \( -name "libcfitsio_*.so" -o -name "libcfitsio_*.a" -o -name "libcfitsio_*.dylib" -o -name "libcfitsio_*.dll" \))
   if ( [ "${CFITSIO}" == "" ] && [ "${LONGCFITSIO}" != "" ] ); then
     # find can return several matches, e.g. a shared and a static library - link the first
     LONGCFITSIO=$(echo "${LONGCFITSIO}" | head -1)
@@ -477,7 +477,7 @@ chmod -R go+rX heasoft_v${VER}
 
 if [ "${ENVFILE}" != "" ]; then
   echo "Storing the HEASoft directory in the source script..."
-  DIR=$(find `pwd`/heasoft_v${VER} -name "ftversion" | grep -v "heatools" | awk '{ print substr( $0, 1, length($0)-14) }')
+  DIR=$(find $(pwd)/heasoft_v${VER} -name "ftversion" | grep -v "heatools" | awk '{ print substr( $0, 1, length($0)-14) }')
   echo "HEASOFTDIR=${DIR}" >> ${ENVFILE}
 else
   setuphelp

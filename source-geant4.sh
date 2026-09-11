@@ -91,7 +91,7 @@ if [[ -f ${__TMP_PATH}/bin/geant4.sh ]]; then
     source "${PATHTOGEANT4MAKE}/geant4make.sh"
   fi
 
-  if [[ `uname -a` == *Darwin* ]]; then
+  if [[ $(uname -a) == *Darwin* ]]; then
     export LD_LIBRARY_PATH=${G4LIB}/..:${LD_LIBRARY_PATH}
     #export DYLD_LIBRARY_PATH=${G4INSTALL}/lib/${G4SYSTEM}/lib:${DYLD_LIBRARY_PATH}
   fi
@@ -102,7 +102,7 @@ elif (test -f "${__TMP_PATH}/env.sh"); then
   source "${__TMP_PATH}/env.sh" > /dev/null
 
   export LD_LIBRARY_PATH=${G4INSTALL}/lib/${G4SYSTEM}:${LD_LIBRARY_PATH}
-  if [[ `uname -a` == *Darwin* ]]; then
+  if [[ $(uname -a) == *Darwin* ]]; then
     export DYLD_LIBRARY_PATH=${G4INSTALL}/lib/${G4SYSTEM}/lib:${LD_LIBRARY_PATH}
   fi
 

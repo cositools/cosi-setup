@@ -75,7 +75,7 @@ if [ ! -d "${EXTERNALPATH}" ]; then
 fi
 
 # Name of the stash where we backup data
-STASHNAME="BackupDuringCositoolsSetup:`date +'%y%m%d.%H%M%S'`"
+STASHNAME="BackupDuringCositoolsSetup:$(date +'%y%m%d.%H%M%S')"
   
 # Maximum compile threads we are allwoed to use
 MAXTHREADS=$(numberofcores)
@@ -186,10 +186,10 @@ echo "Verifying input data"
 
 
 # Everything to lower case:
-OSTYPE=`echo ${OSTYPE} | tr '[:upper:]' '[:lower:]'`
-CPPOPT=`echo ${CPPOPT} | tr '[:upper:]' '[:lower:]'`
-CPPDEBUG=`echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]'`
-GITPULLBEHAVIOR=`echo ${GITPULLBEHAVIOR} | tr '[:upper:]' '[:lower:]'`
+OSTYPE=$(echo ${OSTYPE} | tr '[:upper:]' '[:lower:]')
+CPPOPT=$(echo ${CPPOPT} | tr '[:upper:]' '[:lower:]')
+CPPDEBUG=$(echo ${CPPDEBUG} | tr '[:upper:]' '[:lower:]')
+GITPULLBEHAVIOR=$(echo ${GITPULLBEHAVIOR} | tr '[:upper:]' '[:lower:]')
 
 # Provide feed back and perform error checks:
 
@@ -246,7 +246,7 @@ fi
 
 
 if [ "${GEANT4PATH}" != "" ]; then
-  GEANT4PATH=`absolutefilename "${GEANT4PATH}"`
+  GEANT4PATH=$(absolutefilename "${GEANT4PATH}")
 fi
 if ! checkpathcharacters "${GEANT4PATH}"; then
   echo ""
@@ -268,7 +268,7 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
 elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]] ; then
   echo " * Download the latest version of HEASoft"
 else
-  HEASOFTPATH=`absolutefilename "${HEASOFTPATH}"`
+  HEASOFTPATH=$(absolutefilename "${HEASOFTPATH}")
   if ! checkpathcharacters "${HEASOFTPATH}"; then
     echo ""
     echo "ERROR: HEASoft needs to be installed in a path without spaces or special characters,"
@@ -288,7 +288,7 @@ if [[ "${HEALPIXPATH}" == "off" ]]; then
 elif [[ "${HEALPIXPATH}" == "" ]] ; then
   echo " * Download the latest version of Healpix"
 else
-  HEALPIXPATH=`absolutefilename "${HEALPIXPATH}"`
+  HEALPIXPATH=$(absolutefilename "${HEALPIXPATH}")
   if ! checkpathcharacters "${HEALPIXPATH}"; then
     echo ""
     echo "ERROR: Healpix needs to be installed in a path without spaces or special characters,"
@@ -435,8 +435,8 @@ else
       echo " "
     else
       # Check if the license has been accepted
-      CURRENT_VERSION=`xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/'`
-      ACCEPTED_LICENSE_VERSION=`defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '"' -f 2`
+      CURRENT_VERSION=$(xcodebuild -version | grep '^Xcode\s' | sed -E 's/^Xcode[[:space:]]+([0-9\.]+)/\1/')
+      ACCEPTED_LICENSE_VERSION=$(defaults read /Library/Preferences/com.apple.dt.Xcode 2> /dev/null | grep IDEXcodeVersionForAgreedToGMLicense | cut -d '"' -f 2)
       if [[ "${CURRENT_VERSION}" != "${ACCEPTED_LICENSE_VERSION}"* ]]; then
         echo " "
         echo "Error: You have not accepted the XCode license!"
@@ -669,7 +669,7 @@ else
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new ROOT directory, copy the build log there
-  NEWROOTDIR=`grep ROOTDIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
+  NEWROOTDIR=$(grep ROOTDIR\= "${ENVFILE}" | awk -F= '{ print $2 }')
   if [[ -d ${NEWROOTDIR} ]]; then
     if [[ -f ${NEWROOTDIR}/BuildLogROOT.txt ]]; then
       mv "${NEWROOTDIR}/BuildLogROOT.txt" "${NEWROOTDIR}/BuildLogROOT_before$(date +'%y%m%d%H%M%S').txt"
@@ -766,7 +766,7 @@ else
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Geant4 dir, copy the build log there
-  NEWGEANT4DIR=`grep GEANT4DIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
+  NEWGEANT4DIR=$(grep GEANT4DIR\= "${ENVFILE}" | awk -F= '{ print $2 }')
   if [[ -d ${NEWGEANT4DIR} ]]; then
     if [[ -f ${NEWGEANT4DIR}/BuildLogGeant4.txt ]]; then
       mv "${NEWGEANT4DIR}/BuildLogGeant4.txt" "${NEWGEANT4DIR}/BuildLogGeant4_before$(date +'%y%m%d%H%M%S').txt"
@@ -837,7 +837,7 @@ elif [[ "${HEASOFTPATH}" == "cfitsio" ]]; then
   
   
     # If we have a new cfitsio dir, copy the build log there
-    NEWCFITSIODIR=`grep CFITSIODIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
+    NEWCFITSIODIR=$(grep CFITSIODIR\= "${ENVFILE}" | awk -F= '{ print $2 }')
     if [[ -d ${NEWCFITSIODIR} ]]; then
       if [[ -f ${NEWCFITSIODIR}/BuildLogCFitsIO.txt ]]; then
         mv "${NEWCFITSIODIR}/BuildLogCFitsIO.txt" "${NEWCFITSIODIR}/BuildLogCFitsIO_before$(date +'%y%m%d%H%M%S').txt"
@@ -889,7 +889,7 @@ elif [[ "${HEASOFTPATH}" == "heasoft" ]] || [[ "${HEASOFTPATH}" == "" ]]; then
 
 
   # If we have a new HEASoft dir, copy the build log there
-  NEWHEASOFTDIR=`grep HEASOFTDIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
+  NEWHEASOFTDIR=$(grep HEASOFTDIR\= "${ENVFILE}" | awk -F= '{ print $2 }')
   if [[ -d ${NEWHEASOFTDIR} ]]; then
     if [[ -f ${NEWHEASOFTDIR}/BuildLogHEASoft.txt ]]; then
       mv "${NEWHEASOFTDIR}/BuildLogHEASoft.txt" "${NEWHEASOFTDIR}/BuildLogHEASoft_before$(date +'%y%m%d%H%M%S').txt"
@@ -1023,7 +1023,7 @@ else
   RESULT=${PIPESTATUS[0]}
 
   # If we have a new Healpix dir, copy the build log there
-  NEWHEALPIXDIR=`grep HEALPIXDIR\= "${ENVFILE}" | awk -F= '{ print $2 }'`
+  NEWHEALPIXDIR=$(grep HEALPIXDIR\= "${ENVFILE}" | awk -F= '{ print $2 }')
   if [[ -d ${NEWHEALPIXDIR} ]]; then
     if [[ -f ${NEWHEALPIXDIR}/BuildLogHealpix.txt ]]; then
       mv "${NEWHEALPIXDIR}/BuildLogHealpix.txt" "${NEWHEALPIXDIR}/BuildLogHealpix_before$(date +'%y%m%d%H%M%S').txt"

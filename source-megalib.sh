@@ -82,7 +82,7 @@ fi
 export MEGALIB=${__TMP_PATH}   
 export PATH=${MEGALIB}/bin:${PATH}    
 export LD_LIBRARY_PATH=${MEGALIB}/lib:${LD_LIBRARY_PATH}
-if [[ `uname -a` == *Darwin* ]]; then
+if [[ $(uname -a) == *Darwin* ]]; then
   export DYLD_LIBRARY_PATH=${MEGALIB}/lib:${LD_LIBRARY_PATH}
 fi
 

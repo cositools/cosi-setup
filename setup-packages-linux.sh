@@ -16,12 +16,12 @@ IsArchClone=0
 IsAlpineClone=0
 
 if [ -f /etc/os-release ]; then
-  OS=`cat /etc/os-release | grep "^ID_LIKE=" | awk -F= '{ print $2 }'`
+  OS=$(cat /etc/os-release | grep "^ID_LIKE=" | awk -F= '{ print $2 }')
   OS=${OS//\"/}
 
   # Hack for OS' without ID_LIKE
   if [[ ${OS} == "" ]]; then 
-    OS=`cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }'`
+    OS=$(cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }')
     OS=${OS//\"/}
   fi
 
@@ -132,7 +132,7 @@ fi
 if [[ ${IsDebianClone} -eq 1 ]]; then
   
   # Check if this is Ubuntu:
-  OS=`cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }'`
+  OS=$(cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }')
   OS=${OS//\"/}
   #echo "OS: ${OS}"
 
@@ -200,14 +200,14 @@ if [[ ${IsDebianClone} -eq 1 ]]; then
     # Check if each of the packages exists:
     for PACKAGE in ${REQUIRED}; do
       # Check if the file is installed
-      STATUS=`dpkg-query -Wf'${db:Status-abbrev}' ${PACKAGE} 2>/dev/null | grep '^i'`
+      STATUS=$(dpkg-query -Wf'${db:Status-abbrev}' ${PACKAGE} 2>/dev/null | grep '^i')
       #echo "${PACKAGE}: >${STATUS}<"
       if [[ "${STATUS}" == "" ]]; then
         # Check if it exists at all:
         echo "Not installed: ${PACKAGE}"
         TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
 
-        #STATUS=`apt-cache pkgnames ${PACKAGE} 2>/dev/null`
+        #STATUS=$(apt-cache pkgnames ${PACKAGE} 2>/dev/null)
         #if [[ "${STATUS}" != "" ]]; then
         #  TOBEINSTALLED="${TOBEINSTALLED} ${PACKAGE}"
         #fi
@@ -262,7 +262,7 @@ fi
 if [[ ${IsOpenSuseClone} -eq 1 ]]; then
 
   # Check if this is OpenSUSE:
-  OS=`cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }'`
+  OS=$(cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }')
   OS=${OS//\"/}
   #echo "OS: ${OS}"
   VERSIONID=""
@@ -381,7 +381,7 @@ fi
 if [[ ${IsRedhatClone} -eq 1 ]]; then
 
   # Check which OS we really have:
-  OS=`cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }'`
+  OS=$(cat /etc/os-release | grep "^ID=" | awk -F= '{ print $2 }')
   OS=${OS//\"/}
   #echo "OS: ${OS}"
   if [[ ${OS} == rhel ]] || [[ ${OS} == almalinux ]] || [[ ${OS} == rocky ]] || [[ ${OS} == centos ]]; then

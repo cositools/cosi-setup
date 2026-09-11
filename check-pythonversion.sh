@@ -149,7 +149,7 @@ case ${MODE} in
       exit 1;
     fi
 
-    pv=`"${PYTHONEXE}" --version 2>&1 | awk '{ print $2 }'`
+    pv=$("${PYTHONEXE}" --version 2>&1 | awk '{ print $2 }')
 
     # Reject development versions, e.g., 3.15.0rc1
     if [[ ! ${pv} =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
