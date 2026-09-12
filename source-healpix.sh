@@ -81,5 +81,12 @@ fi
 export HEALPIX=${__TMP_PATH}
 export LD_LIBRARY_PATH=${HEALPIX}/lib:${LD_LIBRARY_PATH}
 
+# Register healpix with pkg-config, so that it is findable
+if [[ -f ${HEALPIX}/lib/pkgconfig/healpix_cxx.pc ]]; then
+  export PKG_CONFIG_PATH=${HEALPIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
+elif [[ -f ${HEALPIX}/lib64/pkgconfig/healpix_cxx.pc ]]; then
+  export PKG_CONFIG_PATH=${HEALPIX}/lib64/pkgconfig:${PKG_CONFIG_PATH}
+fi
+
 
 return
