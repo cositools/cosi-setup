@@ -479,7 +479,11 @@ else
         exit 1
       fi
 
-      "${SETUPPATH}/setup-packages-macports.sh"
+      if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
+        "${SETUPPATH}/setup-packages-macports.sh" --autoinstall
+      else
+        "${SETUPPATH}/setup-packages-macports.sh"
+      fi
       EXITCODE=$?
       if [ "${EXITCODE}" != "0" ]; then
         # The error message is part of the above script
@@ -494,7 +498,11 @@ else
           exit 1
         fi
 
-        "${SETUPPATH}/setup-packages-brew.sh"
+        if [[ ${AUTOPACKAGEINSTALL} == true ]]; then
+          "${SETUPPATH}/setup-packages-brew.sh" --autoinstall
+        else
+          "${SETUPPATH}/setup-packages-brew.sh"
+        fi
         EXITCODE=$?
         if [ "${EXITCODE}" != "0" ]; then
           # The error message is part of the above script
